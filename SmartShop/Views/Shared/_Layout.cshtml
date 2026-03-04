@@ -18,6 +18,13 @@
     <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" />
     <!-- Fancybox -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/2.1.5/jquery.fancybox.min.css" media="screen" />
+    <!-- FIX: ngăn thanh cuộn ngang -->
+    <style>
+        html, body {
+            overflow-x: hidden;
+            max-width: 100%;
+        }
+    </style>
 </head>
 <body class="main-layout @ViewData["BodyClass"]">
 
@@ -66,6 +73,18 @@
                                     <li class="nav-item @(ViewData["ActivePage"]?.ToString() == "Contact" ? "active" : "")">
                                         <a class="nav-link" asp-area="Customers" asp-controller="Home" asp-action="Contact">Contact Us</a>
                                     </li>
+                                    <li class="nav-item d_none login_btn">
+                                        <a class="nav-link" href="#">Login</a>
+                                    </li>
+                                    <li class="nav-item d_none">
+                                        <a class="nav-link" href="#">Register</a>
+                                    </li>
+                                    <li class="nav-item d_none sea_icon">
+                                        <a class="nav-link" href="#">
+                                            <i class="fa fa-shopping-bag" aria-hidden="true"></i>
+                                            <i class="fa fa-search" aria-hidden="true"></i>
+                                        </a>
+                                    </li>
                                 </ul>
                             </div>
                         </nav>
@@ -95,7 +114,7 @@
                 <div class="container">
                     <div class="row">
                         <div class="col-md-12">
-                            <p>&copy; 2025 SmartShop. All Rights Reserved.</p>
+                            <p>© 2019 All Rights Reserved. Design by <a href="https://html.design/">Free Html Templates</a></p>
                         </div>
                     </div>
                 </div>
@@ -103,12 +122,14 @@
         </div>
     </footer>
     <!-- end footer -->
-    <!-- Javascript -->
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Javascript files -->
+    <script src="~/js/jquery.min.js"></script>
+    <script src="~/js/popper.min.js"></script>
+    <script src="~/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/jquery-3.0.0.min.js"></script>
     <script src="~/js/jquery.mCustomScrollbar.concat.min.js"></script>
-    <script src="~/js/custom.js" asp-append-version="true"></script>
+    <script src="~/js/custom.js"></script>
 
-    @await RenderSectionAsync("Scripts", required: false)
+    @RenderSection("Scripts", required: false)
 </body>
 </html>
