@@ -687,7 +687,9 @@ button {
 /** contact section **/
 
 .contact {
-     margin-top: 90px;
+    margin-top: 90px;
+    position: relative; 
+    overflow: hidden;
 }
 
 .contact .main_form h3 {
@@ -701,8 +703,8 @@ button {
 }
 
 #map {
-     height: 100%;
-     min-height: 732px;
+    height: 732px;
+    min-height: 732px;
 }
 
 .main_form {
@@ -710,7 +712,7 @@ button {
      z-index: 999;
      background: #fff;
      padding: 40px 50px;
-     margin-top: 107px;
+     top: 107px;
 }
 
 .main_form .contactus {
