@@ -3,7 +3,7 @@
     ViewData["ActivePage"] = "Home";
 }
 
-<!-- Banner -->
+<!-- banner -->
 <section class="banner_main">
     <div id="banner1" class="carousel slide" data-ride="carousel">
         <ol class="carousel-indicators">
@@ -55,7 +55,7 @@
     </div>
 </section>
 <!-- end banner -->
-<!-- About section -->
+<!-- about section -->
 <div class="about">
     <div class="container">
         <div class="row d_flex">
@@ -67,7 +67,11 @@
             <div class="col-md-7">
                 <div class="titlepage">
                     <h2>About Our Shop</h2>
-                    <p>There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomised words which don't look even slightly believable. If you are going to use a passage of Lorem Ipsum, you need to be sure there isn't anything embarrassing hidden in the middle of text.</p>
+                    <p>
+                        There are many variations of passages of Lorem Ipsum available, but the majority have suffered
+                        alteration in some form, by injected humour, or randomised words which don't look even slightly
+                        believable.
+                    </p>
                 </div>
                 <a class="read_more" asp-area="Customers" asp-controller="Home" asp-action="About">Read More</a>
             </div>
@@ -82,7 +86,10 @@
             <div class="col-md-10 offset-md-1">
                 <div class="titlepage">
                     <h2>Our Glasses</h2>
-                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, qui</p>
+                    <p>
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
+                        labore et dolore magna aliqua.
+                    </p>
                 </div>
             </div>
         </div>
@@ -118,8 +125,11 @@
             <div class="col-md-7 padding_right0">
                 <div class="max_width">
                     <div class="titlepage">
-                        <h2>Best SunGlasses At Our shop</h2>
-                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore</p>
+                        <h2>Best SunGlasses At Our Shop</h2>
+                        <p>
+                            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt
+                            ut labore et dolore magna aliqua.
+                        </p>
                         <a class="read_more" asp-area="Customers" asp-controller="Home" asp-action="Shop">Shop Now</a>
                     </div>
                 </div>
@@ -128,7 +138,7 @@
     </div>
 </div>
 <!-- end Our shop section -->
-<!-- Clients section -->
+<!-- clients section -->
 <div class="clients">
     <div class="container">
         <div class="row">
@@ -148,51 +158,27 @@
                         <li data-target="#myCarousel" data-slide-to="2"></li>
                     </ol>
                     <div class="carousel-inner">
-                        <div class="carousel-item active">
-                            <div class="container">
-                                <div class="carousel-caption">
-                                    <div class="row">
-                                        <div class="col-md-12">
-                                            <div class="clients_box">
-                                                <figure><img src="~/images/our.png" alt="#" /></figure>
-                                                <h3>Sandy Mark</h3>
-                                                <p>It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, It is a long established fact a more-or-less normal distribution of letters,</p>
+                        @for (int i = 0; i < 3; i++)
+                        {
+                            <div class="carousel-item @(i == 0 ? "active" : "")">
+                                <div class="container">
+                                    <div class="carousel-caption @(i == 0 ? "" : "")">
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <div class="clients_box">
+                                                    <figure><img src="~/images/our.png" alt="#" /></figure>
+                                                    <h3>Sandy Mark</h3>
+                                                    <p>
+                                                        It is a long established fact that a reader will be distracted by the readable content
+                                                        of a page when looking at its layout.
+                                                    </p>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="carousel-item">
-                            <div class="container">
-                                <div class="carousel-caption">
-                                    <div class="row">
-                                        <div class="col-md-12">
-                                            <div class="clients_box">
-                                                <figure><img src="~/images/our.png" alt="#" /></figure>
-                                                <h3>Sandy Mark</h3>
-                                                <p>It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, It is a long established fact a more-or-less normal distribution of letters,</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="carousel-item">
-                            <div class="container">
-                                <div class="carousel-caption">
-                                    <div class="row">
-                                        <div class="col-md-12">
-                                            <div class="clients_box">
-                                                <figure><img src="~/images/our.png" alt="#" /></figure>
-                                                <h3>Sandy Mark</h3>
-                                                <p>It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, It is a long established fact a more-or-less normal distribution of letters,</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                        }
                     </div>
                     <a class="carousel-control-prev" href="#myCarousel" role="button" data-slide="prev">
                         <i class="fa fa-angle-left"></i>
@@ -206,58 +192,3 @@
     </div>
 </div>
 <!-- end clients section -->
-<!-- Contact section -->
-<div id="contact" class="contact">
-    <!-- Map phủ toàn bộ nền của .contact -->
-    <div id="map" style="position:absolute; top:0; left:0; width:100%; height:100%;"></div>
-
-    <!-- Form overlay lên trên map -->
-    <div class="container" style="position:relative; z-index:10;">
-        <div class="row">
-            <div class="col-md-6">
-                <form asp-area="Customers" asp-controller="Home" asp-action="Contact"
-                      method="post" id="request" class="main_form">
-                    @Html.AntiForgeryToken()
-                    <div class="row">
-                        <div class="col-md-12">
-                            <h3>Contact Us</h3>
-                        </div>
-                        <div class="col-md-12">
-                            <input class="contactus" placeholder="Name" type="text" name="Name" />
-                        </div>
-                        <div class="col-md-12">
-                            <input class="contactus" placeholder="Phone Number" type="tel" name="PhoneNumber" />
-                        </div>
-                        <div class="col-md-12">
-                            <input class="contactus" placeholder="Email" type="email" name="Email" />
-                        </div>
-                        <div class="col-md-12">
-                            <input class="contactusmess" placeholder="Message" type="text" name="Message" />
-                        </div>
-                        <div class="col-md-12">
-                            <button type="submit" class="send_btn">Send</button>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-<!-- end contact section -->
-@section Scripts {
-    <script>
-        function initMap() {
-            var map = new google.maps.Map(document.getElementById('map'), {
-                zoom: 11,
-                center: { lat: 40.645037, lng: -73.880224 }
-            });
-            var image = '/images/maps-and-flags.png';
-            var beachMarker = new google.maps.Marker({
-                position: { lat: 40.645037, lng: -73.880224 },
-                map: map,
-                icon: image
-            });
-        }
-    </script>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA8eaHt9Dh5H57Zh0xVTqxVdBFCvFMqFjQ&callback=initMap"></script>
-}
