@@ -27,5 +27,11 @@
     <Folder Include="Areas\Admin\Views\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="wwwroot\js\.DS_Store" />
+    <None Include="wwwroot\js\revolution\.DS_Store" />
+    <None Include="wwwroot\js\revolution\js\.DS_Store" />
+  </ItemGroup>
+
 
 </Project>

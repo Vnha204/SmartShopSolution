@@ -2,48 +2,113 @@
 <html lang="en">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
     <title>@ViewData["Title"] - SmartShop</title>
+
+    <!-- Bootstrap CSS (libman) -->
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/SmartShop.styles.css" asp-append-version="true" />
+    <!-- Template CSS -->
+    <link rel="stylesheet" href="~/css/style.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/responsive.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/jquery.mCustomScrollbar.min.css" />
+    <!-- Favicon -->
+    <link rel="icon" href="~/images/fevicon.png" type="image/gif" />
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" />
+    <!-- Fancybox -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/2.1.5/jquery.fancybox.min.css" media="screen" />
 </head>
-<body>
+<body class="main-layout @ViewData["BodyClass"]">
+
+    <!-- Loader -->
+    <div class="loader_bg">
+        <div class="loader"><img src="~/images/loading.gif" alt="#" /></div>
+    </div>
+    <!-- end loader -->
+    <!-- Header -->
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+        <div class="header">
             <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">SmartShop</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                    </ul>
+                <div class="row">
+                    <div class="col-xl-3 col-lg-3 col-md-3 col-sm-3 col logo_section">
+                        <div class="full">
+                            <div class="center-desk">
+                                <div class="logo">
+                                    <a asp-area="Customers" asp-controller="Home" asp-action="Index">
+                                        <img src="~/images/logo.png" alt="#" />
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-9 col-lg-9 col-md-9 col-sm-9">
+                        <nav class="navigation navbar navbar-expand-md navbar-dark">
+                            <button class="navbar-toggler" type="button" data-toggle="collapse"
+                                    data-target="#navbarsExample04" aria-controls="navbarsExample04"
+                                    aria-expanded="false" aria-label="Toggle navigation">
+                                <span class="navbar-toggler-icon"></span>
+                            </button>
+                            <div class="collapse navbar-collapse" id="navbarsExample04">
+                                <ul class="navbar-nav mr-auto">
+                                    <li class="nav-item @(ViewData["ActivePage"]?.ToString() == "Home" ? "active" : "")">
+                                        <a class="nav-link" asp-area="Customers" asp-controller="Home" asp-action="Index">Home</a>
+                                    </li>
+                                    <li class="nav-item @(ViewData["ActivePage"]?.ToString() == "About" ? "active" : "")">
+                                        <a class="nav-link" asp-area="Customers" asp-controller="Home" asp-action="About">About</a>
+                                    </li>
+                                    <li class="nav-item @(ViewData["ActivePage"]?.ToString() == "Glasses" ? "active" : "")">
+                                        <a class="nav-link" asp-area="Customers" asp-controller="Home" asp-action="Glasses">Our Glasses</a>
+                                    </li>
+                                    <li class="nav-item @(ViewData["ActivePage"]?.ToString() == "Shop" ? "active" : "")">
+                                        <a class="nav-link" asp-area="Customers" asp-controller="Home" asp-action="Shop">Shop</a>
+                                    </li>
+                                    <li class="nav-item @(ViewData["ActivePage"]?.ToString() == "Contact" ? "active" : "")">
+                                        <a class="nav-link" asp-area="Customers" asp-controller="Home" asp-action="Contact">Contact Us</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </nav>
+                    </div>
                 </div>
             </div>
-        </nav>
+        </div>
     </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
+    <!-- end header -->
+    @RenderBody()
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2025 - SmartShop - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+    <!-- Footer -->
+    <footer>
+        <div class="footer">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-8 offset-md-2">
+                        <ul class="location_icon">
+                            <li><a href="#"><i class="fa fa-map-marker" aria-hidden="true"></i></a><br /> Location</li>
+                            <li><a href="#"><i class="fa fa-phone" aria-hidden="true"></i></a><br /> +01 1234567890</li>
+                            <li><a href="#"><i class="fa fa-envelope" aria-hidden="true"></i></a><br /> demo@gmail.com</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="copyright">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <p>&copy; 2025 SmartShop. All Rights Reserved.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </footer>
+    <!-- end footer -->
+    <!-- Javascript -->
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/jquery.mCustomScrollbar.concat.min.js"></script>
+    <script src="~/js/custom.js" asp-append-version="true"></script>
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
