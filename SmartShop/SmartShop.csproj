@@ -6,6 +6,13 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Remove="wwwroot\js\revolution\**" />
+    <Content Remove="wwwroot\js\revolution\**" />
+    <EmbeddedResource Remove="wwwroot\js\revolution\**" />
+    <None Remove="wwwroot\js\revolution\**" />
+  </ItemGroup>
+
 
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.23" />
@@ -25,12 +32,6 @@
   <ItemGroup>
     <Folder Include="Areas\Admin\Controllers\" />
     <Folder Include="Areas\Admin\Views\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="wwwroot\js\.DS_Store" />
-    <None Include="wwwroot\js\revolution\.DS_Store" />
-    <None Include="wwwroot\js\revolution\js\.DS_Store" />
   </ItemGroup>
 
 
