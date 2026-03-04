@@ -208,8 +208,11 @@
 <!-- end clients section -->
 <!-- Contact section -->
 <div id="contact" class="contact">
-    <div id="map"></div>
-    <div class="container">
+    <!-- Map phủ toàn bộ nền của .contact -->
+    <div id="map" style="position:absolute; top:0; left:0; width:100%; height:100%;"></div>
+
+    <!-- Form overlay lên trên map -->
+    <div class="container" style="position:relative; z-index:10;">
         <div class="row">
             <div class="col-md-6">
                 <form asp-area="Customers" asp-controller="Home" asp-action="Contact"
