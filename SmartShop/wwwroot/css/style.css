@@ -705,12 +705,23 @@ button {
     min-height: 732px;
 }
 
+.map_section {
+    position: relative; 
+    width: 100%;
+    overflow: hidden;
+}
+
+
 .main_form {
     position: absolute;
+    top: 0; 
+    left: 50px; 
     z-index: 999;
     background: #fff;
     padding: 40px 50px;
-    margin-top: 107px;
+    margin-top: 107px; 
+    width: 520px; 
+    max-width: 45%; 
 }
 
     .main_form .contactus {

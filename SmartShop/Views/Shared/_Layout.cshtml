@@ -62,16 +62,16 @@
                                         <a class="nav-link" asp-area="Customers" asp-controller="Home" asp-action="Index">Home</a>
                                     </li>
                                     <li class="nav-item @(ViewData["ActivePage"]?.ToString() == "About" ? "active" : "")">
-                                        <a class="nav-link" asp-area="Customers" asp-controller="Home" asp-action="About">About</a>
+                                        <a class="nav-link" asp-area="Customers" asp-controller="About" asp-action="Index">About</a>
                                     </li>
                                     <li class="nav-item @(ViewData["ActivePage"]?.ToString() == "Glasses" ? "active" : "")">
-                                        <a class="nav-link" asp-area="Customers" asp-controller="Home" asp-action="Glasses">Our Glasses</a>
+                                        <a class="nav-link" asp-area="Customers" asp-controller="Glasses" asp-action="Index">Our Glasses</a>
                                     </li>
                                     <li class="nav-item @(ViewData["ActivePage"]?.ToString() == "Shop" ? "active" : "")">
-                                        <a class="nav-link" asp-area="Customers" asp-controller="Home" asp-action="Shop">Shop</a>
+                                        <a class="nav-link" asp-area="Customers" asp-controller="Shop" asp-action="Index">Shop</a>
                                     </li>
                                     <li class="nav-item @(ViewData["ActivePage"]?.ToString() == "Contact" ? "active" : "")">
-                                        <a class="nav-link" asp-area="Customers" asp-controller="Home" asp-action="Contact">Contact Us</a>
+                                        <a class="nav-link" asp-area="Customers" asp-controller="Contact" asp-action="Index">Contact Us</a>
                                     </li>
                                     <li class="nav-item d_none login_btn">
                                         <a class="nav-link" href="#">Login</a>
@@ -127,7 +127,25 @@
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/jquery.mCustomScrollbar.concat.min.js"></script>
     <script src="~/js/custom.js"></script>
-
+    @if (ViewData["ShowMap"] != null && (bool)ViewData["ShowMap"])
+    {
+        <script>
+            function initMap() {
+                var location = { lat: 40.645037, lng: -73.880224 };
+                var map = new google.maps.Map(document.getElementById('map'), {
+                    zoom: 11,
+                    center: location
+                });
+                var image = '/images/maps-and-flags.png';
+                new google.maps.Marker({
+                    position: location,
+                    map: map,
+                    icon: image
+                });
+            }
+        </script>
+        <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA8eaHt9Dh5H57Zh0xVTqxVdBFCvFMqFjQ&callback=initMap" async defer></script>
+    }
     @RenderSection("Scripts", required: false)
 </body>
 </html>

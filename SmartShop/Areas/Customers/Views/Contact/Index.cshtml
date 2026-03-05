@@ -1,0 +1,76 @@
+﻿@{
+    ViewData["Title"] = "Contact Us";
+    ViewData["ActivePage"] = "Contact";
+    ViewData["BodyClass"] = "position_head";
+}
+
+<!-- contact section -->
+<div id="contact" class="contact inner_page">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-10 offset-md-1">
+                <div class="titlepage">
+                    <h2>Contact Us</h2>
+                    <p>We'd love to hear from you. Send us a message and we'll get back to you as soon as possible.</p>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <form id="request" class="main_form" method="post">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h3>Send Us A Message</h3>
+                        </div>
+                        <div class="col-md-12">
+                            <input class="contactus" placeholder="Your Name" type="text" name="Name" required />
+                        </div>
+                        <div class="col-md-12">
+                            <input class="contactus" placeholder="Phone Number" type="tel" name="PhoneNumber" />
+                        </div>
+                        <div class="col-md-12">
+                            <input class="contactus" placeholder="Email Address" type="email" name="Email" required />
+                        </div>
+                        <div class="col-md-12">
+                            <input class="contactusmess" placeholder="Your Message" type="text" name="Message" />
+                        </div>
+                        <div class="col-md-12">
+                            <button class="send_btn" type="submit">Send Message</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="col-md-6">
+                <div class="contact_info" style="padding: 30px 0;">
+                    <h3>Get In Touch</h3>
+                    <ul class="list-unstyled" style="margin-top: 20px;">
+                        <li style="margin-bottom: 15px;">
+                            <i class="fa fa-map-marker" style="color:#3498db; margin-right:10px;"></i>
+                            123 Eyewear Street, Fashion District
+                        </li>
+                        <li style="margin-bottom: 15px;">
+                            <i class="fa fa-phone" style="color:#3498db; margin-right:10px;"></i>
+                            +01 1234567890
+                        </li>
+                        <li style="margin-bottom: 15px;">
+                            <i class="fa fa-envelope" style="color:#3498db; margin-right:10px;"></i>
+                            contact@smartshop.com
+                        </li>
+                        <li style="margin-bottom: 15px;">
+                            <i class="fa fa-clock-o" style="color:#3498db; margin-right:10px;"></i>
+                            Mon - Sat: 9:00 AM - 6:00 PM
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container-fluid" style="margin-top: 40px;">
+        <div class="map_section">
+            <div id="map" style="height:400px; background:#e5e5e5; display:flex; align-items:center; justify-content:center;">
+                <p style="color:#999;">Map loading...</p>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- end contact section -->

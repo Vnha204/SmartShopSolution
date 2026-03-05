@@ -1,0 +1,135 @@
+﻿@{
+    ViewData["Title"] = "Shop";
+    ViewData["ActivePage"] = "Shop";
+    ViewData["BodyClass"] = "position_head";
+}
+
+<!-- shop section -->
+<div class="shop_page inner_page">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-10 offset-md-1">
+                <div class="titlepage">
+                    <h2>Our Shop</h2>
+                    <p>Browse our complete collection of eyewear — filter by category, style, and price.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container" style="margin-top: 30px;">
+        <div class="row">
+            <!-- Sidebar Filter -->
+            <div class="col-md-3">
+                <div class="shop_sidebar">
+                    <div class="filter_group">
+                        <h5>Category</h5>
+                        <ul class="list-unstyled">
+                            <li><label><input type="checkbox" value="sunglasses" /> Sunglasses</label></li>
+                            <li><label><input type="checkbox" value="eyeglasses" /> Eyeglasses</label></li>
+                            <li><label><input type="checkbox" value="combo" /> Combo</label></li>
+                            <li><label><input type="checkbox" value="lens" /> Lens Only</label></li>
+                        </ul>
+                    </div>
+                    <div class="filter_group">
+                        <h5>Price Range</h5>
+                        <ul class="list-unstyled">
+                            <li><label><input type="checkbox" /> Under $50</label></li>
+                            <li><label><input type="checkbox" /> $50 - $100</label></li>
+                            <li><label><input type="checkbox" /> $100 - $200</label></li>
+                            <li><label><input type="checkbox" /> Over $200</label></li>
+                        </ul>
+                    </div>
+                    <div class="filter_group">
+                        <h5>Frame Shape</h5>
+                        <ul class="list-unstyled">
+                            <li><label><input type="checkbox" /> Round</label></li>
+                            <li><label><input type="checkbox" /> Square</label></li>
+                            <li><label><input type="checkbox" /> Oval</label></li>
+                            <li><label><input type="checkbox" /> Cat Eye</label></li>
+                        </ul>
+                    </div>
+                    <div class="filter_group">
+                        <h5>Gender</h5>
+                        <ul class="list-unstyled">
+                            <li><label><input type="checkbox" /> Men</label></li>
+                            <li><label><input type="checkbox" /> Women</label></li>
+                            <li><label><input type="checkbox" /> Unisex</label></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Product Grid -->
+            <div class="col-md-9">
+                <div class="row">
+                    <div class="col-xl-4 col-lg-4 col-md-6 col-sm-6">
+                        <div class="glasses_box shop_item">
+                            <figure><img src="~/images/glass1.png" alt="Sunglasses" /></figure>
+                            <h3><span class="blu">$</span>50</h3>
+                            <p>Classic Sunglasses</p>
+                            <button class="send_btn add_cart">Add to Cart</button>
+                        </div>
+                    </div>
+                    <div class="col-xl-4 col-lg-4 col-md-6 col-sm-6">
+                        <div class="glasses_box shop_item">
+                            <figure><img src="~/images/glass2.png" alt="Sunglasses" /></figure>
+                            <h3><span class="blu">$</span>65</h3>
+                            <p>Sport Sunglasses</p>
+                            <button class="send_btn add_cart">Add to Cart</button>
+                        </div>
+                    </div>
+                    <div class="col-xl-4 col-lg-4 col-md-6 col-sm-6">
+                        <div class="glasses_box shop_item">
+                            <figure><img src="~/images/glass3.png" alt="Eyeglasses" /></figure>
+                            <h3><span class="blu">$</span>80</h3>
+                            <p>Blue Light Glasses</p>
+                            <button class="send_btn add_cart">Add to Cart</button>
+                        </div>
+                    </div>
+                    <div class="col-xl-4 col-lg-4 col-md-6 col-sm-6">
+                        <div class="glasses_box shop_item">
+                            <figure><img src="~/images/glass4.png" alt="Eyeglasses" /></figure>
+                            <h3><span class="blu">$</span>55</h3>
+                            <p>Reading Glasses</p>
+                            <button class="send_btn add_cart">Add to Cart</button>
+                        </div>
+                    </div>
+                    <div class="col-xl-4 col-lg-4 col-md-6 col-sm-6">
+                        <div class="glasses_box shop_item">
+                            <figure><img src="~/images/glass5.png" alt="Sunglasses" /></figure>
+                            <h3><span class="blu">$</span>70</h3>
+                            <p>Polarized Sunglasses</p>
+                            <button class="send_btn add_cart">Add to Cart</button>
+                        </div>
+                    </div>
+                    <div class="col-xl-4 col-lg-4 col-md-6 col-sm-6">
+                        <div class="glasses_box shop_item">
+                            <figure><img src="~/images/glass6.png" alt="Sunglasses" /></figure>
+                            <h3><span class="blu">$</span>90</h3>
+                            <p>UV400 Sunglasses</p>
+                            <button class="send_btn add_cart">Add to Cart</button>
+                        </div>
+                    </div>
+                    <div class="col-xl-4 col-lg-4 col-md-6 col-sm-6">
+                        <div class="glasses_box shop_item">
+                            <figure><img src="~/images/glass7.png" alt="Combo" /></figure>
+                            <h3><span class="blu">$</span>120</h3>
+                            <p>Combo Set</p>
+                            <button class="send_btn add_cart">Add to Cart</button>
+                        </div>
+                    </div>
+                    <div class="col-xl-4 col-lg-4 col-md-6 col-sm-6">
+                        <div class="glasses_box shop_item">
+                            <figure><img src="~/images/glass8.png" alt="Combo" /></figure>
+                            <h3><span class="blu">$</span>140</h3>
+                            <p>Combo Premium Set</p>
+                            <button class="send_btn add_cart">Add to Cart</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- end shop section -->

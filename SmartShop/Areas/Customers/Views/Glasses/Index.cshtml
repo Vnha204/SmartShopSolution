@@ -1,0 +1,121 @@
+﻿@{
+    ViewData["Title"] = "Our Glasses";
+    ViewData["ActivePage"] = "Glasses";
+    ViewData["BodyClass"] = "position_head";
+}
+
+<!-- glasses page -->
+<div class="glasses inner_page">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-10 offset-md-1">
+                <div class="titlepage">
+                    <h2>Our Glasses Collection</h2>
+                    <p>Explore our full range of premium eyewear — from stylish sunglasses to corrective lenses.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Category Filter -->
+    <div class="container" style="margin-bottom: 30px;">
+        <div class="row justify-content-center">
+            <div class="col-md-8 text-center">
+                <div class="filter-btns">
+                    <button class="btn btn-filter active" data-filter="all">All</button>
+                    <button class="btn btn-filter" data-filter="sunglasses">Sunglasses</button>
+                    <button class="btn btn-filter" data-filter="eyeglasses">Eyeglasses</button>
+                    <button class="btn btn-filter" data-filter="combo">Combo</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6" data-category="sunglasses">
+                <div class="glasses_box">
+                    <figure><img src="~/images/glass1.png" alt="Sunglasses" /></figure>
+                    <h3><span class="blu">$</span>50</h3>
+                    <p>Sunglasses</p>
+                    <a class="read_more" asp-area="Customers" asp-controller="Home" asp-action="Shop">Buy Now</a>
+                </div>
+            </div>
+            <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6" data-category="sunglasses">
+                <div class="glasses_box">
+                    <figure><img src="~/images/glass2.png" alt="Sunglasses" /></figure>
+                    <h3><span class="blu">$</span>65</h3>
+                    <p>Sunglasses</p>
+                    <a class="read_more" asp-area="Customers" asp-controller="Home" asp-action="Shop">Buy Now</a>
+                </div>
+            </div>
+            <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6" data-category="eyeglasses">
+                <div class="glasses_box">
+                    <figure><img src="~/images/glass3.png" alt="Eyeglasses" /></figure>
+                    <h3><span class="blu">$</span>80</h3>
+                    <p>Eyeglasses</p>
+                    <a class="read_more" asp-area="Customers" asp-controller="Home" asp-action="Shop">Buy Now</a>
+                </div>
+            </div>
+            <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6" data-category="eyeglasses">
+                <div class="glasses_box">
+                    <figure><img src="~/images/glass4.png" alt="Eyeglasses" /></figure>
+                    <h3><span class="blu">$</span>55</h3>
+                    <p>Eyeglasses</p>
+                    <a class="read_more" asp-area="Customers" asp-controller="Home" asp-action="Shop">Buy Now</a>
+                </div>
+            </div>
+            <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6" data-category="sunglasses">
+                <div class="glasses_box">
+                    <figure><img src="~/images/glass5.png" alt="Sunglasses" /></figure>
+                    <h3><span class="blu">$</span>70</h3>
+                    <p>Polarized Sunglasses</p>
+                    <a class="read_more" asp-area="Customers" asp-controller="Home" asp-action="Shop">Buy Now</a>
+                </div>
+            </div>
+            <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6" data-category="sunglasses">
+                <div class="glasses_box">
+                    <figure><img src="~/images/glass6.png" alt="Sunglasses" /></figure>
+                    <h3><span class="blu">$</span>90</h3>
+                    <p>UV400 Sunglasses</p>
+                    <a class="read_more" asp-area="Customers" asp-controller="Home" asp-action="Shop">Buy Now</a>
+                </div>
+            </div>
+            <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6" data-category="combo">
+                <div class="glasses_box">
+                    <figure><img src="~/images/glass7.png" alt="Combo" /></figure>
+                    <h3><span class="blu">$</span>120</h3>
+                    <p>Combo Set</p>
+                    <a class="read_more" asp-area="Customers" asp-controller="Home" asp-action="Shop">Buy Now</a>
+                </div>
+            </div>
+            <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6" data-category="combo">
+                <div class="glasses_box">
+                    <figure><img src="~/images/glass8.png" alt="Combo" /></figure>
+                    <h3><span class="blu">$</span>140</h3>
+                    <p>Combo Premium Set</p>
+                    <a class="read_more" asp-area="Customers" asp-controller="Home" asp-action="Shop">Buy Now</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- end glasses page -->
+@section Scripts {
+    <script>
+        document.querySelectorAll('.btn-filter').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.btn-filter').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                var filter = this.getAttribute('data-filter');
+                document.querySelectorAll('[data-category]').forEach(function(item) {
+                    if (filter === 'all' || item.getAttribute('data-category') === filter) {
+                        item.style.display = '';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+            });
+        });
+    </script>
+}
