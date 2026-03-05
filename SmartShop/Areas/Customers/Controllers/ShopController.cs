@@ -2,9 +2,9 @@
 
 namespace SmartShop.Areas.Customers.Controllers
 {
+    [Area("Customers")]
     public class ShopController : Controller
     {
-        [Area("Customers")]
         public IActionResult Index()
         {
             return View();
