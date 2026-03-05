@@ -1,6 +1,5 @@
 /*---------------------------------------------------------------------
     File Name: custom.js
-    (Cleaned - removed malicious tracking scripts from template)
 ---------------------------------------------------------------------*/
 
 $(function () {
@@ -15,30 +14,24 @@ $(function () {
 
     /* Tooltip
     -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- */
-    $(document).ready(function () {
-        $('[data-toggle="tooltip"]').tooltip();
-    });
+    $('[data-toggle="tooltip"]').tooltip();
 
     /* Mouseover
     -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- */
-    $(document).ready(function () {
-        $(".main-menu ul li.megamenu").mouseover(function () {
-            if (!$(this).parent().hasClass("#wrapper")) {
-                $("#wrapper").addClass('overlay');
-            }
-        });
-        $(".main-menu ul li.megamenu").mouseleave(function () {
-            $("#wrapper").removeClass('overlay');
-        });
+    $(".main-menu ul li.megamenu").mouseover(function () {
+        if (!$(this).parent().hasClass("#wrapper")) {
+            $("#wrapper").addClass('overlay');
+        }
+    });
+    $(".main-menu ul li.megamenu").mouseleave(function () {
+        $("#wrapper").removeClass('overlay');
     });
 
     /* Toggle sidebar
     -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- */
-    $(document).ready(function () {
-        $('#sidebarCollapse').on('click', function () {
-            $('#sidebar').toggleClass('active');
-            $(this).toggleClass('active');
-        });
+    $('#sidebarCollapse').on('click', function () {
+        $('#sidebar').toggleClass('active');
+        $(this).toggleClass('active');
     });
 
     /* Product slider
@@ -47,5 +40,9 @@ $(function () {
         interval: 5000
     });
 
-});
+    /* Carousel Bootstrap 4 compat
+    -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- */
+    $('#banner1').carousel({ interval: 4000 });
+    $('#myCarousel').carousel({ interval: 5000 });
+
 });
