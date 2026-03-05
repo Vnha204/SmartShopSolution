@@ -1,4 +1,7 @@
-﻿<!DOCTYPE html>
+﻿@{
+    var bodyClass = ViewData["BodyClass"]?.ToString() ?? "";
+}
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -26,7 +29,7 @@
         }
     </style>
 </head>
-<body class="main-layout @ViewData["BodyClass"]">
+<body class="main-layout @BodyClass">
 
     <!-- Loader -->
     <div class="loader_bg">
