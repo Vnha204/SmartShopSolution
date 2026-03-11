@@ -1,11 +1,14 @@
 using Microsoft.EntityFrameworkCore;
-using SmartShop.Data.Data;
+using SmartShop.Data;
+using SmartShop.Data.Repository;
+using SmartShop.Data.Repository.IRepository;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
+builder.Services.AddDbContext<SmartShopDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 var app = builder.Build();
 
