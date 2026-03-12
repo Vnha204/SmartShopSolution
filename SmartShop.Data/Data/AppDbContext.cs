@@ -1,30 +1,35 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
+using SmartShop.Models;
 using System.ComponentModel;
 using System.Net;
-using SmartShop.Models;
 using CategoryAttribute = SmartShop.Models.CategoryAttribute;
 
-namespace SmartShop.Data
+namespace SmartShop.Data.Data
 {
-    public class SmartShopDbContext : DbContext
+    // ⚡ Đổi từ DbContext → IdentityDbContext<AppUser>
+    public class AppDbContext : IdentityDbContext<AppUser>
     {
-        public SmartShopDbContext(DbContextOptions<SmartShopDbContext> options)
-            : base(options) { }
+        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
+        // ===== Product System =====
         public DbSet<Category> Categories => Set<Category>();
-        public DbSet<Models.Attribute> Attributes => Set<Models.Attribute>();
+        public DbSet<Product> Products => Set<Product>();
+        public DbSet<SmartShop.Models.Attribute> Attributes => Set<SmartShop.Models.Attribute>();
         public DbSet<AttributeValue> AttributeValues => Set<AttributeValue>();
         public DbSet<CategoryAttribute> CategoryAttributes => Set<CategoryAttribute>();
-        public DbSet<Product> Products => Set<Product>();
-        public DbSet<ProductCategory> ProductCategories => Set<ProductCategory>();
         public DbSet<ProductAttributeValue> ProductAttributeValues => Set<ProductAttributeValue>();
-        //public DbSet<User> Users => Set<User>();
-        //public DbSet<Address> Addresses => Set<Address>();
-        //public DbSet<Order> Orders => Set<Order>();
-        //public DbSet<OrderItem> OrderItems => Set<OrderItem>();
+        public DbSet<ProductCategory> ProductCategories => Set<ProductCategory>();
+
+        // ===== User / Order System =====
+        public DbSet<Address> Addresses => Set<Address>();
+        public DbSet<Order> Orders => Set<Order>();
+        public DbSet<OrderItem> OrderItems => Set<OrderItem>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder); // BẮT BUỘC — để Identity tạo bảng của nó
+
             // Composite keys
             modelBuilder.Entity<ProductCategory>()
                 .HasKey(pc => new { pc.ProductId, pc.CategoryId });
@@ -32,17 +37,21 @@ namespace SmartShop.Data
             modelBuilder.Entity<CategoryAttribute>()
                 .HasKey(ca => new { ca.CategoryId, ca.AttributeId });
 
-            // ProductAttributeValue: unique (ProductId, AttributeValueId)
             modelBuilder.Entity<ProductAttributeValue>()
                 .HasIndex(p => new { p.ProductId, p.AttributeValueId })
                 .IsUnique();
 
-            // Category self-reference: xóa cha không cascade xuống con
+            // Category self-reference
             modelBuilder.Entity<Category>()
                 .HasOne(c => c.Parent)
                 .WithMany(c => c.Children)
                 .HasForeignKey(c => c.ParentId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            // Order unique code
+            modelBuilder.Entity<Order>()
+                .HasIndex(o => o.OrderCode)
+                .IsUnique();
         }
     }
 }

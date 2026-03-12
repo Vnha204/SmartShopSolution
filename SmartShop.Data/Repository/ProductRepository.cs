@@ -1,4 +1,6 @@
-﻿using SmartShop.Data.Repository.IRepository;
+﻿using Microsoft.EntityFrameworkCore;
+using SmartShop.Data.Data;
+using SmartShop.Data.Repository.IRepository;
 using SmartShop.Models;
 using System;
 using System.Collections.Generic;
@@ -10,7 +12,7 @@ namespace SmartShop.Data.Repository
 {
     public class ProductRepository : Repository<Product>, IProductRepository
     {
-        public ProductRepository(SmartShopDbContext context) : base(context) { }
+        public ProductRepository(AppDbContext context) : base(context) { }
 
         public async Task<Product?> GetBySlugAsync(string slug)
             => await _context.Products

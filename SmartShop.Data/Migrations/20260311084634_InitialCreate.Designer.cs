@@ -5,13 +5,13 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using SmartShop.Data;
+using SmartShop.Data.Data;
 
 #nullable disable
 
 namespace SmartShop.Data.Migrations
 {
-    [DbContext(typeof(SmartShopDbContext))]
+    [DbContext(typeof(AppDbContext))]
     [Migration("20260311084634_InitialCreate")]
     partial class InitialCreate
     {

@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using SmartShop.Data.Data;
 using SmartShop.Data.Repository.IRepository;
 using System;
 using System.Collections.Generic;
@@ -14,11 +15,11 @@ namespace SmartShop.Data.Repository
     /// </summary>
     public class Repository<T> : IRepository<T> where T : class
     {
-        protected readonly SmartShopDbContext _context;
+        protected readonly AppDbContext _context;
         protected readonly DbSet<T> _dbSet;
-        private SmartShopDbContext context;
+        private AppDbContext context;
 
-        public Repository(SmartShopDbContext context)
+        public Repository(AppDbContext context)
         {
             _context = context;
             _dbSet = context.Set<T>();

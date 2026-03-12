@@ -1,0 +1,40 @@
+﻿@model dynamic
+
+<div class="container my-5">
+    <div class="row">
+        <!-- SIDEBAR -->
+        <div class="col-md-3">
+            <div class="card shadow-sm">
+                <div class="list-group list-group-flush">
+                    <a asp-controller="Account" asp-action="Profile"
+                       class="list-group-item list-group-item-action
+                              @(ViewContext.RouteData.Values["action"]?.ToString() == "Profile" ? "active" : "")">
+                        Trang tài khoản
+                    </a>
+                    <a asp-controller="Account" asp-action="Orders"
+                       class="list-group-item list-group-item-action fw-bold
+                              @(ViewContext.RouteData.Values["action"]?.ToString() == "Orders" ? "active" : "")">
+                        Đơn hàng
+                    </a>
+                    <a asp-controller="Account" asp-action="Addresses"
+                       class="list-group-item list-group-item-action
+                              @(ViewContext.RouteData.Values["action"]?.ToString() == "Addresses" ? "active" : "")">
+                        Địa chỉ
+                    </a>
+                    <form asp-controller="Auth" asp-action="Logout" method="post">
+                        @Html.AntiForgeryToken()
+                        <button type="submit"
+                                class="list-group-item list-group-item-action text-danger border-0 text-start w-100">
+                            Đăng xuất
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- MAIN CONTENT -->
+        <div class="col-md-9">
+            @RenderBody()
+        </div>
+    </div>
+</div>

@@ -1,0 +1,60 @@
+﻿@model IEnumerable<SmartShop.Models.Order>
+@{
+    ViewData["Title"] = "Đơn hàng của tôi";
+}
+
+<div class="card shadow-sm">
+    <div class="card-header bg-white">
+        <div class="border-bottom border-primary border-3 pb-2">
+            <h5 class="mb-0">Đơn hàng</h5>
+        </div>
+    </div>
+    <div class="card-body">
+        @if (!Model.Any())
+        {
+            <div class="d-flex justify-content-between align-items-center py-3 bg-light rounded px-3">
+                <div>
+                    <i class="fa fa-stop me-2 text-primary"></i>
+                    <span>Bạn chưa có đơn hàng nào.</span>
+                </div>
+                <a asp-area="Customers" asp-controller="Shop" asp-action="Index"
+                   class="btn btn-outline-secondary btn-sm">Duyệt sản phẩm</a>
+            </div>
+        }
+        else
+        {
+            @foreach (var order in Model)
+            {
+                <div class="card mb-3 border">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span class="fw-bold">#@order.OrderCode</span>
+                        <span class="badge @GetStatusBadge(order.Status)">
+                            @SmartShop.Models.OrderStatus.DisplayNames.GetValueOrDefault(order.Status, order.Status)
+                        </span>
+                    </div>
+                    <div class="card-body">
+                        <p class="mb-1 text-muted small">
+                            Ngày đặt: @order.CreatedAt.ToString("dd/MM/yyyy HH:mm")
+                        </p>
+                        <p class="mb-0 fw-bold">
+                            Tổng: @order.TotalPrice.ToString("N0") ₫
+                        </p>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</div>
+
+@functions {
+    string GetStatusBadge(string status) => status switch
+    {
+        "pending" => "bg-warning text-dark",
+        "confirmed" => "bg-info text-dark",
+        "processing" => "bg-primary",
+        "shipping" => "bg-info",
+        "delivered" => "bg-success",
+        "cancelled" => "bg-danger",
+        _ => "bg-secondary"
+    };
+}

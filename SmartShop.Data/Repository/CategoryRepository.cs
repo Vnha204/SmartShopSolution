@@ -1,4 +1,6 @@
-﻿using SmartShop.Data.Repository.IRepository;
+﻿using Microsoft.EntityFrameworkCore;
+using SmartShop.Data.Data;
+using SmartShop.Data.Repository.IRepository;
 using SmartShop.Models;
 using System;
 using System.Collections.Generic;
@@ -10,7 +12,7 @@ namespace SmartShop.Data.Repository
 {
     public class CategoryRepository : Repository<Category>, ICategoryRepository
     {
-        public CategoryRepository(SmartShopDbContext context) : base(context) { }
+        public CategoryRepository(AppDbContext context) : base(context) { }
 
         public async Task<IEnumerable<Category>> GetRootCategoriesAsync()
             => await _context.Categories

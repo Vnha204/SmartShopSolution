@@ -1,0 +1,77 @@
+﻿@{
+    ViewData["Title"] = "Tổng quan";
+    Layout = "_AdminLayout";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="mb-0">Tổng quan <small class="text-muted fs-6">Tổng quan</small></h4>
+</div>
+
+<div class="row g-3">
+    <!-- Sản phẩm -->
+    <div class="col-xl-3 col-md-6">
+        <div class="card text-white h-100" style="background:#f0a500;">
+            <div class="card-body d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="fw-bold">@ViewBag.TotalProducts</h2>
+                    <p class="mb-0">Sản phẩm</p>
+                </div>
+                <i class="fa fa-shopping-bag fa-3x opacity-50"></i>
+            </div>
+            <div class="card-footer bg-transparent border-0">
+                <a asp-action="Index" asp-controller="Product"
+                   class="text-white text-decoration-none small">Chi tiết →</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Danh mục -->
+    <div class="col-xl-3 col-md-6">
+        <div class="card text-white h-100" style="background:#28a745;">
+            <div class="card-body d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="fw-bold">@ViewBag.TotalCategories</h2>
+                    <p class="mb-0">Danh mục sản phẩm</p>
+                </div>
+                <i class="fa fa-tags fa-3x opacity-50"></i>
+            </div>
+            <div class="card-footer bg-transparent border-0">
+                <a href="#" class="text-white text-decoration-none small">Chi tiết →</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Đơn hàng chờ -->
+    <div class="col-xl-3 col-md-6">
+        <div class="card text-white h-100" style="background:#e91e8c;">
+            <div class="card-body d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="fw-bold">@ViewBag.PendingOrders</h2>
+                    <p class="mb-0">Đơn hàng chưa xử lý</p>
+                    <p class="mb-0 small">@ViewBag.TotalOrders Đơn hàng đã xử lý</p>
+                </div>
+                <i class="fa fa-shopping-cart fa-3x opacity-50"></i>
+            </div>
+            <div class="card-footer bg-transparent border-0">
+                <a asp-action="Index" asp-controller="Order"
+                   class="text-white text-decoration-none small">Chi tiết →</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Thành viên -->
+    <div class="col-xl-3 col-md-6">
+        <div class="card text-white h-100" style="background:#e91e63;">
+            <div class="card-body d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="fw-bold">@ViewBag.TotalUsers</h2>
+                    <p class="mb-0">Thành viên</p>
+                </div>
+                <i class="fa fa-users fa-3x opacity-50"></i>
+            </div>
+            <div class="card-footer bg-transparent border-0">
+                <a href="#" class="text-white text-decoration-none small">Chi tiết →</a>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,76 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using SmartShop.Models
+@inject SignInManager<AppUser> SignInManager
+@inject UserManager<AppUser> UserManager
+
+@if (SignInManager.IsSignedIn(User))
+{
+    var user = await UserManager.GetUserAsync(User);
+    var isAdmin = User.IsInRole("Admin");
+
+    <div class="nav-item dropdown">
+        <!-- Avatar tròn -->
+        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#"
+           id="userDropdown" role="button" data-bs-toggle="dropdown">
+            <div class="user-avatar rounded-circle bg-primary d-flex align-items-center
+                            justify-content-center text-white"
+                 style="width:36px;height:36px;font-size:16px;">
+                @if (!string.IsNullOrEmpty(user?.AvatarUrl))
+                {
+                    <img src="@user.AvatarUrl" class="rounded-circle" width="36" height="36" alt="avatar" />
+                }
+                else
+                {
+                    <i class="fa fa-user"></i>
+                }
+            </div>
+        </a>
+
+        <ul class="dropdown-menu dropdown-menu-end shadow">
+            <li class="dropdown-header px-3 py-2">
+                <strong>@user?.FullName</strong>
+                <br /><small class="text-muted">@user?.Email</small>
+            </li>
+            <li><hr class="dropdown-divider" /></li>
+            <li>
+                <a class="dropdown-item" asp-controller="Account" asp-action="Orders">
+                    <i class="fa fa-shopping-bag me-2"></i> Đơn hàng
+                </a>
+            </li>
+            <li>
+                <a class="dropdown-item" asp-controller="Account" asp-action="Addresses">
+                    <i class="fa fa-map-marker me-2"></i> Địa chỉ
+                </a>
+            </li>
+            <li>
+                <a class="dropdown-item" asp-controller="Account" asp-action="Profile">
+                    <i class="fa fa-cog me-2"></i> Tài khoản
+                </a>
+            </li>
+            @if (isAdmin)
+            {
+                <li><hr class="dropdown-divider" /></li>
+                <li>
+                    <a class="dropdown-item text-primary fw-bold"
+                       asp-area="Admin" asp-controller="Dashboard" asp-action="Index">
+                        <i class="fa fa-tachometer me-2"></i> Quản lý
+                    </a>
+                </li>
+            }
+            <li><hr class="dropdown-divider" /></li>
+            <li>
+                <form asp-controller="Auth" asp-action="Logout" method="post">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="dropdown-item text-danger">
+                        <i class="fa fa-sign-out me-2"></i> Đăng xuất
+                    </button>
+                </form>
+            </li>
+        </ul>
+    </div>
+}
+else
+{
+    <a class="nav-link" asp-controller="Auth" asp-action="Login">Đăng nhập</a>
+    <a class="nav-link" asp-controller="Auth" asp-action="Register">Đăng ký</a>
+}

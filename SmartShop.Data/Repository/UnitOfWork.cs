@@ -1,4 +1,5 @@
-﻿using SmartShop.Data.Repository.IRepository;
+﻿using SmartShop.Data.Data;
+using SmartShop.Data.Repository.IRepository;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,13 +14,13 @@ namespace SmartShop.Data.Repository
     /// </summary>
     public class UnitOfWork : IUnitOfWork
     {
-        private readonly SmartShopDbContext _context;
+        private readonly AppDbContext _context;
 
         public ICategoryRepository Categories { get; private set; }
         public IProductRepository Products { get; private set; }
         //public IUserRepository Users { get; private set; }
 
-        public UnitOfWork(SmartShopDbContext context)
+        public UnitOfWork(AppDbContext context)
         {
             _context = context;
             Categories = new CategoryRepository(_context);
