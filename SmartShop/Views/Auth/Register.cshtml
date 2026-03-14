@@ -1,0 +1,149 @@
+﻿@model RegisterVM
+@{
+    ViewData["Title"] = "Đăng ký";
+    Layout = "_Layout";
+}
+
+<section class="inner_page position_head">
+    <div class="container">
+        <div class="row justify-content-center" style="min-height: 80vh; align-items: center; padding: 60px 0;">
+            <div class="col-md-5 col-sm-10">
+
+                <div class="card shadow-sm border-0 rounded-3">
+                    <div class="card-body p-4 p-md-5">
+
+                        <!-- Title -->
+                        <div class="text-center mb-4">
+                            <h3 class="fw-bold" style="color:#3498db;">
+                                <i class="fa fa-user-plus me-2"></i> Đăng ký
+                            </h3>
+                            <p class="text-muted small">Tạo tài khoản SmartShop miễn phí</p>
+                        </div>
+
+                        <!-- Validation errors -->
+                        @if (!ViewData.ModelState.IsValid)
+                        {
+                            <div class="alert alert-danger py-2 small">
+                                <ul class="mb-0 ps-3">
+                                    @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                                    {
+                                        <li>@error.ErrorMessage</li>
+                                    }
+                                </ul>
+                            </div>
+                        }
+
+                        <form asp-controller="Auth" asp-action="Register" method="post">
+                            @Html.AntiForgeryToken()
+
+                            <!-- Full Name -->
+                            <div class="mb-3">
+                                <label asp-for="FullName" class="form-label fw-semibold small"></label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0">
+                                        <i class="fa fa-user text-muted"></i>
+                                    </span>
+                                    <input asp-for="FullName" type="text"
+                                           class="form-control border-start-0 ps-0"
+                                           placeholder="Nguyễn Văn A"
+                                           autocomplete="name" />
+                                </div>
+                                <span asp-validation-for="FullName" class="text-danger small"></span>
+                            </div>
+
+                            <!-- Email -->
+                            <div class="mb-3">
+                                <label asp-for="Email" class="form-label fw-semibold small"></label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0">
+                                        <i class="fa fa-envelope text-muted"></i>
+                                    </span>
+                                    <input asp-for="Email" type="email"
+                                           class="form-control border-start-0 ps-0"
+                                           placeholder="example@email.com"
+                                           autocomplete="email" />
+                                </div>
+                                <span asp-validation-for="Email" class="text-danger small"></span>
+                            </div>
+
+                            <!-- Password -->
+                            <div class="mb-3">
+                                <label asp-for="Password" class="form-label fw-semibold small"></label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0">
+                                        <i class="fa fa-lock text-muted"></i>
+                                    </span>
+                                    <input asp-for="Password" type="password"
+                                           class="form-control border-start-0 ps-0"
+                                           placeholder="Tối thiểu 6 ký tự"
+                                           autocomplete="new-password"
+                                           id="regPasswordInput" />
+                                    <button type="button" class="input-group-text bg-light border-start-0"
+                                            onclick="togglePassword('regPasswordInput', this)">
+                                        <i class="fa fa-eye text-muted"></i>
+                                    </button>
+                                </div>
+                                <span asp-validation-for="Password" class="text-danger small"></span>
+                            </div>
+
+                            <!-- Confirm Password -->
+                            <div class="mb-4">
+                                <label asp-for="ConfirmPassword" class="form-label fw-semibold small"></label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0">
+                                        <i class="fa fa-lock text-muted"></i>
+                                    </span>
+                                    <input asp-for="ConfirmPassword" type="password"
+                                           class="form-control border-start-0 ps-0"
+                                           placeholder="Nhập lại mật khẩu"
+                                           autocomplete="new-password"
+                                           id="regConfirmInput" />
+                                    <button type="button" class="input-group-text bg-light border-start-0"
+                                            onclick="togglePassword('regConfirmInput', this)">
+                                        <i class="fa fa-eye text-muted"></i>
+                                    </button>
+                                </div>
+                                <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
+                            </div>
+
+                            <!-- Submit -->
+                            <button type="submit" class="btn w-100 fw-semibold text-white py-2"
+                                    style="background: linear-gradient(90deg,#3498db,#2980b9); border:none; border-radius:8px;">
+                                <i class="fa fa-user-plus me-2"></i> Tạo tài khoản
+                            </button>
+                        </form>
+
+                        <!-- Login link -->
+                        <div class="text-center mt-4 pt-2 border-top">
+                            <p class="small text-muted mb-0">
+                                Đã có tài khoản?
+                                <a asp-controller="Auth" asp-action="Login"
+                                   class="fw-semibold text-decoration-none" style="color:#3498db;">
+                                    Đăng nhập
+                                </a>
+                            </p>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        function togglePassword(inputId, btn) {
+            var input = document.getElementById(inputId);
+            var icon = btn.querySelector('i');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.replace('fa-eye', 'fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.replace('fa-eye-slash', 'fa-eye');
+            }
+        }
+    </script>
+}

@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using SmartShop.Models;
+using SmartShop.Models.ViewModels;
 using SmartShop.Utility;
 
 namespace SmartShop.Controllers

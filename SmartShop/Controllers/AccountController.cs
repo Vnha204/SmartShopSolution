@@ -49,7 +49,29 @@ namespace SmartShop.Controllers
 
             return View(addresses);
         }
+        // ===== Thêm địa chỉ mới =====
+        [HttpPost, ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddAddress(Address model)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return RedirectToAction("Login", "Auth");
 
+            model.UserId = user.Id;
+
+            // Nếu đặt mặc định thì bỏ mặc định tất cả địa chỉ cũ
+            if (model.IsDefault)
+            {
+                var existingAddresses = _context.Addresses.Where(a => a.UserId == user.Id);
+                foreach (var addr in existingAddresses)
+                    addr.IsDefault = false;
+            }
+
+            _context.Addresses.Add(model);
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = "Đã thêm địa chỉ thành công!";
+            return RedirectToAction(nameof(Addresses));
+        }
         // ===== Thông tin tài khoản =====
         public async Task<IActionResult> Profile()
         {

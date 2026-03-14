@@ -27,6 +27,28 @@
             overflow-x: hidden;
             max-width: 100%;
         }
+        /* Auth dropdown trong navbar template */
+        /* .nav-auth-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+            .nav-auth-wrapper .dropdown-menu {
+                min-width: 220px;
+            }
+
+            .nav-auth-wrapper .user-avatar {
+                cursor: pointer;
+            }
+
+            .nav-auth-wrapper .dropdown-item {
+                font-size: 14px;
+            } */
+        /* Căn chỉnh partial vào navbar */
+        /* .navbar-nav .nav-auth-wrapper {
+            margin-left: 8px;
+        } */
     </style>
 </head>
 <body class="main-layout @bodyClass">
@@ -79,18 +101,7 @@
                                     <li class="nav-item @(ViewData["ActivePage"]?.ToString() == "Contact" ? "active" : "")">
                                         <a class="nav-link" asp-area="Customers" asp-controller="Contact" asp-action="Index">Contact Us</a>
                                     </li>
-                                    <li class="nav-item d_none login_btn">
-                                        <a class="nav-link" href="#">Login</a>
-                                    </li>
-                                    <li class="nav-item d_none">
-                                        <a class="nav-link" href="#">Register</a>
-                                    </li>
-                                    <li class="nav-item d_none sea_icon">
-                                        <a class="nav-link" href="#">
-                                            <i class="fa fa-shopping-bag" aria-hidden="true"></i>
-                                            <i class="fa fa-search" aria-hidden="true"></i>
-                                        </a>
-                                    </li>
+                                    @await Html.PartialAsync("_NavbarAuth")
                                 </ul>
                             </div>
                         </nav>

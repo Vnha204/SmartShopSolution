@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SmartShop.Models
+namespace SmartShop.Models.ViewModels
 {
     public class LoginVM
     {

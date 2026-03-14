@@ -1,0 +1,195 @@
+﻿@model IEnumerable<SmartShop.Models.Order>
+@{
+    ViewData["Title"] = "Quản lý đơn hàng";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="mb-1 fw-bold">Đơn hàng</h4>
+        <p class="text-muted small mb-0">Tổng: @Model.Count() đơn hàng</p>
+    </div>
+</div>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show py-2 small">
+        <i class="fa fa-check-circle me-2"></i> @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<!-- Filter tabs -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body p-0">
+        <ul class="nav nav-tabs border-0 px-3 pt-3" id="orderTabs">
+            <li class="nav-item">
+                <a class="nav-link active" href="#" onclick="filterOrders('all', this)">
+                    Tất cả <span class="badge bg-secondary ms-1">@Model.Count()</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" onclick="filterOrders('pending', this)">
+                    Chờ xác nhận
+                    <span class="badge ms-1" style="background:#f0a500;">@Model.Count(o => o.Status == "pending")</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" onclick="filterOrders('confirmed', this)">
+                    Đã xác nhận <span class="badge bg-info ms-1">@Model.Count(o => o.Status == "confirmed")</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" onclick="filterOrders('shipping', this)">
+                    Đang giao <span class="badge bg-primary ms-1">@Model.Count(o => o.Status == "shipping")</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" onclick="filterOrders('delivered', this)">
+                    Đã giao <span class="badge bg-success ms-1">@Model.Count(o => o.Status == "delivered")</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" onclick="filterOrders('cancelled', this)">
+                    Đã huỷ <span class="badge bg-danger ms-1">@Model.Count(o => o.Status == "cancelled")</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<!-- Table -->
+<div class="card border-0 shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table admin-table mb-0" id="ordersTable">
+                <thead>
+                    <tr>
+                        <th style="width:50px;">#</th>
+                        <th>Mã đơn</th>
+                        <th>Khách hàng</th>
+                        <th>Sản phẩm</th>
+                        <th>Tổng tiền</th>
+                        <th>Thanh toán</th>
+                        <th>Trạng thái</th>
+                        <th>Ngày đặt</th>
+                        <th style="width:120px;">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (!Model.Any())
+                    {
+                        <tr>
+                            <td colspan="9" class="text-center py-5 text-muted">
+                                <i class="fa fa-shopping-cart fa-2x d-block mb-2" style="opacity:0.3;"></i>
+                                Chưa có đơn hàng nào
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var order in Model)
+                        {
+                            <tr data-status="@order.Status">
+                                <td class="text-muted small">@order.Id</td>
+                                <td>
+                                    <span class="fw-semibold">#@order.OrderCode</span>
+                                </td>
+                                <td>
+                                    <div class="fw-semibold small">@(order.User?.FullName ?? "—")</div>
+                                    <div class="text-muted" style="font-size:11px;">@(order.User?.Email ?? "")</div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-light text-dark border">
+                                        @order.OrderItems.Count sản phẩm
+                                    </span>
+                                </td>
+                                <td class="fw-semibold text-success">
+                                    @order.TotalPrice.ToString("N0") ₫
+                                </td>
+                                <td>
+                                    <span class="badge @(order.PaymentStatus == "paid" ? "bg-success" : "bg-warning text-dark") badge-status">
+                                        @(order.PaymentStatus == "paid" ? "Đã thanh toán" : "Chưa TT")
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge badge-status @GetStatusBadge(order.Status)">
+                                        @SmartShop.Models.OrderStatus.DisplayNames.GetValueOrDefault(order.Status, order.Status)
+                                    </span>
+                                </td>
+                                <td class="small text-muted">
+                                    @order.CreatedAt.ToString("dd/MM/yyyy")
+                                    <br /><span style="font-size:11px;">@order.CreatedAt.ToString("HH:mm")</span>
+                                </td>
+                                <td>
+                                    <div class="d-flex gap-1">
+                                        <a asp-area="Admin" asp-controller="Order" asp-action="Detail"
+                                           asp-route-id="@order.Id"
+                                           class="btn btn-sm btn-outline-primary" title="Xem chi tiết">
+                                            <i class="fa fa-eye"></i>
+                                        </a>
+                                        <!-- Quick status update dropdown -->
+                                        <div class="dropdown">
+                                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle"
+                                                    data-bs-toggle="dropdown" title="Cập nhật trạng thái">
+                                                <i class="fa fa-refresh"></i>
+                                            </button>
+                                            <ul class="dropdown-menu dropdown-menu-end shadow-sm" style="font-size:13px;">
+                                                @foreach (var s in SmartShop.Models.OrderStatus.DisplayNames)
+                                                {
+                                                    <li>
+                                                        <form asp-area="Admin" asp-controller="Order"
+                                                              asp-action="UpdateStatus" method="post" class="d-inline">
+                                                            @Html.AntiForgeryToken()
+                                                            <input type="hidden" name="id" value="@order.Id" />
+                                                            <input type="hidden" name="status" value="@s.Key" />
+                                                            <button type="submit"
+                                                                    class="dropdown-item @(order.Status == s.Key ? "active" : "")">
+                                                                @s.Value
+                                                            </button>
+                                                        </form>
+                                                    </li>
+                                                }
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@functions {
+    string GetStatusBadge(string status) => status switch
+    {
+        "pending" => "bg-warning text-dark",
+        "confirmed" => "bg-info text-dark",
+        "processing" => "bg-primary",
+        "shipping" => "bg-info",
+        "delivered" => "bg-success",
+        "cancelled" => "bg-danger",
+        _ => "bg-secondary"
+    };
+}
+
+@section Scripts {
+    <script>
+        function filterOrders(status, tabEl) {
+            // Update active tab
+            document.querySelectorAll('#orderTabs .nav-link').forEach(el => el.classList.remove('active'));
+            tabEl.classList.add('active');
+
+            // Filter rows
+            document.querySelectorAll('#ordersTable tbody tr[data-status]').forEach(row => {
+                if (status === 'all' || row.dataset.status === status) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+    </script>
+}
