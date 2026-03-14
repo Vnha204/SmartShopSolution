@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SmartShop.Data.Data;
+using SmartShop.Models;
 using SmartShop.Utility;
 
 namespace SmartShop.Areas.Admin.Controllers
@@ -25,8 +26,21 @@ namespace SmartShop.Areas.Admin.Controllers
 
         // AJAX: Cập nhật trạng thái đơn hàng
         [HttpPost]
+        [ValidateAntiForgeryToken] // ✅ FIX: Thêm bảo mật CSRF
         public async Task<IActionResult> UpdateStatus(int id, string status)
         {
+            // ✅ FIX: Validate status hợp lệ
+            var validStatuses = new[] { 
+                OrderStatus.Pending, OrderStatus.Confirmed, OrderStatus.Processing,
+                OrderStatus.Shipping, OrderStatus.Delivered, OrderStatus.Cancelled 
+            };
+            
+            if (string.IsNullOrEmpty(status) || !validStatuses.Contains(status))
+            {
+                TempData["Error"] = "Trạng thái không hợp lệ!";
+                return RedirectToAction(nameof(Index));
+            }
+
             var order = await _context.Orders.FindAsync(id);
             if (order == null) return NotFound();
 

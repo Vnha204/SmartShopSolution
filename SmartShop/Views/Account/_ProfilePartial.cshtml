@@ -1,0 +1,80 @@
+@model SmartShop.Models.AppUser
+
+<div class="card card-custom">
+    <div class="card-header bg-white border-bottom py-3">
+        <h5 class="mb-0 fw-bold">
+            <i class="fa fa-user me-2 text-primary-custom"></i> Thông tin tài khoản
+        </h5>
+    </div>
+    <div class="card-body p-4">
+        <!-- Alert messages -->
+        <div id="profile-alerts"></div>
+
+        <form id="profileForm" method="post">
+            @Html.AntiForgeryToken()
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold small">Họ và tên</label>
+                    <input type="text" name="fullName" value="@Model.FullName"
+                           class="form-control form-control-custom" placeholder="Họ và tên" required />
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold small">Email</label>
+                    <input type="email" value="@Model.Email"
+                           class="form-control form-control-custom bg-light" readonly />
+                    <div class="form-text">Email không thể thay đổi.</div>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold small">Số điện thoại</label>
+                    <input type="tel" name="phoneNumber" value="@Model.PhoneNumber"
+                           class="form-control form-control-custom" placeholder="0912 345 678" />
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold small">Ngày tạo tài khoản</label>
+                    <input type="text" value="@Model.CreatedAt.ToString("dd/MM/yyyy")"
+                           class="form-control form-control-custom bg-light" readonly />
+                </div>
+
+                <div class="col-12 mt-2">
+                    <button type="submit" class="btn btn-primary-custom px-4">
+                        <i class="fa fa-save me-2"></i> Lưu thay đổi
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+// AJAX form submit
+$('#profileForm').on('submit', function(e) {
+    e.preventDefault();
+    var $form = $(this);
+    
+    $.ajax({
+        url: '@Url.Action("UpdateProfile", "Account")',
+        type: 'POST',
+        data: $form.serialize(),
+        success: function(response) {
+            var alertClass = response.success ? 'alert-success' : 'alert-danger';
+            var icon = response.success ? 'fa-check-circle' : 'fa-exclamation-circle';
+            $('#profile-alerts').html(
+                '<div class="alert ' + alertClass + ' alert-dismissible fade show">' +
+                '<i class="fa ' + icon + ' me-2"></i>' + response.message +
+                '<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>'
+            );
+        },
+        error: function() {
+            $('#profile-alerts').html(
+                '<div class="alert alert-danger alert-dismissible fade show">' +
+                '<i class="fa fa-exclamation-circle me-2"></i>Có lỗi xảy ra. Vui lòng thử lại.' +
+                '<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>'
+            );
+        }
+    });
+});
+</script>

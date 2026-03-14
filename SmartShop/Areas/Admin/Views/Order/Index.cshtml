@@ -12,14 +12,22 @@
 
 @if (TempData["Success"] != null)
 {
-    <div class="alert alert-success alert-dismissible fade show py-2 small">
+    <div class="alert alert-success alert-custom alert-dismissible fade show">
         <i class="fa fa-check-circle me-2"></i> @TempData["Success"]
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
 }
 
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-custom alert-dismissible fade show">
+        <i class="fa fa-exclamation-circle me-2"></i> @TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
 <!-- Filter tabs -->
-<div class="card border-0 shadow-sm mb-4">
+<div class="card card-custom mb-4">
     <div class="card-body p-0">
         <ul class="nav nav-tabs border-0 px-3 pt-3" id="orderTabs">
             <li class="nav-item">
@@ -30,7 +38,7 @@
             <li class="nav-item">
                 <a class="nav-link" href="#" onclick="filterOrders('pending', this)">
                     Chờ xác nhận
-                    <span class="badge ms-1" style="background:#f0a500;">@Model.Count(o => o.Status == "pending")</span>
+                    <span class="badge ms-1 bg-warning text-dark">@Model.Count(o => o.Status == "pending")</span>
                 </a>
             </li>
             <li class="nav-item">
@@ -58,7 +66,7 @@
 </div>
 
 <!-- Table -->
-<div class="card border-0 shadow-sm">
+<div class="card card-custom">
     <div class="card-body p-0">
         <div class="table-responsive">
             <table class="table admin-table mb-0" id="ordersTable">
@@ -107,13 +115,13 @@
                                     @order.TotalPrice.ToString("N0") ₫
                                 </td>
                                 <td>
-                                    <span class="badge @(order.PaymentStatus == "paid" ? "bg-success" : "bg-warning text-dark") badge-status">
+                                    <span class="badge badge-status @StatusBadgeHelper.GetPaymentStatusBadge(order.PaymentStatus)">
                                         @(order.PaymentStatus == "paid" ? "Đã thanh toán" : "Chưa TT")
                                     </span>
                                 </td>
                                 <td>
-                                    <span class="badge badge-status @GetStatusBadge(order.Status)">
-                                        @SmartShop.Models.OrderStatus.DisplayNames.GetValueOrDefault(order.Status, order.Status)
+                                    <span class="badge badge-status @StatusBadgeHelper.GetOrderStatusBadge(order.Status)">
+                                        @OrderStatus.DisplayNames.GetValueOrDefault(order.Status, order.Status)
                                     </span>
                                 </td>
                                 <td class="small text-muted">
@@ -127,14 +135,13 @@
                                            class="btn btn-sm btn-outline-primary" title="Xem chi tiết">
                                             <i class="fa fa-eye"></i>
                                         </a>
-                                        <!-- Quick status update dropdown -->
                                         <div class="dropdown">
                                             <button class="btn btn-sm btn-outline-secondary dropdown-toggle"
                                                     data-bs-toggle="dropdown" title="Cập nhật trạng thái">
                                                 <i class="fa fa-refresh"></i>
                                             </button>
                                             <ul class="dropdown-menu dropdown-menu-end shadow-sm" style="font-size:13px;">
-                                                @foreach (var s in SmartShop.Models.OrderStatus.DisplayNames)
+                                                @foreach (var s in OrderStatus.DisplayNames)
                                                 {
                                                     <li>
                                                         <form asp-area="Admin" asp-controller="Order"
@@ -162,28 +169,13 @@
     </div>
 </div>
 
-@functions {
-    string GetStatusBadge(string status) => status switch
-    {
-        "pending" => "bg-warning text-dark",
-        "confirmed" => "bg-info text-dark",
-        "processing" => "bg-primary",
-        "shipping" => "bg-info",
-        "delivered" => "bg-success",
-        "cancelled" => "bg-danger",
-        _ => "bg-secondary"
-    };
-}
-
 @section Scripts {
     <script>
         function filterOrders(status, tabEl) {
-            // Update active tab
             document.querySelectorAll('#orderTabs .nav-link').forEach(el => el.classList.remove('active'));
             tabEl.classList.add('active');
 
-            // Filter rows
-            document.querySelectorAll('#ordersTable tbody tr[data-status]').forEach(row => {
+            document.querySelectorAll('#ordersTable tbody tr').forEach(row => {
                 if (status === 'all' || row.dataset.status === status) {
                     row.style.display = '';
                 } else {

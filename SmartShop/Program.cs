@@ -98,12 +98,12 @@ app.MapAreaControllerRoute(
 app.MapControllerRoute(
     name: "auth",
     pattern: "auth/{action=Login}",
-    defaults: new { controller = "Auth" });
+    defaults: new { controller = "Auth", area = "" });
 
 app.MapControllerRoute(
     name: "account",
     pattern: "account/{action=Index}",
-    defaults: new { controller = "Account" });
+    defaults: new { controller = "Account", area = "" });
 
 app.MapControllerRoute(
     name: "default",

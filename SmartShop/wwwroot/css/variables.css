@@ -1,0 +1,237 @@
+/* ===== CSS Variables - SmartShop Theme ===== */
+:root {
+    /* Primary Colors */
+    --primary-color: #3498db;
+    --primary-hover: #2980b9;
+    --primary-light: rgba(52, 152, 219, 0.1);
+    
+    /* Status Colors */
+    --success-color: #28a745;
+    --warning-color: #f0a500;
+    --danger-color: #dc3545;
+    --info-color: #17a2b8;
+    
+    /* Text Colors */
+    --text-primary: #333;
+    --text-muted: #6c757d;
+    --text-light: #adb5bd;
+    
+    /* Background */
+    --bg-light: #f8f9fa;
+    --bg-white: #ffffff;
+    
+    /* Border */
+    --border-color: #dee2e6;
+    --border-radius: 8px;
+    --border-radius-sm: 6px;
+    
+    /* Shadow */
+    --shadow-sm: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    --shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+    
+    /* Spacing */
+    --spacing-xs: 0.25rem;
+    --spacing-sm: 0.5rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 1.5rem;
+    --spacing-xl: 2rem;
+    
+    /* Navbar */
+    --navbar-height: 100px;
+}
+
+/* ===== Fix: Account/Shop Page Layout ===== */
+.inner_page.position_head {
+    padding-top: var(--navbar-height);
+    min-height: 100vh;
+    background: var(--bg-light);
+}
+
+/* ===== Dropdown Menu Fix ===== */
+.dropdown-menu {
+    border-radius: var(--border-radius);
+}
+
+.dropdown-menu .dropdown-item {
+    display: flex !important;
+    align-items: center !important;
+    padding: 0.5rem 1rem;
+    transition: all 0.2s ease;
+}
+
+.dropdown-menu .dropdown-item:hover {
+    background: var(--primary-light);
+}
+
+.dropdown-menu .dropdown-item i.fa {
+    width: 16px !important;
+    text-align: center !important;
+    flex-shrink: 0;
+}
+
+/* ===== Account Sidebar Fix ===== */
+.card-custom {
+    border: 0;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+}
+
+.list-group-item {
+    display: flex !important;
+    align-items: center !important;
+    padding: 12px 20px;
+    transition: all 0.2s ease;
+}
+
+.list-group-item i.fa {
+    width: 16px !important;
+    text-align: center !important;
+    flex-shrink: 0;
+    color: var(--text-muted);
+}
+
+.list-group-item.active {
+    background: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+    color: #fff !important;
+}
+
+.list-group-item.active i.fa {
+    color: #fff !important;
+}
+
+.list-group-item:hover:not(.active) {
+    background: var(--primary-light);
+}
+
+.list-group-item:hover:not(.active) i.fa {
+    color: var(--primary-color);
+}
+
+/* ===== Account Section Styles ===== */
+.account-sidebar-card {
+    position: sticky;
+    top: 120px;
+    border: 0;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+}
+
+.account-header {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-hover)) !important;
+}
+
+.account-nav .list-group-item {
+    padding: 12px 20px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    border-left: 3px solid transparent !important;
+}
+
+.account-nav .list-group-item:hover:not(.active) {
+    background: var(--primary-light);
+    border-left-color: var(--primary-color) !important;
+}
+
+.account-nav .list-group-item.active {
+    background: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+    color: #fff !important;
+    border-left-color: var(--primary-hover) !important;
+}
+
+.account-nav .list-group-item.active i {
+    color: #fff !important;
+}
+
+.account-nav .list-group-item i {
+    color: var(--text-muted);
+}
+
+.account-nav .list-group-item:hover i {
+    color: var(--primary-color);
+}
+
+.account-content-area {
+    min-height: 400px;
+}
+
+/* Order & Address items */
+order-item,
+.address-item {
+    transition: all 0.2s ease;
+}
+
+.order-item:hover,
+.address-item:hover {
+    box-shadow: var(--shadow-sm);
+    border-color: var(--primary-color) !important;
+}
+
+/* ===== Utility Classes ===== */
+.btn-primary-custom {
+    background: var(--primary-color);
+    border: none;
+    border-radius: var(--border-radius);
+    color: white;
+    transition: background 0.2s ease;
+}
+
+.btn-primary-custom:hover {
+    background: var(--primary-hover);
+    color: white;
+}
+
+.text-primary-custom {
+    color: var(--primary-color) !important;
+}
+
+.bg-primary-custom {
+    background: var(--primary-color) !important;
+}
+
+/* Form input consistent */
+.form-control-custom {
+    border-radius: var(--border-radius-sm);
+    border: 1px solid var(--border-color);
+}
+
+.form-control-custom:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem var(--primary-light);
+}
+
+/* ===== Navbar Alignment Fix ===== */
+.navigation .navbar-nav {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.navigation .navbar-nav .nav-item {
+    display: flex;
+    align-items: center;
+}
+
+.navigation .navbar-nav .nav-link {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    white-space: nowrap;
+}
+
+/* User dropdown alignment */
+.navigation .navbar-nav .nav-item.dropdown {
+    margin-left: 0.5rem;
+}
+
+.navigation .navbar-nav .nav-item.dropdown .nav-link {
+    padding: 0;
+}
+
+/* Remove spinner completely */
+#account-loading {
+    display: none !important;
+}

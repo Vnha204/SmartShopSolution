@@ -7,113 +7,24 @@
 <section class="inner_page position_head">
     <div class="container my-5">
         <div class="row">
+            <!-- Sidebar -->
+            <div class="col-lg-3 col-md-4 mb-4">
+                <partial name="_AccountSidebar" />
+            </div>
 
-            {{! ===== SIDEBAR ===== }}
-            <div class="col-md-3 mb-4">
-                <div class="card border-0 shadow-sm rounded-3">
-                    <div class="card-body p-0">
-                        <!-- User header -->
-                        <div class="text-center p-4 border-bottom"
-                             style="background: linear-gradient(135deg,#3498db,#2980b9); border-radius: 12px 12px 0 0;">
-                            <div class="mx-auto mb-2 d-flex align-items-center justify-content-center rounded-circle bg-white"
-                                 style="width:60px;height:60px;font-size:26px;color:#3498db;">
-                                <i class="fa fa-user"></i>
-                            </div>
-                            <p class="fw-bold mb-0 text-white">@Model.FullName</p>
-                            <small class="text-white-50">@Model.Email</small>
-                        </div>
-                        <!-- Nav -->
-                        <div class="list-group list-group-flush">
-                            <a asp-controller="Account" asp-action="Profile"
-                               class="list-group-item list-group-item-action active border-0 d-flex align-items-center gap-2">
-                                <i class="fa fa-user-circle text-primary"></i> Tài khoản
-                            </a>
-                            <a asp-controller="Account" asp-action="Orders"
-                               class="list-group-item list-group-item-action border-0 d-flex align-items-center gap-2">
-                                <i class="fa fa-shopping-bag text-muted"></i> Đơn hàng
-                            </a>
-                            <a asp-controller="Account" asp-action="Addresses"
-                               class="list-group-item list-group-item-action border-0 d-flex align-items-center gap-2">
-                                <i class="fa fa-map-marker text-muted"></i> Địa chỉ
-                            </a>
-                            <form asp-controller="Auth" asp-action="Logout" method="post">
-                                @Html.AntiForgeryToken()
-                                <button type="submit"
-                                        class="list-group-item list-group-item-action border-0 text-danger d-flex align-items-center gap-2 w-100 text-start bg-transparent">
-                                    <i class="fa fa-sign-out"></i> Đăng xuất
-                                </button>
-                            </form>
-                        </div>
+            <!-- Main Content Area - AJAX Loaded -->
+            <div class="col-lg-9 col-md-8">
+                <div id="account-content" class="account-content-area">
+                    <!-- Content - Không cần loading spinner -->
+                    <div id="account-content-inner">
+                        <partial name="_ProfilePartial" model="Model" />
                     </div>
                 </div>
             </div>
-
-            {{! ===== CONTENT ===== }}
-            <div class="col-md-9">
-                <div class="card border-0 shadow-sm rounded-3">
-                    <div class="card-header bg-white border-bottom py-3">
-                        <h5 class="mb-0 fw-bold">
-                            <i class="fa fa-user-circle me-2 text-primary"></i> Thông tin tài khoản
-                        </h5>
-                    </div>
-                    <div class="card-body p-4">
-
-                        @if (TempData["Success"] != null)
-                        {
-                            <div class="alert alert-success alert-dismissible fade show py-2 small">
-                                <i class="fa fa-check-circle me-2"></i> @TempData["Success"]
-                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                            </div>
-                        }
-
-                        <form asp-controller="Account" asp-action="Profile" method="post">
-                            @Html.AntiForgeryToken()
-
-                            <div class="row g-3">
-
-                                <!-- Full Name -->
-                                <div class="col-md-6">
-                                    <label class="form-label fw-semibold small">Họ và tên</label>
-                                    <input type="text" name="fullName" value="@Model.FullName"
-                                           class="form-control" placeholder="Họ và tên" required />
-                                </div>
-
-                                <!-- Email (readonly) -->
-                                <div class="col-md-6">
-                                    <label class="form-label fw-semibold small">Email</label>
-                                    <input type="email" value="@Model.Email"
-                                           class="form-control bg-light" readonly />
-                                    <div class="form-text">Email không thể thay đổi.</div>
-                                </div>
-
-                                <!-- Phone -->
-                                <div class="col-md-6">
-                                    <label class="form-label fw-semibold small">Số điện thoại</label>
-                                    <input type="tel" name="phoneNumber" value="@Model.PhoneNumber"
-                                           class="form-control" placeholder="0912 345 678" />
-                                </div>
-
-                                <!-- Created At (readonly) -->
-                                <div class="col-md-6">
-                                    <label class="form-label fw-semibold small">Ngày tạo tài khoản</label>
-                                    <input type="text" value="@Model.CreatedAt.ToString("dd/MM/yyyy")"
-                                           class="form-control bg-light" readonly />
-                                </div>
-
-                                <!-- Submit -->
-                                <div class="col-12 mt-2">
-                                    <button type="submit" class="btn px-4 text-white fw-semibold"
-                                            style="background:#3498db; border:none; border-radius:8px;">
-                                        <i class="fa fa-save me-2"></i> Lưu thay đổi
-                                    </button>
-                                </div>
-                            </div>
-                        </form>
-
-                    </div>
-                </div>
-            </div>
-
         </div>
     </div>
 </section>
+
+@section Scripts {
+    <partial name="_AccountAjaxScript" />
+}

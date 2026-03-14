@@ -1,0 +1,194 @@
+@model IEnumerable<SmartShop.Models.Address>
+
+<div class="card card-custom">
+    <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <h5 class="mb-0 fw-bold">
+            <i class="fa fa-map-marker me-2 text-primary-custom"></i> Địa chỉ giao hàng
+        </h5>
+        <button class="btn btn-sm btn-primary-custom px-3"
+                data-bs-toggle="modal" data-bs-target="#addAddressModal">
+            <i class="fa fa-plus me-1"></i> Thêm địa chỉ
+        </button>
+    </div>
+    <div class="card-body p-4">
+        <div id="addresses-alerts"></div>
+
+        @if (!Model.Any())
+        {
+            <div class="text-center py-5 text-muted">
+                <i class="fa fa-map-marker fa-3x mb-3 d-block" style="opacity:0.3;"></i>
+                <p>Bạn chưa có địa chỉ nào.</p>
+                <button class="btn btn-primary-custom px-4"
+                        data-bs-toggle="modal" data-bs-target="#addAddressModal">
+                    <i class="fa fa-plus me-2"></i> Thêm địa chỉ đầu tiên
+                </button>
+            </div>
+        }
+        else
+        {
+            <div class="addresses-list">
+                @foreach (var address in Model)
+                {
+                    <div class="border rounded-3 p-3 mb-3 address-item @(address.IsDefault ? "border-primary" : "")" 
+                         style="@(address.IsDefault ? "background: rgba(52, 152, 219, 0.05);" : "")">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="flex-grow-1">
+                                <div class="fw-semibold d-flex align-items-center gap-2">
+                                    <i class="fa fa-user text-muted"></i>
+                                    @address.FullName
+                                    @if (address.IsDefault)
+                                    {
+                                        <span class="badge bg-primary" style="font-size:10px;">Mặc định</span>
+                                    }
+                                </div>
+                                <div class="text-muted small mt-1">
+                                    <i class="fa fa-phone me-1"></i> @address.PhoneNumber
+                                </div>
+                                <div class="text-muted small mt-1">
+                                    <i class="fa fa-map-marker me-1"></i>
+                                    @address.StreetLine, @address.Ward, @address.District, @address.Province
+                                </div>
+                            </div>
+                            <div class="d-flex gap-2 flex-shrink-0">
+                                @if (!address.IsDefault)
+                                {
+                                    <button type="button" class="btn btn-sm btn-outline-primary set-default-btn"
+                                            data-id="@address.Id" title="Đặt mặc định">
+                                        <i class="fa fa-check"></i>
+                                    </button>
+                                }
+                                <button type="button" class="btn btn-sm btn-outline-danger delete-address-btn"
+                                        data-id="@address.Id" title="Xóa">
+                                    <i class="fa fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Add Address Modal -->
+<div class="modal fade" id="addAddressModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header border-bottom">
+                <h5 class="modal-title fw-bold">
+                    <i class="fa fa-map-marker me-2 text-primary-custom"></i> Thêm địa chỉ mới
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="addAddressForm" method="post">
+                @Html.AntiForgeryToken()
+                <div class="modal-body p-4">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold small">Họ và tên người nhận</label>
+                            <input type="text" name="FullName" class="form-control form-control-custom" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold small">Số điện thoại</label>
+                            <input type="tel" name="PhoneNumber" class="form-control form-control-custom" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold small">Tỉnh/Thành phố</label>
+                            <input type="text" name="Province" class="form-control form-control-custom" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold small">Quận/Huyện</label>
+                            <input type="text" name="District" class="form-control form-control-custom" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold small">Phường/Xã</label>
+                            <input type="text" name="Ward" class="form-control form-control-custom" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold small">Địa chỉ chi tiết</label>
+                            <input type="text" name="StreetLine" class="form-control form-control-custom" 
+                                   placeholder="Số nhà, tên đường..." required />
+                        </div>
+                        <div class="col-12">
+                            <div class="form-check">
+                                <input type="checkbox" name="IsDefault" value="true" 
+                                       class="form-check-input" id="isDefaultCheck" />
+                                <label class="form-check-label" for="isDefaultCheck">
+                                    Đặt làm địa chỉ mặc định
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-top">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary-custom">
+                        <i class="fa fa-save me-1"></i> Lưu địa chỉ
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+// AJAX Add Address
+$('#addAddressForm').on('submit', function(e) {
+    e.preventDefault();
+    var $form = $(this);
+    
+    $.ajax({
+        url: '@Url.Action("AddAddressAjax", "Account")',
+        type: 'POST',
+        data: $form.serialize(),
+        success: function(response) {
+            if (response.success) {
+                $('#addAddressModal').modal('hide');
+                // Reload addresses tab
+                $('.account-tab[data-tab="addresses"]').trigger('click');
+            } else {
+                alert(response.message || 'Có lỗi xảy ra!');
+            }
+        },
+        error: function() {
+            alert('Có lỗi xảy ra. Vui lòng thử lại!');
+        }
+    });
+});
+
+// AJAX Set Default
+$(document).on('click', '.set-default-btn', function() {
+    var id = $(this).data('id');
+    var token = $('input[name="__RequestVerificationToken"]').first().val();
+    
+    $.post('@Url.Action("SetDefaultAddressAjax", "Account")', 
+        { id: id, __RequestVerificationToken: token }, 
+        function(response) {
+            if (response.success) {
+                $('.account-tab[data-tab="addresses"]').trigger('click');
+            } else {
+                alert(response.message);
+            }
+        }
+    );
+});
+
+// AJAX Delete
+$(document).on('click', '.delete-address-btn', function() {
+    if (!confirm('Bạn có chắc muốn xóa địa chỉ này?')) return;
+    
+    var id = $(this).data('id');
+    var token = $('input[name="__RequestVerificationToken"]').first().val();
+    
+    $.post('@Url.Action("DeleteAddressAjax", "Account")', 
+        { id: id, __RequestVerificationToken: token }, 
+        function(response) {
+            if (response.success) {
+                $('.account-tab[data-tab="addresses"]').trigger('click');
+            } else {
+                alert(response.message);
+            }
+        }
+    );
+});
+</script>

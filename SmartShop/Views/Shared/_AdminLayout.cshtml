@@ -1,0 +1,452 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using SmartShop.Models
+@inject SignInManager<AppUser> SignInManager
+@inject UserManager<AppUser> UserManager
+@{
+    var currentUser = await UserManager.GetUserAsync(User);
+    var currentAction = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@ViewData["Title"] — SmartShop Admin</title>
+
+    <!-- Bootstrap 5 -->
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <!-- Font Awesome 4 (đồng bộ với template) -->
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" />
+    <!-- Font Awesome 6 (icon mới hơn cho admin) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+    <style>
+        /* ===== ADMIN LAYOUT ===== */
+        html, body {
+            height: 100%;
+            margin: 0;
+            font-family: 'Segoe UI', sans-serif;
+            background: #f0f2f5;
+        }
+
+        .admin-wrapper {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* SIDEBAR */
+        .admin-sidebar {
+            width: 250px;
+            min-height: 100vh;
+            background: linear-gradient(180deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: #fff;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            z-index: 1000;
+            transition: all 0.3s;
+        }
+
+            .admin-sidebar .sidebar-brand {
+                padding: 20px 20px 16px;
+                border-bottom: 1px solid rgba(255,255,255,0.1);
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+
+                .admin-sidebar .sidebar-brand img {
+                    width: 36px;
+                    height: 36px;
+                    object-fit: contain;
+                }
+
+                .admin-sidebar .sidebar-brand span {
+                    font-size: 18px;
+                    font-weight: 700;
+                    letter-spacing: 0.5px;
+                }
+
+            /* USER INFO trong sidebar */
+            .admin-sidebar .sidebar-user {
+                padding: 14px 20px;
+                border-bottom: 1px solid rgba(255,255,255,0.1);
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+
+                .admin-sidebar .sidebar-user .avatar {
+                    width: 38px;
+                    height: 38px;
+                    border-radius: 50%;
+                    background: rgba(255,255,255,0.2);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 16px;
+                    color: #fff;
+                    flex-shrink: 0;
+                }
+
+                .admin-sidebar .sidebar-user .info .name {
+                    font-weight: 600;
+                    font-size: 14px;
+                }
+
+                .admin-sidebar .sidebar-user .info .role {
+                    font-size: 11px;
+                    color: rgba(255,255,255,0.6);
+                    background: rgba(255,255,255,0.1);
+                    padding: 1px 8px;
+                    border-radius: 10px;
+                    display: inline-block;
+                }
+
+            /* NAV ITEMS */
+            .admin-sidebar .sidebar-nav {
+                flex: 1;
+                padding: 10px 0;
+                overflow-y: auto;
+            }
+
+            .admin-sidebar .nav-section-title {
+                font-size: 10px;
+                text-transform: uppercase;
+                letter-spacing: 1.5px;
+                color: rgba(255,255,255,0.4);
+                padding: 14px 20px 6px;
+                font-weight: 600;
+            }
+
+            .admin-sidebar .nav-item a {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                padding: 10px 20px;
+                color: rgba(255,255,255,0.75);
+                text-decoration: none;
+                font-size: 14px;
+                transition: all 0.2s;
+                border-left: 3px solid transparent;
+            }
+
+                .admin-sidebar .nav-item a:hover {
+                    background: rgba(255,255,255,0.08);
+                    color: #fff;
+                    border-left-color: rgba(255,255,255,0.3);
+                }
+
+                .admin-sidebar .nav-item a.active {
+                    background: rgba(255,255,255,0.12);
+                    color: #fff;
+                    font-weight: 600;
+                    border-left-color: #e94560;
+                }
+
+                .admin-sidebar .nav-item a i {
+                    width: 18px;
+                    text-align: center;
+                    font-size: 15px;
+                }
+
+            /* SIDEBAR FOOTER */
+            .admin-sidebar .sidebar-footer {
+                padding: 14px 20px;
+                border-top: 1px solid rgba(255,255,255,0.1);
+            }
+
+                .admin-sidebar .sidebar-footer form button {
+                    width: 100%;
+                    background: rgba(233,69,96,0.2);
+                    border: 1px solid rgba(233,69,96,0.4);
+                    color: #ff6b6b;
+                    padding: 8px;
+                    border-radius: 6px;
+                    font-size: 13px;
+                    transition: all 0.2s;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 6px;
+                }
+
+                    .admin-sidebar .sidebar-footer form button:hover {
+                        background: rgba(233,69,96,0.4);
+                        color: #fff;
+                    }
+
+        /* MAIN CONTENT */
+        .admin-main {
+            margin-left: 250px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* TOP BAR */
+        .admin-topbar {
+            background: #fff;
+            border-bottom: 1px solid #e8ecef;
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+        }
+
+            .admin-topbar .page-title {
+                font-size: 18px;
+                font-weight: 600;
+                color: #2d3748;
+                margin: 0;
+            }
+
+            .admin-topbar .breadcrumb {
+                margin: 0;
+                font-size: 13px;
+            }
+
+            .admin-topbar .breadcrumb-item a {
+                color: #4a6cf7;
+                text-decoration: none;
+            }
+
+            .admin-topbar .topbar-actions {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+            }
+
+                .admin-topbar .topbar-actions .btn-home {
+                    font-size: 13px;
+                    color: #555;
+                    text-decoration: none;
+                    padding: 6px 12px;
+                    border: 1px solid #ddd;
+                    border-radius: 6px;
+                    transition: all 0.2s;
+                }
+
+                    .admin-topbar .topbar-actions .btn-home:hover {
+                        background: #f0f2f5;
+                        color: #333;
+                    }
+
+        /* PAGE CONTENT */
+        .admin-content {
+            padding: 24px;
+            flex: 1;
+        }
+
+        /* TOAST / ALERT */
+        .admin-toast-area {
+            position: fixed;
+            top: 70px;
+            right: 20px;
+            z-index: 9999;
+            min-width: 300px;
+        }
+
+        /* RESPONSIVE */
+        @@media (max-width: 768px) {
+            .admin-sidebar {
+                transform: translateX(-250px);
+            }
+
+                .admin-sidebar.show {
+                    transform: translateX(0);
+                }
+
+            .admin-main {
+                margin-left: 0;
+            }
+        }
+
+        /* STATS CARD */
+        .stat-card {
+            border-radius: 12px;
+            border: none;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+            .stat-card:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 8px 24px rgba(0,0,0,0.12) !important;
+            }
+
+            .stat-card .stat-icon {
+                opacity: 0.3;
+            }
+
+        /* TABLE */
+        .admin-table thead th {
+            background: #f8f9fa;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .admin-table tbody tr:hover {
+            background: #f8f9ff;
+        }
+
+        /* BADGE STATUS */
+        .badge-status {
+            font-size: 11px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-wrapper">
+
+        <!-- ===== SIDEBAR ===== -->
+        <aside class="admin-sidebar" id="adminSidebar">
+
+            <!-- Brand -->
+            <div class="sidebar-brand">
+                <img src="~/images/logo.png" alt="SmartShop" onerror="this.style.display='none'" />
+                <span>SmartShop</span>
+            </div>
+
+            <!-- User info -->
+            <div class="sidebar-user">
+                <div class="avatar">
+                    @if (!string.IsNullOrEmpty(currentUser?.AvatarUrl))
+                    {
+                        <img src="@currentUser.AvatarUrl" style="width:38px;height:38px;border-radius:50%;object-fit:cover;" />
+                    }
+                    else
+                    {
+                        <i class="fa fa-user"></i>
+                    }
+                </div>
+                <div class="info">
+                    <div class="name">@(currentUser?.FullName ?? "Admin")</div>
+                    <span class="role">Admin</span>
+                </div>
+            </div>
+
+            <!-- Nav -->
+            <nav class="sidebar-nav">
+                <div class="nav-section-title">Tổng quan</div>
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index"
+                           class="@(currentController == "Dashboard" ? "active" : "")">
+                            <i class="fa fa-tachometer"></i> Dashboard
+                        </a>
+                    </li>
+                </ul>
+
+                <div class="nav-section-title">Quản lý</div>
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a asp-area="Admin" asp-controller="Product" asp-action="Index"
+                           class="@(currentController == "Product" ? "active" : "")">
+                            <i class="fa fa-shopping-bag"></i> Sản phẩm
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a asp-area="Admin" asp-controller="Order" asp-action="Index"
+                           class="@(currentController == "Order" ? "active" : "")">
+                            <i class="fa fa-shopping-cart"></i> Đơn hàng
+                            @* Badge pending orders — có thể thêm ViewBag sau *@
+                        </a>
+                    </li>
+                </ul>
+
+                <div class="nav-section-title">Khác</div>
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a asp-area="Customers" asp-controller="Home" asp-action="Index" target="_blank">
+                            <i class="fa fa-external-link"></i> Xem trang web
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+            <!-- Footer logout -->
+            <div class="sidebar-footer">
+                <form asp-controller="Auth" asp-action="Logout" method="post">
+                    @Html.AntiForgeryToken()
+                    <button type="submit">
+                        <i class="fa fa-sign-out"></i> Đăng xuất
+                    </button>
+                </form>
+            </div>
+        </aside>
+        <!-- ===== END SIDEBAR ===== -->
+        <!-- ===== MAIN ===== -->
+        <div class="admin-main">
+
+            <!-- Topbar -->
+            <div class="admin-topbar">
+                <div>
+                    <h5 class="page-title">@(ViewData["Title"] ?? "Admin")</h5>
+                </div>
+                <div class="topbar-actions">
+                    <a asp-area="Customers" asp-controller="Home" asp-action="Index"
+                       class="btn-home" target="_blank">
+                        <i class="fa fa-home"></i> Trang chủ
+                    </a>
+                    <span class="text-muted small">@(currentUser?.Email ?? "")</span>
+                </div>
+            </div>
+
+            <!-- Toast alerts (TempData) -->
+            @if (TempData["Success"] != null)
+            {
+                <div class="admin-toast-area">
+                    <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+                        <i class="fa fa-check-circle me-2"></i> @TempData["Success"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                </div>
+            }
+            @if (TempData["Error"] != null)
+            {
+                <div class="admin-toast-area">
+                    <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+                        <i class="fa fa-exclamation-circle me-2"></i> @TempData["Error"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                </div>
+            }
+
+            <!-- Page content -->
+            <main class="admin-content">
+                @RenderBody()
+            </main>
+        </div>
+        <!-- ===== END MAIN ===== -->
+
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Auto-dismiss toast after 4s
+        setTimeout(function () {
+            document.querySelectorAll('.admin-toast-area .alert').forEach(function (el) {
+                var bsAlert = bootstrap.Alert.getOrCreateInstance(el);
+                bsAlert.close();
+            });
+        }, 4000);
+    </script>
+
+    @RenderSection("Scripts", required: false)
+</body>
+</html>
