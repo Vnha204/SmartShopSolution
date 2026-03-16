@@ -168,20 +168,3 @@
         </div>
     </div>
 </div>
-
-@section Scripts {
-    <script>
-        function filterOrders(status, tabEl) {
-            document.querySelectorAll('#orderTabs .nav-link').forEach(el => el.classList.remove('active'));
-            tabEl.classList.add('active');
-
-            document.querySelectorAll('#ordersTable tbody tr').forEach(row => {
-                if (status === 'all' || row.dataset.status === status) {
-                    row.style.display = '';
-                } else {
-                    row.style.display = 'none';
-                }
-            });
-        }
-    </script>
-}

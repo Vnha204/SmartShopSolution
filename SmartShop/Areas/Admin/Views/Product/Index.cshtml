@@ -158,33 +158,3 @@
         </div>
     </div>
 </div>
-
-@section Scripts {
-    <script>
-        function searchProducts() {
-            var keyword = document.getElementById('searchInput').value.toLowerCase();
-            filterTable(keyword, document.getElementById('statusFilter').value);
-        }
-
-        function filterByStatus() {
-            var keyword = document.getElementById('searchInput').value.toLowerCase();
-            filterTable(keyword, document.getElementById('statusFilter').value);
-        }
-
-        function filterTable(keyword, status) {
-            var rows = document.querySelectorAll('#productTableBody tr[data-name]');
-            var count = 0;
-            rows.forEach(function (row) {
-                var nameMatch = row.dataset.name.includes(keyword);
-                var statusMatch = (status === 'all') || (row.dataset.status === status);
-                if (nameMatch && statusMatch) {
-                    row.style.display = '';
-                    count++;
-                } else {
-                    row.style.display = 'none';
-                }
-            });
-            document.getElementById('rowCount').textContent = count;
-        }
-    </script>
-}

@@ -1,48 +1,54 @@
-/*---------------------------------------------------------------------
-    File Name: custom.js
----------------------------------------------------------------------*/
+/**
+ * custom.js - Main site JavaScript
+ * SmartShop - E-commerce Platform
+ */
 
-$(function () {
+(function ($) {
+    'use strict';
 
-    "use strict";
+    $(function () {
 
-    /* Preloader
-    -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- */
-    setTimeout(function () {
-        $('.loader_bg').fadeToggle();
-    }, 1500);
+        // Preloader - fade out after content loads
+        setTimeout(function () {
+            $('.loader_bg').fadeOut(300);
+        }, 800);
 
-    /* Tooltip
-    -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- */
-    $('[data-toggle="tooltip"]').tooltip();
+        // Initialize Bootstrap 5 tooltips
+        var tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+        tooltipTriggerList.forEach(function (el) {
+            new bootstrap.Tooltip(el);
+        });
 
-    /* Mouseover
-    -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- */
-    $(".main-menu ul li.megamenu").mouseover(function () {
-        if (!$(this).parent().hasClass("#wrapper")) {
-            $("#wrapper").addClass('overlay');
-        }
+        // Megamenu overlay effect
+        var $wrapper = $('#wrapper');
+        $('.main-menu ul li.megamenu')
+            .on('mouseenter', function () {
+                $wrapper.addClass('overlay');
+            })
+            .on('mouseleave', function () {
+                $wrapper.removeClass('overlay');
+            });
+
+        // Sidebar toggle (admin)
+        $('#sidebarCollapse').on('click', function () {
+            $('#sidebar').toggleClass('active');
+            $(this).toggleClass('active');
+        });
+
+        // Carousel initialization
+        var carousels = {
+            '#blogCarousel': { interval: 5000 },
+            '#banner1': { interval: 4000 },
+            '#myCarousel': { interval: 5000 }
+        };
+
+        Object.keys(carousels).forEach(function (selector) {
+            var $el = $(selector);
+            if ($el.length) {
+                $el.carousel(carousels[selector]);
+            }
+        });
+
     });
-    $(".main-menu ul li.megamenu").mouseleave(function () {
-        $("#wrapper").removeClass('overlay');
-    });
 
-    /* Toggle sidebar
-    -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- */
-    $('#sidebarCollapse').on('click', function () {
-        $('#sidebar').toggleClass('active');
-        $(this).toggleClass('active');
-    });
-
-    /* Product slider
-    -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- */
-    $('#blogCarousel').carousel({
-        interval: 5000
-    });
-
-    /* Carousel Bootstrap 4 compat
-    -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- */
-    $('#banner1').carousel({ interval: 4000 });
-    $('#myCarousel').carousel({ interval: 5000 });
-
-});
+})(jQuery);

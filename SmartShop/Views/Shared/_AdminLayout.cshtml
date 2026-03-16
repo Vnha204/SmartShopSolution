@@ -437,16 +437,8 @@
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        // Auto-dismiss toast after 4s
-        setTimeout(function () {
-            document.querySelectorAll('.admin-toast-area .alert').forEach(function (el) {
-                var bsAlert = bootstrap.Alert.getOrCreateInstance(el);
-                bsAlert.close();
-            });
-        }, 4000);
-    </script>
+    <script src="~/js/admin.js"></script>
 
-    @RenderSection("Scripts", required: false)
+    @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

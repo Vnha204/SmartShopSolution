@@ -11,12 +11,13 @@
 <section class="inner_page position_head">
     <div class="container my-5">
         <div class="row">
-            <!-- Sidebar - Luôn cố định -->
+            <!-- Sidebar -->
             <div class="col-lg-3 col-md-4 mb-4">
                 <div class="card card-custom account-sidebar-card">
                     <div class="card-body p-0">
                         <!-- User Header -->
-                        <div class="text-center p-4 border-bottom account-header">
+                        <div class="text-center p-4 border-bottom account-header"
+                             style="background: linear-gradient(135deg, var(--primary-color), var(--primary-hover)); border-radius: var(--border-radius) var(--border-radius) 0 0;">
                             <div class="mx-auto mb-2 d-flex align-items-center justify-content-center rounded-circle bg-white"
                                  style="width:60px;height:60px;font-size:26px;color:var(--primary-color);">
                                 @if (!string.IsNullOrEmpty(user?.AvatarUrl))
@@ -32,25 +33,25 @@
                             <small class="text-white-50">@user?.Email</small>
                         </div>
 
-                        <!-- Navigation Tabs - AJAX -->
-                        <div class="list-group list-group-flush account-nav">
-                            <a href="javascript:void(0)" 
+                        <!-- Navigation Tabs - FA 4.0.3 compatible icons -->
+                        <div class="list-group list-group-flush account-nav" id="accountNav">
+                            <a href="javascript:void(0)"
                                class="list-group-item list-group-item-action border-0 d-flex align-items-center gap-3 account-tab @(currentAction == "Profile" ? "active" : "")"
-                               data-tab="profile" 
+                               data-tab="profile"
                                data-url="@Url.Action("ProfilePartial", "Account")">
-                                <i class="fa fa-user-circle" style="width: 18px; text-align: center;"></i>
+                                <i class="fa fa-user" style="width: 18px; text-align: center;"></i>
                                 <span>Tài khoản</span>
                             </a>
-                            <a href="javascript:void(0)" 
+                            <a href="javascript:void(0)"
                                class="list-group-item list-group-item-action border-0 d-flex align-items-center gap-3 account-tab @(currentAction == "Orders" ? "active" : "")"
-                               data-tab="orders" 
+                               data-tab="orders"
                                data-url="@Url.Action("OrdersPartial", "Account")">
-                                <i class="fa fa-box" style="width: 18px; text-align: center;"></i>
+                                <i class="fa fa-shopping-cart" style="width: 18px; text-align: center;"></i>
                                 <span>Đơn hàng</span>
                             </a>
-                            <a href="javascript:void(0)" 
+                            <a href="javascript:void(0)"
                                class="list-group-item list-group-item-action border-0 d-flex align-items-center gap-3 account-tab @(currentAction == "Addresses" ? "active" : "")"
-                               data-tab="addresses" 
+                               data-tab="addresses"
                                data-url="@Url.Action("AddressesPartial", "Account")">
                                 <i class="fa fa-map-marker" style="width: 18px; text-align: center;"></i>
                                 <span>Địa chỉ</span>
@@ -72,15 +73,6 @@
             <!-- Main Content Area - AJAX Loaded -->
             <div class="col-lg-9 col-md-8">
                 <div id="account-content" class="account-content-area">
-                    <!-- Loading Spinner -->
-                    <div id="account-loading" class="text-center py-5 d-none">
-                        <div class="spinner-border text-primary" role="status">
-                            <span class="visually-hidden">Đang tải...</span>
-                        </div>
-                        <p class="text-muted mt-2">Đang tải nội dung...</p>
-                    </div>
-                    
-                    <!-- Content sẽ được load vào đây -->
                     <div id="account-content-inner">
                         @RenderBody()
                     </div>
@@ -90,83 +82,4 @@
     </div>
 </section>
 
-@section Scripts {
-    <script>
-        $(document).ready(function () {
-            // AJAX Tab Navigation - Không reload trang
-            $('.account-tab').on('click', function (e) {
-                e.preventDefault();
-
-                var $this = $(this);
-                var url = $this.data('url');
-                var tabName = $this.data('tab');
-
-                // Đừng làm gì nếu đã active
-                if ($this.hasClass('active')) return;
-
-                // Cập nhật trạng thái active
-                $('.account-tab').removeClass('active');
-                $this.addClass('active');
-
-                // Hiện loading spinner
-                $('#account-content-inner').addClass('d-none');
-                $('#account-loading').removeClass('d-none');
-
-                // Load nội dung qua AJAX
-                $.ajax({
-                    url: url,
-                    type: 'GET',
-                    success: function (data) {
-                        // Ẩn loading, hiện nội dung
-                        $('#account-loading').addClass('d-none');
-                        $('#account-content-inner').html(data).removeClass('d-none');
-
-                        // Cập nhật URL mà không reload trang
-                        var newUrl = '@Url.Action("Index", "Account")/' + tabName.charAt(0).toUpperCase() + tabName.slice(1);
-                        history.pushState({ tab: tabName }, '', '/' + tabName.charAt(0).toUpperCase() + tabName.slice(1) === 'Profile' ? 'Account' : 'Account/' + tabName.charAt(0).toUpperCase() + tabName.slice(1));
-
-                        // Cập nhật title
-                        var titles = {
-                            'profile': 'Tài khoản của tôi',
-                            'orders': 'Đơn hàng của tôi',
-                            'addresses': 'Địa chỉ của tôi'
-                        };
-                        document.title = titles[tabName] + ' - SmartShop';
-
-                        // Re-initialize any Bootstrap components
-                        initBootstrapComponents();
-                    },
-                    error: function (xhr) {
-                        $('#account-loading').addClass('d-none');
-                        $('#account-content-inner')
-                            .html('<div class="alert alert-danger"><i class="fa fa-exclamation-circle me-2"></i>Không thể tải nội dung. Vui lòng thử lại.</div>')
-                            .removeClass('d-none');
-                    }
-                });
-            });
-
-            // Handle browser back/forward buttons
-            window.addEventListener('popstate', function (e) {
-                if (e.state && e.state.tab) {
-                    var $tab = $('.account-tab[data-tab="' + e.state.tab + '"]');
-                    if ($tab.length) {
-                        $tab.click();
-                    }
-                }
-            });
-
-            // Initialize Bootstrap components after AJAX load
-            function initBootstrapComponents() {
-                // Re-initialize tooltips
-                var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-                tooltipTriggerList.map(function (el) {
-                    return new bootstrap.Tooltip(el);
-                });
-
-                // Re-initialize modals
-                var modalTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="modal"]'));
-                // Modals tự động khởi tạo bởi Bootstrap
-            }
-        });
-    </script>
-}
+@* account.js is loaded from _Layout.cshtml - no need to add here *@

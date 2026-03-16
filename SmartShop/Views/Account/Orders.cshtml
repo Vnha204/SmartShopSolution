@@ -1,34 +1,7 @@
 ﻿@model IEnumerable<SmartShop.Models.Order>
 @{
     ViewData["Title"] = "Đơn hàng của tôi";
-    Layout = "_Layout";
+    Layout = "_AccountLayout";
 }
 
-<section class="inner_page position_head">
-    <div class="container my-5">
-        <div class="row">
-            <!-- Sidebar -->
-            <div class="col-lg-3 col-md-4 mb-4">
-                <partial name="_AccountSidebar" />
-            </div>
-
-            <!-- Main Content Area -->
-            <div class="col-lg-9 col-md-8">
-                <div id="account-content" class="account-content-area">
-                    <div id="account-loading" class="text-center py-5 d-none">
-                        <div class="spinner-border text-primary" role="status">
-                            <span class="visually-hidden">Đang tải...</span>
-                        </div>
-                    </div>
-                    <div id="account-content-inner">
-                        <partial name="_OrdersPartial" model="Model" />
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-@section Scripts {
-    <partial name="_AccountAjaxScript" />
-}
+<partial name="_OrdersPartial" model="Model" />

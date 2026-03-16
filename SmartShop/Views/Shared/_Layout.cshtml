@@ -140,30 +140,24 @@
         </div>
     </footer>
     <!-- end footer -->
+    
+    <!-- Core Scripts -->
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    @* <script src="~/js/popper.min.js"></script> *@
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/jquery.mCustomScrollbar.concat.min.js"></script>
+    
+    <!-- App Scripts -->
     <script src="~/js/custom.js"></script>
+    <script src="~/js/account.js"></script>
+    <script src="~/js/admin-tables.js"></script>
+    
+    <!-- Google Maps (conditional) -->
     @if (ViewData["ShowMap"] != null && (bool)ViewData["ShowMap"])
     {
-        <script>
-            function initMap() {
-                var location = { lat: 40.645037, lng: -73.880224 };
-                var map = new google.maps.Map(document.getElementById('map'), {
-                    zoom: 11,
-                    center: location
-                });
-                var image = '/images/maps-and-flags.png';
-                new google.maps.Marker({
-                    position: location,
-                    map: map,
-                    icon: image
-                });
-            }
-        </script>
+        <script src="~/js/maps.js"></script>
         <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA8eaHt9Dh5H57Zh0xVTqxVdBFCvFMqFjQ&callback=initMap" async defer></script>
     }
-    @RenderSection("Scripts", required: false)
+    
+    @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
