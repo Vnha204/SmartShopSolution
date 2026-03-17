@@ -1,0 +1,69 @@
+@model SmartShop.Models.Product
+@{
+    ViewData["Title"] = "Xoá sản phẩm";
+    Layout = "_AdminLayout";
+}
+
+<div class="d-flex align-items-center mb-4 gap-3">
+    <a asp-area="Admin" asp-controller="Product" asp-action="Index"
+       class="btn btn-sm btn-outline-secondary">
+        <i class="fa fa-arrow-left me-1"></i> Quay lại
+    </a>
+    <h4 class="mb-0 fw-bold text-danger">Xoá sản phẩm</h4>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center py-5">
+                <div class="mb-3">
+                    @if (!string.IsNullOrEmpty(Model.ThumbnailUrl))
+                    {
+                        <img src="@Model.ThumbnailUrl" alt="@Model.Name"
+                             style="width:100px;height:100px;object-fit:contain;border-radius:8px;border:1px solid #eee;" />
+                    }
+                    else
+                    {
+                        <div style="width:80px;height:80px;background:#f5f5f5;border-radius:8px;display:flex;align-items:center;justify-content:center;margin:0 auto;">
+                            <i class="fa fa-shopping-bag fa-2x text-muted"></i>
+                        </div>
+                    }
+                </div>
+
+                <h5 class="fw-bold">@Model.Name</h5>
+                <p class="text-muted small mb-1">Slug: <code>@Model.Slug</code></p>
+                <p class="text-muted small mb-3">
+                    Giá: @Model.BasePrice.ToString("N0") ₫ &nbsp;|&nbsp; Kho: @Model.Stock
+                </p>
+
+                @if (Model.ProductCategories.Any())
+                {
+                    <div class="mb-3">
+                        @foreach (var pc in Model.ProductCategories)
+                        {
+                            <span class="badge bg-light text-dark border me-1">@pc.Category?.Name</span>
+                        }
+                    </div>
+                }
+
+                <div class="alert alert-danger py-2 small text-start mb-4">
+                    <i class="fa fa-exclamation-triangle me-2"></i>
+                    Bạn có chắc chắn muốn xoá sản phẩm này? Hành động này <strong>không thể hoàn tác</strong>.
+                    Tất cả liên kết danh mục và thuộc tính của sản phẩm cũng sẽ bị xoá.
+                </div>
+
+                <form asp-area="Admin" asp-controller="Product" asp-action="Delete"
+                      asp-route-id="@Model.Id" method="post" class="d-flex gap-2 justify-content-center">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-danger px-4">
+                        <i class="fa fa-trash me-2"></i> Xác nhận xoá
+                    </button>
+                    <a asp-area="Admin" asp-controller="Product" asp-action="Index"
+                       class="btn btn-outline-secondary px-4">
+                        Huỷ
+                    </a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

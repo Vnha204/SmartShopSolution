@@ -1,14 +1,16 @@
-﻿@model IEnumerable<SmartShop.Models.Product>
+@model SmartShop.Models.ViewModels.ProductIndexVM
 @{
     ViewData["Title"] = "Quản lý sản phẩm";
+    Layout = "_AdminLayout";
 }
 
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
         <h4 class="mb-1 fw-bold">Sản phẩm</h4>
-        <p class="text-muted small mb-0">Tổng: @Model.Count() sản phẩm</p>
+        <p class="text-muted small mb-0">Tìm thấy: @Model.TotalCount sản phẩm</p>
     </div>
-    <a href="#" class="btn text-white px-4"
+    <a asp-area="Admin" asp-controller="Product" asp-action="Create"
+       class="btn text-white px-4"
        style="background:#3498db; border:none; border-radius:8px;">
         <i class="fa fa-plus me-2"></i> Thêm sản phẩm
     </a>
@@ -21,36 +23,156 @@
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
 }
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show py-2 small">
+        <i class="fa fa-exclamation-circle me-2"></i> @TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
 
-<!-- Search & Filter bar -->
-<div class="card border-0 shadow-sm mb-4">
-    <div class="card-body py-3">
-        <div class="row g-2 align-items-center">
-            <div class="col-md-5">
-                <div class="input-group">
-                    <span class="input-group-text bg-light border-end-0">
-                        <i class="fa fa-search text-muted"></i>
-                    </span>
-                    <input type="text" id="searchInput" class="form-control border-start-0"
-                           placeholder="Tìm theo tên sản phẩm..." onkeyup="searchProducts()" />
+<!-- ══════════════════════════════════════════════════════════════════════
+     FILTER PANEL (server-side GET form)
+══════════════════════════════════════════════════════════════════════ -->
+<form method="get" asp-area="Admin" asp-controller="Product" asp-action="Index" id="filterForm">
+    <!-- Row 1: search + status + category + submit -->
+    <div class="card border-0 shadow-sm mb-3">
+        <div class="card-body py-3">
+            <div class="row g-2 align-items-end">
+
+                <!-- Name search -->
+                <div class="col-md-4">
+                    <label class="form-label small fw-semibold mb-1">Tìm tên sản phẩm</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0">
+                            <i class="fa fa-search text-muted"></i>
+                        </span>
+                        <input type="text" name="SearchTerm" value="@Model.SearchTerm"
+                               class="form-control border-start-0"
+                               placeholder="Nhập tên sản phẩm..." />
+                    </div>
                 </div>
-            </div>
-            <div class="col-md-3">
-                <select class="form-select" id="statusFilter" onchange="filterByStatus()">
-                    <option value="all">Tất cả trạng thái</option>
-                    <option value="active">Đang bán</option>
-                    <option value="inactive">Ngừng bán</option>
-                </select>
-            </div>
-            <div class="col-md-4 text-end text-muted small">
-                <i class="fa fa-info-circle me-1"></i>
-                Hiển thị <span id="rowCount">@Model.Count()</span> / @Model.Count() sản phẩm
+
+                <!-- Status filter -->
+                <div class="col-md-2">
+                    <label class="form-label small fw-semibold mb-1">Trạng thái</label>
+                    <select name="StatusFilter" class="form-select">
+                        <option value="all"      selected="@(Model.StatusFilter == "all"      ? "selected" : null)">Tất cả</option>
+                        <option value="active"   selected="@(Model.StatusFilter == "active"   ? "selected" : null)">Đang bán</option>
+                        <option value="inactive" selected="@(Model.StatusFilter == "inactive" ? "selected" : null)">Ngừng bán</option>
+                    </select>
+                </div>
+
+                <!-- Category filter -->
+                <div class="col-md-3">
+                    <label class="form-label small fw-semibold mb-1">Danh mục</label>
+                    <select name="CategoryId" class="form-select">
+                        <option value="">Tất cả danh mục</option>
+                        @foreach (var cat in Model.AllCategories)
+                        {
+                            <option value="@cat.Id"
+                                    selected="@(Model.CategoryId == cat.Id ? "selected" : null)">
+                                @cat.Name
+                            </option>
+                        }
+                    </select>
+                </div>
+
+                <!-- Actions -->
+                <div class="col-md-3 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary flex-fill">
+                        <i class="fa fa-search me-1"></i> Lọc
+                    </button>
+                    @if (Model.HasActiveFilter)
+                    {
+                        <a asp-area="Admin" asp-controller="Product" asp-action="Index"
+                           class="btn btn-outline-secondary">
+                            <i class="fa fa-times me-1"></i> Xoá lọc
+                        </a>
+                    }
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<!-- Product table -->
+    <!-- Row 2: attribute filters + price range (collapsible) -->
+    @if (Model.FilterAttributeGroups.Any())
+    {
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white border-bottom py-2 d-flex align-items-center justify-content-between"
+                 style="cursor:pointer;" data-bs-toggle="collapse" data-bs-target="#advancedFilters">
+                <span class="fw-semibold small">
+                    <i class="fa fa-sliders me-2 text-secondary"></i> Bộ lọc nâng cao
+                    @if (Model.AttributeValueIds.Any(id => id > 0) || Model.MinPrice.HasValue || Model.MaxPrice.HasValue)
+                    {
+                        <span class="badge bg-primary ms-2">Đang lọc</span>
+                    }
+                </span>
+                <i class="fa fa-chevron-down small text-muted"></i>
+            </div>
+            <div class="collapse @(Model.AttributeValueIds.Any(id => id > 0) || Model.MinPrice.HasValue || Model.MaxPrice.HasValue ? "show" : "")"
+                 id="advancedFilters">
+                <div class="card-body py-3">
+                    <div class="row g-3 align-items-end">
+
+                        @* One dropdown per attribute group *@
+                        @foreach (var attr in Model.FilterAttributeGroups)
+                        {
+                            // Find which (if any) value from this group is currently active
+                            var selectedOptId = Model.AttributeValueIds
+                                .FirstOrDefault(id => attr.Options.Any(o => o.Id == id));
+
+                            <div class="col-md-3">
+                                <label class="form-label small fw-semibold mb-1">@attr.DisplayName</label>
+                                <select name="AttributeValueIds" class="form-select form-select-sm">
+                                    <option value="0">Tất cả @attr.DisplayName.ToLower()</option>
+                                    @foreach (var opt in attr.Options)
+                                    {
+                                        <option value="@opt.Id"
+                                                selected="@(opt.Id == selectedOptId ? "selected" : null)">
+                                            @opt.DisplayName
+                                        </option>
+                                    }
+                                </select>
+                            </div>
+                        }
+
+                        @* Price range *@
+                        <div class="col-md-2">
+                            <label class="form-label small fw-semibold mb-1">Giá từ (₫)</label>
+                            <input type="number" name="MinPrice" value="@Model.MinPrice"
+                                   class="form-control form-control-sm" min="0" step="10000"
+                                   placeholder="0" />
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label small fw-semibold mb-1">Đến (₫)</label>
+                            <input type="number" name="MaxPrice" value="@Model.MaxPrice"
+                                   class="form-control form-control-sm" min="0" step="10000"
+                                   placeholder="∞" />
+                        </div>
+
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-sm btn-primary w-100">
+                                <i class="fa fa-filter me-1"></i> Áp dụng
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- Preserve price filter inputs even when no attribute groups configured -->
+        <input type="hidden" name="MinPrice" value="@Model.MinPrice" />
+        <input type="hidden" name="MaxPrice" value="@Model.MaxPrice" />
+    }
+</form>
+
+<!-- ══════════════════════════════════════════════════════════════════════
+     PRODUCT TABLE
+══════════════════════════════════════════════════════════════════════ -->
 <div class="card border-0 shadow-sm">
     <div class="card-body p-0">
         <div class="table-responsive">
@@ -59,32 +181,49 @@
                     <tr>
                         <th style="width:50px;">ID</th>
                         <th>Sản phẩm</th>
+                        <th>Danh mục</th>
                         <th>Giá gốc</th>
                         <th>Giá KM</th>
                         <th>Kho</th>
                         <th>Trạng thái</th>
                         <th>Nổi bật</th>
-                        <th>Ngày tạo</th>
-                        <th style="width:100px;">Thao tác</th>
+                        <th>Thuộc tính</th>
+                        <th style="width:120px;">Thao tác</th>
                     </tr>
                 </thead>
                 <tbody id="productTableBody">
-                    @if (!Model.Any())
+                    @if (!Model.Products.Any())
                     {
                         <tr>
-                            <td colspan="9" class="text-center py-5 text-muted">
+                            <td colspan="10" class="text-center py-5 text-muted">
                                 <i class="fa fa-shopping-bag fa-2x d-block mb-2" style="opacity:0.3;"></i>
-                                Chưa có sản phẩm nào. Hãy thêm sản phẩm đầu tiên.
+                                @if (Model.HasActiveFilter)
+                                {
+                                    <span>Không tìm thấy sản phẩm nào phù hợp với bộ lọc.</span>
+                                }
+                                else
+                                {
+                                    <span>Chưa có sản phẩm nào. Hãy thêm sản phẩm đầu tiên.</span>
+                                }
                             </td>
                         </tr>
                     }
                     else
                     {
-                        @foreach (var product in Model)
+                        @foreach (var product in Model.Products)
                         {
+                            var category = product.ProductCategories.FirstOrDefault()?.Category;
+                            var attrValues = product.ProductAttributeValues
+                                .Select(pav => pav.AttributeValue?.DisplayName)
+                                .Where(v => v != null)
+                                .ToList();
+
                             <tr data-name="@product.Name.ToLower()"
                                 data-status="@(product.IsActive ? "active" : "inactive")">
+
                                 <td class="text-muted small">@product.Id</td>
+
+                                <!-- Product name + thumbnail -->
                                 <td>
                                     <div class="d-flex align-items-center gap-3">
                                         @if (!string.IsNullOrEmpty(product.ThumbnailUrl))
@@ -104,6 +243,20 @@
                                         </div>
                                     </div>
                                 </td>
+
+                                <!-- Category -->
+                                <td class="small">
+                                    @if (category != null)
+                                    {
+                                        <span class="badge bg-light text-dark border">@category.Name</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">—</span>
+                                    }
+                                </td>
+
+                                <!-- Prices -->
                                 <td class="small">@product.BasePrice.ToString("N0") ₫</td>
                                 <td class="small">
                                     @if (product.SalePrice.HasValue)
@@ -115,20 +268,26 @@
                                         <span class="text-muted">—</span>
                                     }
                                 </td>
+
+                                <!-- Stock -->
                                 <td>
                                     <span class="badge @(product.Stock > 0 ? "bg-success" : "bg-danger") badge-status">
                                         @product.Stock
                                     </span>
                                 </td>
+
+                                <!-- Status -->
                                 <td>
                                     <span class="badge @(product.IsActive ? "bg-success" : "bg-secondary") badge-status">
                                         @(product.IsActive ? "Đang bán" : "Ngừng bán")
                                     </span>
                                 </td>
+
+                                <!-- Featured -->
                                 <td>
                                     @if (product.IsFeatured)
                                     {
-                                        <span class="badge" style="background:#f0a500; font-size:11px;">
+                                        <span class="badge" style="background:#f0a500;font-size:11px;">
                                             <i class="fa fa-star"></i> Nổi bật
                                         </span>
                                     }
@@ -137,19 +296,45 @@
                                         <span class="text-muted small">—</span>
                                     }
                                 </td>
-                                <td class="small text-muted">
-                                    @product.CreatedAt.ToString("dd/MM/yyyy")
+
+                                <!-- Attribute summary -->
+                                <td>
+                                    @if (attrValues.Any())
+                                    {
+                                        <div class="d-flex flex-wrap gap-1">
+                                            @foreach (var v in attrValues)
+                                            {
+                                                <span class="badge bg-light text-dark border" style="font-size:10px;">@v</span>
+                                            }
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted small">—</span>
+                                    }
                                 </td>
+
+                                <!-- Actions -->
                                 <td>
                                     <div class="d-flex gap-1">
-                                        <a href="#" class="btn btn-sm btn-outline-primary" title="Sửa">
+                                        <a asp-area="Admin" asp-controller="Product" asp-action="Details"
+                                           asp-route-id="@product.Id"
+                                           class="btn btn-sm btn-outline-secondary" title="Chi tiết">
+                                            <i class="fa fa-eye"></i>
+                                        </a>
+                                        <a asp-area="Admin" asp-controller="Product" asp-action="Edit"
+                                           asp-route-id="@product.Id"
+                                           class="btn btn-sm btn-outline-primary" title="Sửa">
                                             <i class="fa fa-pencil"></i>
                                         </a>
-                                        <a href="#" class="btn btn-sm btn-outline-danger" title="Xoá">
+                                        <a asp-area="Admin" asp-controller="Product" asp-action="Delete"
+                                           asp-route-id="@product.Id"
+                                           class="btn btn-sm btn-outline-danger" title="Xoá">
                                             <i class="fa fa-trash"></i>
                                         </a>
                                     </div>
                                 </td>
+
                             </tr>
                         }
                     }

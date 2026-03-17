@@ -351,6 +351,8 @@
                     </li>
                 </ul>
 
+                @* (file head/body unchanged above) *@
+
                 <div class="nav-section-title">Quản lý</div>
                 <ul class="nav flex-column">
                     <li class="nav-item">
@@ -360,13 +362,26 @@
                         </a>
                     </li>
                     <li class="nav-item">
+                        <a asp-area="Admin" asp-controller="Category" asp-action="Index"
+                           class="@(currentController == "Category" ? "active" : "")">
+                            <i class="fa fa-tags"></i> Danh mục
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a asp-area="Admin" asp-controller="Order" asp-action="Index"
                            class="@(currentController == "Order" ? "active" : "")">
                             <i class="fa fa-shopping-cart"></i> Đơn hàng
-                            @* Badge pending orders — có thể thêm ViewBag sau *@
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a asp-area="Admin" asp-controller="Member" asp-action="Index"
+                           class="@(currentController == "Member" ? "active" : "")">
+                            <i class="fa fa-users"></i> Thành viên
                         </a>
                     </li>
                 </ul>
+
+                @* remainder of file unchanged *@
 
                 <div class="nav-section-title">Khác</div>
                 <ul class="nav flex-column">

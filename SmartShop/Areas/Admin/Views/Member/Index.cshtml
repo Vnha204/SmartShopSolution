@@ -1,0 +1,153 @@
+@model IEnumerable<SmartShop.Areas.Admin.Controllers.MemberController.MemberListItem>
+@{
+    ViewData["Title"] = "Quản lý Thành viên";
+    Layout = "_AdminLayout";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="mb-1 fw-bold">Thành viên</h4>
+        <p class="text-muted small mb-0">Tổng: @Model.Count() thành viên</p>
+    </div>
+</div>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show py-2 small">
+        <i class="fa fa-check-circle me-2"></i> @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show py-2 small">
+        <i class="fa fa-exclamation-circle me-2"></i> @TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<!-- Search bar -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body py-3">
+        <div class="row g-2 align-items-center">
+            <div class="col-md-5">
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0">
+                        <i class="fa fa-search text-muted"></i>
+                    </span>
+                    <input type="text" id="searchInput" class="form-control border-start-0"
+                           placeholder="Tìm theo email hoặc tên..." onkeyup="searchMembers()" />
+                </div>
+            </div>
+            <div class="col-md-3">
+                <select class="form-select" id="roleFilter" onchange="filterByRole()">
+                    <option value="all">Tất cả vai trò</option>
+                    <option value="admin">Admin</option>
+                    <option value="customer">Customer</option>
+                </select>
+            </div>
+            <div class="col-md-4 text-end text-muted small">
+                <i class="fa fa-info-circle me-1"></i>
+                Hiển thị <span id="rowCount">@Model.Count()</span> / @Model.Count() thành viên
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table admin-table mb-0">
+                <thead>
+                    <tr>
+                        <th>Email</th>
+                        <th>Họ và tên</th>
+                        <th>Vai trò</th>
+                        <th>Trạng thái</th>
+                        <th>Ngày tạo</th>
+                        <th style="width:100px;">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody id="memberTableBody">
+                    @foreach (var u in Model)
+                    {
+                        <tr data-email="@u.Email.ToLower()" data-name="@u.FullName.ToLower()"
+                            data-role="@u.Role.ToLower()">
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <div style="width:34px;height:34px;border-radius:50%;background:#e8edf5;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                        <i class="fa fa-user text-muted" style="font-size:14px;"></i>
+                                    </div>
+                                    <span class="small fw-semibold">@u.Email</span>
+                                </div>
+                            </td>
+                            <td class="small">@u.FullName</td>
+                            <td>
+                                <span class="badge @(u.Role == "Admin" ? "bg-danger" : "bg-secondary") badge-status">
+                                    @u.Role
+                                </span>
+                            </td>
+                            <td>
+                                @if (u.IsLockedOut)
+                                {
+                                    <span class="badge bg-warning text-dark badge-status">
+                                        <i class="fa fa-lock me-1"></i> Vô hiệu hoá
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-success badge-status">
+                                        <i class="fa fa-check me-1"></i> Hoạt động
+                                    </span>
+                                }
+                            </td>
+                            <td class="small text-muted">@u.CreatedAt.ToString("dd/MM/yyyy")</td>
+                            <td>
+                                <form asp-area="Admin" asp-controller="Member" asp-action="ToggleActive"
+                                      method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@u.Id" />
+                                    <button type="submit"
+                                            class="btn btn-sm @(u.IsLockedOut ? "btn-outline-success" : "btn-outline-warning")"
+                                            title="@(u.IsLockedOut ? "Kích hoạt lại" : "Vô hiệu hoá")"
+                                            onclick="return confirm('@(u.IsLockedOut ? "Kích hoạt lại tài khoản này?" : "Vô hiệu hoá tài khoản này?")')">
+                                        <i class="fa @(u.IsLockedOut ? "fa-unlock" : "fa-lock")"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function searchMembers() {
+            const q = document.getElementById('searchInput').value.toLowerCase();
+            const role = document.getElementById('roleFilter').value;
+            filterTable(q, role);
+        }
+
+        function filterByRole() {
+            const q = document.getElementById('searchInput').value.toLowerCase();
+            const role = document.getElementById('roleFilter').value;
+            filterTable(q, role);
+        }
+
+        function filterTable(q, role) {
+            const rows = document.querySelectorAll('#memberTableBody tr[data-email]');
+            let visible = 0;
+            rows.forEach(row => {
+                const emailMatch = row.dataset.email.includes(q) || row.dataset.name.includes(q);
+                const roleMatch = role === 'all' || row.dataset.role === role;
+                const show = emailMatch && roleMatch;
+                row.style.display = show ? '' : 'none';
+                if (show) visible++;
+            });
+            document.getElementById('rowCount').textContent = visible;
+        }
+    </script>
+}

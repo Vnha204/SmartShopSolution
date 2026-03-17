@@ -1,0 +1,117 @@
+@model SmartShop.Models.Category
+@{
+    ViewData["Title"] = "Thêm danh mục";
+    Layout = "_AdminLayout";
+    var parentCategories = ViewBag.ParentCategories as List<SmartShop.Models.Category> ?? new();
+}
+
+<div class="d-flex align-items-center mb-4 gap-3">
+    <a asp-area="Admin" asp-controller="Category" asp-action="Index"
+       class="btn btn-sm btn-outline-secondary">
+        <i class="fa fa-arrow-left me-1"></i> Quay lại
+    </a>
+    <h4 class="mb-0 fw-bold">Thêm danh mục mới</h4>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-7">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-bottom py-3">
+                <h6 class="mb-0 fw-bold"><i class="fa fa-tags me-2 text-primary"></i> Thông tin danh mục</h6>
+            </div>
+            <div class="card-body">
+                <form asp-area="Admin" asp-controller="Category" asp-action="Create" method="post">
+                    @Html.AntiForgeryToken()
+
+                    <div class="mb-3">
+                        <label asp-for="Name" class="form-label fw-semibold">Tên danh mục <span class="text-danger">*</span></label>
+                        <input asp-for="Name" class="form-control" placeholder="Nhập tên danh mục..."
+                               oninput="generateSlug(this.value)" />
+                        <span asp-validation-for="Name" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Slug" class="form-label fw-semibold">Slug (URL) <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <span class="input-group-text text-muted" style="font-size:12px;">/danh-muc/</span>
+                            <input asp-for="Slug" class="form-control" placeholder="slug-danh-muc" />
+                        </div>
+                        <span asp-validation-for="Slug" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="ParentId" class="form-label fw-semibold">Danh mục cha</label>
+                        <select asp-for="ParentId" class="form-select">
+                            <option value="">— Không có (danh mục gốc) —</option>
+                            @foreach (var parent in parentCategories)
+                            {
+                                <option value="@parent.Id">@parent.Name</option>
+                            }
+                        </select>
+                        <span asp-validation-for="ParentId" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="ImageUrl" class="form-label fw-semibold">URL hình ảnh</label>
+                        <input asp-for="ImageUrl" class="form-control"
+                               placeholder="https://... hoặc /images/category.jpg"
+                               oninput="previewImage(this.value)" />
+                        <span asp-validation-for="ImageUrl" class="text-danger small"></span>
+                        <div id="imgPreview" class="mt-2" style="display:none;">
+                            <img id="previewImg" src="" alt="Preview"
+                                 style="max-height:120px;border-radius:6px;border:1px solid #eee;object-fit:cover;" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="SortOrder" class="form-label fw-semibold">Thứ tự hiển thị</label>
+                        <input asp-for="SortOrder" class="form-control" type="number" min="0" style="max-width:120px;" />
+                        <div class="form-text">Số nhỏ hơn hiển thị trước.</div>
+                    </div>
+
+                    <div class="mb-4">
+                        <div class="form-check form-switch">
+                            <input asp-for="IsActive" class="form-check-input" type="checkbox" role="switch" checked />
+                            <label asp-for="IsActive" class="form-check-label">Hiển thị trên website</label>
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary px-4">
+                            <i class="fa fa-save me-2"></i> Lưu danh mục
+                        </button>
+                        <a asp-area="Admin" asp-controller="Category" asp-action="Index"
+                           class="btn btn-outline-secondary">
+                            Huỷ
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        function generateSlug(name) {
+            const slug = name.toLowerCase()
+                .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                .replace(/đ/g, 'd').replace(/Đ/g, 'd')
+                .replace(/[^a-z0-9\s-]/g, '')
+                .trim().replace(/\s+/g, '-');
+            document.getElementById('Slug').value = slug;
+        }
+
+        function previewImage(url) {
+            const preview = document.getElementById('imgPreview');
+            const img = document.getElementById('previewImg');
+            if (url) {
+                img.src = url;
+                preview.style.display = 'block';
+            } else {
+                preview.style.display = 'none';
+            }
+        }
+    </script>
+}

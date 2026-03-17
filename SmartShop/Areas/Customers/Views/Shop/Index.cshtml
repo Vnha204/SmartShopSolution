@@ -20,7 +20,7 @@
 
     <div class="container" style="margin-top: 30px;">
         <div class="row">
-            <!-- Sidebar Filter - Modern Design -->
+            <!-- Sidebar Filter -->
             <div class="col-lg-3 col-md-4">
                 <div class="shop_sidebar">
                     <div class="d-flex justify-content-between align-items-center mb-3">
@@ -42,21 +42,16 @@
                                     @foreach (var cat in Model.Categories)
                                     {
                                         <li>
-                                            <label>
-                                                <input type="checkbox" name="categoryIds" value="@cat.Id" 
-                                                       @(cat.IsSelected ? "checked" : "") />
-                                                @cat.Name
-                                                <span class="badge bg-light text-muted ms-auto">@cat.ProductCount</span>
+                                            <label class="d-flex align-items-center justify-content-between">
+                                                <span>
+                                                    <input type="checkbox" name="categoryIds" value="@cat.Id"
+                                                           @(cat.IsSelected ? "checked" : "") />
+                                                    <span class="ms-2">@cat.Name</span>
+                                                </span>
+                                                <span class="badge bg-light text-muted ms-2">@cat.ProductCount</span>
                                             </label>
                                         </li>
                                     }
-                                }
-                                else
-                                {
-                                    <li><label><input type="checkbox" name="categoryIds" value="1" /> Kính râm</label></li>
-                                    <li><label><input type="checkbox" name="categoryIds" value="2" /> Kính cận</label></li>
-                                    <li><label><input type="checkbox" name="categoryIds" value="3" /> Combo</label></li>
-                                    <li><label><input type="checkbox" name="categoryIds" value="4" /> Tròng kính</label></li>
                                 }
                             </ul>
                         </div>
@@ -67,12 +62,12 @@
                             <div class="price-inputs d-flex gap-2 mb-3">
                                 <div class="input-group input-group-sm">
                                     <span class="input-group-text">₫</span>
-                                    <input type="number" class="form-control" name="minPrice" 
+                                    <input type="number" class="form-control" name="minPrice"
                                            value="@Model?.Filter?.MinPrice" placeholder="Từ" />
                                 </div>
                                 <div class="input-group input-group-sm">
                                     <span class="input-group-text">₫</span>
-                                    <input type="number" class="form-control" name="maxPrice" 
+                                    <input type="number" class="form-control" name="maxPrice"
                                            value="@Model?.Filter?.MaxPrice" placeholder="Đến" />
                                 </div>
                             </div>
@@ -83,20 +78,13 @@
                                     {
                                         <li>
                                             <label>
-                                                <input type="radio" name="priceRange" value="@range.Value" 
+                                                <input type="radio" name="priceRange" value="@range.Value"
                                                        @(range.IsSelected ? "checked" : "") />
                                                 @range.Label
                                                 <span class="badge bg-light text-muted">@range.ProductCount</span>
                                             </label>
                                         </li>
                                     }
-                                }
-                                else
-                                {
-                                    <li><label><input type="radio" name="priceRange" value="0-500000" /> Dưới 500.000₫</label></li>
-                                    <li><label><input type="radio" name="priceRange" value="500000-1000000" /> 500.000₫ - 1.000.000₫</label></li>
-                                    <li><label><input type="radio" name="priceRange" value="1000000-2000000" /> 1.000.000₫ - 2.000.000₫</label></li>
-                                    <li><label><input type="radio" name="priceRange" value="2000000+" /> Trên 2.000.000₫</label></li>
                                 }
                             </ul>
                         </div>
@@ -124,29 +112,6 @@
                                 </div>
                             }
                         }
-                        else
-                        {
-                            <!-- Fallback filters -->
-                            <div class="filter_group">
-                                <h5><i class="fa fa-eye me-2"></i> Kiểu gọng</h5>
-                                <ul class="list-unstyled">
-                                    <li><label><input type="checkbox" name="shapes" value="round" /> Tròn</label></li>
-                                    <li><label><input type="checkbox" name="shapes" value="square" /> Vuông</label></li>
-                                    <li><label><input type="checkbox" name="shapes" value="oval" /> Oval</label></li>
-                                    <li><label><input type="checkbox" name="shapes" value="cateye" /> Cat Eye</label></li>
-                                    <li><label><input type="checkbox" name="shapes" value="aviator" /> Aviator</label></li>
-                                </ul>
-                            </div>
-
-                            <div class="filter_group">
-                                <h5><i class="fa fa-users me-2"></i> Giới tính</h5>
-                                <ul class="list-unstyled">
-                                    <li><label><input type="checkbox" name="gender" value="men" /> Nam</label></li>
-                                    <li><label><input type="checkbox" name="gender" value="women" /> Nữ</label></li>
-                                    <li><label><input type="checkbox" name="gender" value="unisex" /> Unisex</label></li>
-                                </ul>
-                            </div>
-                        }
 
                         <button type="submit" class="btn btn-primary-custom w-100">
                             <i class="fa fa-search me-2"></i> Áp dụng bộ lọc
@@ -157,10 +122,88 @@
 
             <!-- Product Grid -->
             <div class="col-lg-9 col-md-8">
-                <!-- Sort & View options -->
+                <!-- Top filter bar (dropdowns) -->
+                <div class="mb-3">
+                    <div class="d-flex flex-wrap gap-2 align-items-center">
+                        <div class="dropdown">
+                            <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="filterCategoryBtn"
+                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                Danh mục sản phẩm
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="filterCategoryBtn">
+                                @foreach (var cat in Model.Categories)
+                                {
+                                    <li>
+                                        <a class="dropdown-item" href="#" data-shop-filter data-target-input="input[name='categoryIds'][value='@cat.Id']">
+                                            @cat.Name <span class="text-muted ms-2">(@cat.ProductCount)</span>
+                                        </a>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+
+                        <div class="dropdown">
+                            <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="filterGenderBtn"
+                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                Giới tính
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="filterGenderBtn">
+                                <li><a class="dropdown-item" href="#" data-shop-filter data-target-input="input[name='attributeValueIds'][value='1']">Nam</a></li>
+                                <li><a class="dropdown-item" href="#" data-shop-filter data-target-input="input[name='attributeValueIds'][value='2']">Nữ</a></li>
+                                <li><a class="dropdown-item" href="#" data-shop-filter data-target-input="input[name='attributeValueIds'][value='3']">Unisex</a></li>
+                            </ul>
+                        </div>
+
+                        <div class="dropdown">
+                            <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="filterStyleBtn"
+                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                Kiểu dáng
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="filterStyleBtn">
+                                @* Example values; they map to attributeValueIds in the filter form *@
+                                <li><a class="dropdown-item" href="#" data-shop-filter data-target-input="input[name='attributeValueIds'][value='4']">Tròn</a></li>
+                                <li><a class="dropdown-item" href="#" data-shop-filter data-target-input="input[name='attributeValueIds'][value='5']">Vuông</a></li>
+                            </ul>
+                        </div>
+
+                        <div class="dropdown">
+                            <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="filterMaterialBtn"
+                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                Chất liệu
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="filterMaterialBtn">
+                                <li><a class="dropdown-item" href="#" data-shop-filter data-target-input="input[name='attributeValueIds'][value='6']">Kim loại</a></li>
+                                <li><a class="dropdown-item" href="#" data-shop-filter data-target-input="input[name='attributeValueIds'][value='7']">Nhựa</a></li>
+                            </ul>
+                        </div>
+
+                        <div class="dropdown">
+                            <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="filterPriceBtn"
+                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                Khoảng giá
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="filterPriceBtn">
+                                @foreach (var r in Model.PriceRanges)
+                                {
+                                    <li>
+                                        <a class="dropdown-item" href="#" data-shop-filter data-target-input="input[name='priceRange'][value='@r.Value']">
+                                            @r.Label
+                                        </a>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+
+                        <div class="ms-auto">
+                            <span class="text-muted"><strong id="productCount">@(Model?.TotalProducts ?? 0)</strong> sản phẩm</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sort & view (kept) -->
                 <div class="d-flex justify-content-between align-items-center mb-4 p-3 bg-white rounded shadow-sm">
                     <span class="text-muted">
-                        <strong id="productCount">@(Model?.TotalProducts ?? 0)</strong> sản phẩm
+                        <strong id="productCountTop">@(Model?.TotalProducts ?? 0)</strong> sản phẩm
                     </span>
                     <div class="d-flex gap-3 align-items-center">
                         <select class="form-select form-select-sm" style="width: auto;" name="sortBy" id="sortBy">
@@ -205,7 +248,6 @@
                     }
                     else
                     {
-                        <!-- Empty state hoặc sample products -->
                         <div class="col-12 text-center py-5">
                             <i class="fa fa-search fa-3x text-muted mb-3"></i>
                             <p class="text-muted">Không tìm thấy sản phẩm nào phù hợp.</p>
@@ -239,48 +281,6 @@
     </div>
 </div>
 <!-- end shop section -->
-
 @section Scripts {
-    <script>
-        $(document).ready(function() {
-            // Clear all filters
-            $('#clearFilters, #clearFiltersEmpty').on('click', function() {
-                $('#filterForm')[0].reset();
-                window.location.href = '@Url.Action("Index", "Shop", new { area = "Customers" })';
-            });
-
-            // Sort change - auto submit
-            $('#sortBy').on('change', function() {
-                var url = new URL(window.location.href);
-                url.searchParams.set('sortBy', $(this).val());
-                window.location.href = url.toString();
-            });
-
-            // Add to cart
-            $('.add_cart').on('click', function() {
-                var productId = $(this).data('product-id');
-                $.post('@Url.Action("AddToCart", "Cart", new { area = "Customers" })', 
-                    { productId: productId, quantity: 1 }, 
-                    function(response) {
-                        if (response.success) {
-                            // Update cart badge
-                            $('#cart-count').text(response.cartCount);
-                            // Show toast notification
-                            alert('Đã thêm vào giỏ hàng!');
-                        }
-                    }
-                );
-            });
-
-            // Load cart count on page load
-            $.get('@Url.Action("GetCartCount", "Cart", new { area = "Customers" })', function(count) {
-                $('#cart-count').text(count);
-                if (count == 0) {
-                    $('#cart-count').hide();
-                } else {
-                    $('#cart-count').show();
-                }
-            });
-        });
-    </script>
+    <script src="~/js/shop.js"></script>
 }
