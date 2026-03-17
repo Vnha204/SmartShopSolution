@@ -1,0 +1,82 @@
+@{
+    ViewData["Title"] = "Cấu hình thuộc tính";
+    Layout = "_AdminLayout";
+
+    var category       = (SmartShop.Models.Category)ViewBag.Category;
+    var allAttributes  = (List<SmartShop.Models.Attribute>)ViewBag.AllAttributes;
+    var mappedIds      = (HashSet<int>)ViewBag.MappedIds;
+}
+
+<div class="d-flex align-items-center mb-4 gap-3">
+    <a asp-area="Admin" asp-controller="CategoryAttribute" asp-action="Index"
+       class="btn btn-sm btn-outline-secondary">
+        <i class="fa fa-arrow-left me-1"></i> Quay lại
+    </a>
+    <div>
+        <h4 class="mb-0 fw-bold">Cấu hình thuộc tính</h4>
+        <small class="text-muted">Danh mục: <strong>@category.Name</strong></small>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-7">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-bottom py-3">
+                <h6 class="mb-0 fw-bold">
+                    <i class="fa fa-check-square me-2 text-primary"></i>
+                    Chọn thuộc tính áp dụng cho <strong>@category.Name</strong>
+                </h6>
+            </div>
+            <div class="card-body">
+                @if (!allAttributes.Any())
+                {
+                    <p class="text-muted small">
+                        Chưa có thuộc tính nào.
+                        <a asp-area="Admin" asp-controller="Attribute" asp-action="Create">Thêm thuộc tính</a> trước.
+                    </p>
+                }
+                else
+                {
+                    <form asp-area="Admin" asp-controller="CategoryAttribute"
+                          asp-action="Manage" asp-route-id="@category.Id" method="post">
+                        @Html.AntiForgeryToken()
+
+                        <p class="text-muted small mb-3">
+                            Tích chọn các thuộc tính sẽ hiển thị khi admin tạo/sửa sản phẩm
+                            thuộc danh mục <strong>@category.Name</strong>.
+                        </p>
+
+                        <div class="row g-2 mb-4">
+                            @foreach (var attr in allAttributes)
+                            {
+                                var isMapped = mappedIds.Contains(attr.Id);
+                                <div class="col-md-6">
+                                    <div class="form-check border rounded p-3
+                                                @(isMapped ? "bg-primary bg-opacity-10 border-primary" : "")">
+                                        <input class="form-check-input" type="checkbox"
+                                               name="enabledAttributeIds" value="@attr.Id"
+                                               id="attr_@attr.Id"
+                                               checked="@(isMapped ? "checked" : null)" />
+                                        <label class="form-check-label w-100" for="attr_@attr.Id">
+                                            <span class="fw-semibold">@attr.DisplayName</span>
+                                            <br />
+                                            <code class="text-muted" style="font-size:11px;">@attr.Name</code>
+                                        </label>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fa fa-save me-2"></i> Lưu cấu hình
+                            </button>
+                            <a asp-area="Admin" asp-controller="CategoryAttribute" asp-action="Index"
+                               class="btn btn-outline-secondary">Huỷ</a>
+                        </div>
+                    </form>
+                }
+            </div>
+        </div>
+    </div>
+</div>

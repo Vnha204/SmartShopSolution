@@ -18,11 +18,11 @@
     <div class="row g-4">
 
         <!-- ═══════════════════════════════════════════════════════════════
-             LEFT COLUMN — Main product info + Attributes
+             LEFT COLUMN — Main info + Attributes
         ════════════════════════════════════════════════════════════════ -->
         <div class="col-lg-8">
 
-            <!-- Basic info ──────────────────────────────────────────────── -->
+            <!-- Basic info -->
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-header bg-white border-bottom py-3">
                     <h6 class="mb-0 fw-bold">
@@ -49,12 +49,11 @@
                         <label asp-for="Description" class="form-label fw-semibold"></label>
                         <textarea asp-for="Description" class="form-control" rows="5"
                                   placeholder="Mô tả chi tiết sản phẩm..."></textarea>
-                        <span asp-validation-for="Description" class="text-danger small"></span>
                     </div>
                 </div>
             </div>
 
-            <!-- Price & Stock ───────────────────────────────────────────── -->
+            <!-- Price & Stock -->
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-header bg-white border-bottom py-3">
                     <h6 class="mb-0 fw-bold">
@@ -89,7 +88,7 @@
                 </div>
             </div>
 
-            <!-- Thumbnail ──────────────────────────────────────────────── -->
+            <!-- Thumbnail -->
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-header bg-white border-bottom py-3">
                     <h6 class="mb-0 fw-bold">
@@ -97,13 +96,10 @@
                     </h6>
                 </div>
                 <div class="card-body">
-                    <div class="mb-3">
-                        <label asp-for="ThumbnailUrl" class="form-label fw-semibold"></label>
-                        <input asp-for="ThumbnailUrl" class="form-control"
-                               placeholder="https://... hoặc /images/product.jpg"
-                               oninput="previewImage(this.value)" />
-                        <span asp-validation-for="ThumbnailUrl" class="text-danger small"></span>
-                    </div>
+                    <label asp-for="ThumbnailUrl" class="form-label fw-semibold"></label>
+                    <input asp-for="ThumbnailUrl" class="form-control"
+                           placeholder="https://... hoặc /images/product.jpg"
+                           oninput="previewImage(this.value)" />
                     <div id="imgPreview" class="mt-2" style="display:none;">
                         <img id="previewImg" src="" alt="Preview"
                              style="max-height:180px;border-radius:8px;border:1px solid #eee;object-fit:contain;" />
@@ -111,28 +107,26 @@
                 </div>
             </div>
 
-            <!-- Dynamic attributes card — populated via AJAX when category changes -->
+            <!-- Dynamic attributes (shown after leaf category chosen) -->
             <div id="attributeCard" class="card border-0 shadow-sm mb-4" style="display:none;">
                 <div class="card-header bg-white border-bottom py-3">
                     <h6 class="mb-0 fw-bold">
-                        <i class="fa fa-sliders me-2 text-secondary"></i> Thuộc tính sản phẩm
+                        <i class="fa fa-check-square-o me-2 text-secondary"></i> Thuộc tính sản phẩm
                     </h6>
                 </div>
                 <div class="card-body">
-                    <div id="attributeSection">
-                        {{-- JS renders dropdowns here --}}
-                    </div>
+                    <div id="attributeSection"></div>
                 </div>
             </div>
 
         </div>
 
         <!-- ═══════════════════════════════════════════════════════════════
-             RIGHT COLUMN — Status + Category
+             RIGHT COLUMN — Status + Category drill-down
         ════════════════════════════════════════════════════════════════ -->
         <div class="col-lg-4">
 
-            <!-- Status ──────────────────────────────────────────────────── -->
+            <!-- Status -->
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-header bg-white border-bottom py-3">
                     <h6 class="mb-0 fw-bold">
@@ -142,7 +136,7 @@
                 <div class="card-body">
                     <div class="form-check form-switch mb-3">
                         <input asp-for="IsActive" class="form-check-input" type="checkbox" role="switch" />
-                        <label asp-for="IsActive" class="form-check-label">Đang bán (hiển thị trên shop)</label>
+                        <label asp-for="IsActive" class="form-check-label">Đang bán</label>
                     </div>
                     <div class="form-check form-switch">
                         <input asp-for="IsFeatured" class="form-check-input" type="checkbox" role="switch" />
@@ -151,7 +145,7 @@
                 </div>
             </div>
 
-            <!-- Category (single dropdown) ─────────────────────────────── -->
+            <!-- Category drill-down -->
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-header bg-white border-bottom py-3">
                     <h6 class="mb-0 fw-bold">
@@ -159,35 +153,38 @@
                     </h6>
                 </div>
                 <div class="card-body">
-                    <label asp-for="CategoryId" class="form-label fw-semibold visually-hidden"></label>
-                    <select asp-for="CategoryId" class="form-select" id="categoryDropdown"
-                            onchange="onCategoryChange(this.value)">
-                        <option value="">-- Chọn danh mục --</option>
-                        @foreach (var cat in Model.AllCategories)
-                        {
-                            <option value="@cat.Id"
-                                    selected="@(Model.CategoryId == cat.Id ? "selected" : null)">
-                                @cat.Name
-                            </option>
-                        }
-                    </select>
-                    <span asp-validation-for="CategoryId" class="text-danger small"></span>
+                    {{--
+                        Hidden input holds the final selected leaf category ID.
+                        asp-for binds validation; JS sets its value.
+                    --}}
+                    <input type="hidden" asp-for="CategoryId" id="CategoryId" />
+                    <span asp-validation-for="CategoryId" class="text-danger small d-block mb-2"></span>
+
+                    <!-- Drill-down dropdowns render here (JS) -->
+                    <div id="categoryChainContainer"></div>
+
+                    <!-- Breadcrumb display when leaf selected -->
+                    <div id="leafDisplay" class="mt-2" style="display:none;">
+                        <small class="text-success fw-semibold">
+                            <i class="fa fa-check-circle me-1"></i>
+                            <span id="leafBreadcrumb"></span>
+                        </small>
+                    </div>
+
                     <p class="text-muted small mt-2 mb-0">
                         <i class="fa fa-info-circle me-1"></i>
-                        Chọn danh mục để hiển thị các thuộc tính phù hợp.
+                        Chọn đến danh mục cấp cuối để hiển thị thuộc tính phù hợp.
                     </p>
                 </div>
             </div>
 
-            <!-- Save buttons ─────────────────────────────────────────────── -->
+            <!-- Save -->
             <div class="d-grid gap-2">
                 <button type="submit" class="btn btn-primary">
                     <i class="fa fa-save me-2"></i> Lưu sản phẩm
                 </button>
                 <a asp-area="Admin" asp-controller="Product" asp-action="Index"
-                   class="btn btn-outline-secondary">
-                    Huỷ
-                </a>
+                   class="btn btn-outline-secondary">Huỷ</a>
             </div>
 
         </div>
@@ -197,81 +194,205 @@
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
     <script>
-        // ── Slug generator ────────────────────────────────────────────────────
-        function generateSlug(name) {
-            const slug = name.toLowerCase()
-                .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-                .replace(/đ/g, 'd').replace(/Đ/g, 'd')
-                .replace(/[^a-z0-9\s-]/g, '')
-                .trim().replace(/\s+/g, '-');
-            document.getElementById('Slug').value = slug;
+    // ── Constants ─────────────────────────────────────────────────────────────
+    const CAT_API   = '/Admin/api/categories';
+    let   _maxDepth = 0;   // tracks deepest dropdown level rendered
+
+    // ── Slug generator ────────────────────────────────────────────────────────
+    function generateSlug(name) {
+        const s = name.toLowerCase()
+            .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+            .replace(/đ/g, 'd').replace(/Đ/g, 'd')
+            .replace(/[^a-z0-9\s-]/g, '').trim().replace(/\s+/g, '-');
+        document.getElementById('Slug').value = s;
+    }
+
+    // ── Image preview ─────────────────────────────────────────────────────────
+    function previewImage(url) {
+        const p = document.getElementById('imgPreview');
+        const i = document.getElementById('previewImg');
+        if (url) { i.src = url; p.style.display = 'block'; }
+        else     { p.style.display = 'none'; }
+    }
+
+    // ═════════════════════════════════════════════════════════════════════════
+    // Category drill-down
+    // ═════════════════════════════════════════════════════════════════════════
+
+    // Remove all dropdown wrappers at depth >= fromDepth
+    function removeDepthsFrom(fromDepth) {
+        for (let d = fromDepth; d <= _maxDepth + 1; d++) {
+            const el = document.getElementById('cat-level-' + d);
+            if (el) el.remove();
         }
+        _maxDepth = Math.max(fromDepth - 1, 0);
+    }
 
-        // ── Image preview ─────────────────────────────────────────────────────
-        function previewImage(url) {
-            const preview = document.getElementById('imgPreview');
-            const img     = document.getElementById('previewImg');
-            if (url) { img.src = url; preview.style.display = 'block'; }
-            else     { preview.style.display = 'none'; }
+    // Render a dropdown for a given depth level
+    async function renderLevel(parentId, depth) {
+        removeDepthsFrom(depth);
+        clearLeaf();
+
+        const url = parentId != null
+            ? `${CAT_API}/children?parentId=${parentId}`
+            : `${CAT_API}/children`;
+
+        const resp       = await fetch(url);
+        const categories = await resp.json();
+        if (!categories.length) return;
+
+        const container = document.getElementById('categoryChainContainer');
+        const wrapper   = document.createElement('div');
+        wrapper.id        = 'cat-level-' + depth;
+        wrapper.className = 'mb-2';
+
+        const label = document.createElement('small');
+        label.className   = 'form-text text-muted mb-1 d-block';
+        label.textContent = depth === 0 ? 'Danh mục gốc' : 'Danh mục con';
+        wrapper.appendChild(label);
+
+        const sel = document.createElement('select');
+        sel.className         = 'form-select form-select-sm';
+        sel.dataset.depth     = depth;
+        sel.dataset.parentId  = parentId ?? '';
+        sel.addEventListener('change', function () { onLevelChange(this); });
+
+        const placeholder       = document.createElement('option');
+        placeholder.value       = '';
+        placeholder.textContent = '-- Chọn --';
+        sel.appendChild(placeholder);
+
+        categories.forEach(c => {
+            const opt              = document.createElement('option');
+            opt.value              = c.id;
+            opt.textContent        = c.name;
+            opt.dataset.hasChildren = c.hasChildren ? '1' : '0';
+            sel.appendChild(opt);
+        });
+
+        wrapper.appendChild(sel);
+        container.appendChild(wrapper);
+        _maxDepth = Math.max(_maxDepth, depth);
+    }
+
+    // Called when user picks an item in level <depth>
+    async function onLevelChange(sel) {
+        const depth      = parseInt(sel.dataset.depth);
+        const categoryId = sel.value;
+
+        // Remove everything deeper
+        removeDepthsFrom(depth + 1);
+        clearLeaf();
+
+        if (!categoryId) return;
+
+        const opt         = sel.querySelector(`option[value="${categoryId}"]`);
+        const hasChildren = opt && opt.dataset.hasChildren === '1';
+
+        if (hasChildren) {
+            await renderLevel(parseInt(categoryId), depth + 1);
+        } else {
+            setLeaf(parseInt(categoryId), await fetchBreadcrumbText(categoryId));
         }
+    }
 
-        // ── Category change → AJAX load attributes ────────────────────────────
-        async function onCategoryChange(categoryId) {
-            const card    = document.getElementById('attributeCard');
-            const section = document.getElementById('attributeSection');
+    function setLeaf(categoryId, breadcrumbText) {
+        document.getElementById('CategoryId').value = categoryId;
+        document.getElementById('leafBreadcrumb').textContent = breadcrumbText;
+        document.getElementById('leafDisplay').style.display = 'block';
+        loadAttributes(categoryId, []);
+    }
 
-            if (!categoryId) {
-                card.style.display = 'none';
-                section.innerHTML  = '';
-                return;
-            }
+    function clearLeaf() {
+        document.getElementById('CategoryId').value = '';
+        document.getElementById('leafDisplay').style.display = 'none';
+        document.getElementById('attributeCard').style.display = 'none';
+        document.getElementById('attributeSection').innerHTML = '';
+    }
 
-            try {
-                const resp  = await fetch(`/Admin/Product/GetAttributesByCategory?categoryId=${categoryId}`);
-                const attrs = await resp.json();
-                renderAttributes(section, attrs, []);
-                card.style.display = attrs.length > 0 ? 'block' : 'none';
-            } catch (e) {
-                console.error('Failed to load attributes', e);
+    async function fetchBreadcrumbText(categoryId) {
+        const resp = await fetch(`${CAT_API}/breadcrumb?categoryId=${categoryId}`);
+        const bc   = await resp.json();
+        return bc.map(b => b.name).join(' › ');
+    }
+
+    // Pre-load for Edit mode: given a known categoryId, expand the chain
+    async function preloadCategoryChain(leafCategoryId) {
+        const resp      = await fetch(`${CAT_API}/breadcrumb?categoryId=${leafCategoryId}`);
+        const breadcrumb = await resp.json();
+        if (!breadcrumb.length) return;
+
+        // Render root level
+        await renderLevel(null, 0);
+
+        for (let i = 0; i < breadcrumb.length; i++) {
+            const item = breadcrumb[i];
+            const sel  = document.querySelector(`#cat-level-${i} select`);
+            if (sel) sel.value = item.id;
+
+            if (i < breadcrumb.length - 1) {
+                // Load next level (children of current item)
+                await renderLevel(item.id, i + 1);
+            } else {
+                // Leaf
+                setLeaf(item.id, breadcrumb.map(b => b.name).join(' › '));
             }
         }
+    }
 
-        // ── Render attribute dropdowns from JSON data ─────────────────────────
-        // selectedIds: array of currently selected AttributeValue IDs
-        function renderAttributes(container, attrs, selectedIds) {
-            if (!attrs || attrs.length === 0) {
-                container.innerHTML = '<p class="text-muted small mb-0">Danh mục này không có thuộc tính.</p>';
-                return;
-            }
+    // ═════════════════════════════════════════════════════════════════════════
+    // Attribute loading (checkboxes)
+    // ═════════════════════════════════════════════════════════════════════════
 
-            let html = '';
-            attrs.forEach(attr => {
-                const selectedId = selectedIds.find(id =>
-                    attr.options.some(o => o.id === id)
-                ) || 0;
+    async function loadAttributes(categoryId, selectedIds) {
+        const card    = document.getElementById('attributeCard');
+        const section = document.getElementById('attributeSection');
+        try {
+            const resp  = await fetch(`${CAT_API}/${categoryId}/attributes`);
+            const attrs = await resp.json();
+            renderAttributeCheckboxes(section, attrs, selectedIds);
+            card.style.display = attrs.length > 0 ? 'block' : 'none';
+        } catch (e) {
+            console.error('Failed to load attributes', e);
+        }
+    }
 
-                let optHtml = `<option value="">-- Chọn ${escHtml(attr.displayName)} --</option>`;
-                attr.options.forEach(opt => {
-                    const sel = opt.id === selectedId ? ' selected' : '';
-                    optHtml += `<option value="${opt.id}"${sel}>${escHtml(opt.displayName)}</option>`;
-                });
-
-                html += `
-                <div class="mb-3 attr-group" data-attribute-id="${attr.attributeId}">
-                    <label class="form-label fw-semibold">${escHtml(attr.displayName)}</label>
-                    <select name="SelectedAttributeValueIds" class="form-select">
-                        ${optHtml}
-                    </select>
+    function renderAttributeCheckboxes(container, attrs, selectedIds) {
+        if (!attrs || !attrs.length) {
+            container.innerHTML =
+                '<p class="text-muted small mb-0">Danh mục này chưa có thuộc tính nào được cấu hình.</p>';
+            return;
+        }
+        let html = '';
+        attrs.forEach(attr => {
+            html += `<div class="mb-3">
+                <p class="fw-semibold mb-1">${escHtml(attr.displayName)}</p>
+                <div class="d-flex flex-wrap gap-2">`;
+            attr.values.forEach(v => {
+                const chk = (selectedIds.includes(v.id) || v.selected) ? ' checked' : '';
+                html += `<div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox"
+                           name="SelectedAttributeValueIds" value="${v.id}"
+                           id="av_${v.id}"${chk} />
+                    <label class="form-check-label" for="av_${v.id}">
+                        ${escHtml(v.displayName)}
+                    </label>
                 </div>`;
             });
+            html += `</div></div>`;
+        });
+        container.innerHTML = html;
+    }
 
-            container.innerHTML = html;
-        }
+    function escHtml(str) {
+        const d = document.createElement('div');
+        d.appendChild(document.createTextNode(str));
+        return d.innerHTML;
+    }
 
-        function escHtml(str) {
-            const d = document.createElement('div');
-            d.appendChild(document.createTextNode(str));
-            return d.innerHTML;
-        }
+    // ── Init ──────────────────────────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', function () {
+        renderLevel(null, 0);  // Load root categories on page load
+    });
     </script>
 }

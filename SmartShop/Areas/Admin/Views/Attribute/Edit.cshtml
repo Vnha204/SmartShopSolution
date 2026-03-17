@@ -1,0 +1,71 @@
+@model SmartShop.Models.Attribute
+@{
+    ViewData["Title"] = "Sửa thuộc tính";
+    Layout = "_AdminLayout";
+}
+
+<div class="d-flex align-items-center mb-4 gap-3">
+    <a asp-area="Admin" asp-controller="Attribute" asp-action="Index"
+       class="btn btn-sm btn-outline-secondary">
+        <i class="fa fa-arrow-left me-1"></i> Quay lại
+    </a>
+    <h4 class="mb-0 fw-bold">Sửa thuộc tính</h4>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-bottom py-3">
+                <h6 class="mb-0 fw-bold">
+                    <i class="fa fa-pencil me-2 text-primary"></i> Chỉnh sửa thông tin
+                </h6>
+            </div>
+            <div class="card-body">
+                <form asp-area="Admin" asp-controller="Attribute" asp-action="Edit"
+                      asp-route-id="@Model.Id" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="Id" />
+
+                    <div class="mb-3">
+                        <label asp-for="Name" class="form-label fw-semibold">
+                            Tên nội bộ (Name) <span class="text-danger">*</span>
+                        </label>
+                        <input asp-for="Name" class="form-control" />
+                        <div class="form-text">Dùng chữ thường, không dấu, không khoảng trắng.</div>
+                        <span asp-validation-for="Name" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="DisplayName" class="form-label fw-semibold">
+                            Tên hiển thị <span class="text-danger">*</span>
+                        </label>
+                        <input asp-for="DisplayName" class="form-control" />
+                        <span asp-validation-for="DisplayName" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="SortOrder" class="form-label fw-semibold">Thứ tự hiển thị</label>
+                        <input asp-for="SortOrder" class="form-control" type="number" min="0" />
+                        <span asp-validation-for="SortOrder" class="text-danger small"></span>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fa fa-save me-2"></i> Lưu thay đổi
+                        </button>
+                        <a asp-area="Admin" asp-controller="Attribute" asp-action="Values"
+                           asp-route-id="@Model.Id" class="btn btn-outline-info">
+                            <i class="fa fa-list me-1"></i> Quản lý giá trị
+                        </a>
+                        <a asp-area="Admin" asp-controller="Attribute" asp-action="Index"
+                           class="btn btn-outline-secondary">Huỷ</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

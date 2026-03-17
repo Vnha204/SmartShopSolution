@@ -3,8 +3,9 @@
     ViewData["Title"] = "Sửa sản phẩm";
     Layout = "_AdminLayout";
 
-    // Build a JS array of currently selected attribute value IDs for pre-selection
-    var selectedIdsJson = System.Text.Json.JsonSerializer.Serialize(Model.SelectedAttributeValueIds);
+    var selectedIdsJson  = System.Text.Json.JsonSerializer.Serialize(Model.SelectedAttributeValueIds);
+    var existingCatId    = Model.CategoryId.HasValue ? Model.CategoryId.Value.ToString() : "null";
+    bool hasAttributes   = Model.AvailableAttributes.Any();
 }
 
 <div class="d-flex align-items-center mb-4 gap-3">
@@ -15,18 +16,19 @@
     <h4 class="mb-0 fw-bold">Sửa sản phẩm</h4>
 </div>
 
-<form asp-area="Admin" asp-controller="Product" asp-action="Edit" asp-route-id="@Model.Id" method="post">
+<form asp-area="Admin" asp-controller="Product" asp-action="Edit"
+      asp-route-id="@Model.Id" method="post">
     @Html.AntiForgeryToken()
     <input type="hidden" asp-for="Id" />
 
     <div class="row g-4">
 
         <!-- ═══════════════════════════════════════════════════════════════
-             LEFT COLUMN — Main product info + Attributes
+             LEFT COLUMN
         ════════════════════════════════════════════════════════════════ -->
         <div class="col-lg-8">
 
-            <!-- Basic info ──────────────────────────────────────────────── -->
+            <!-- Basic info -->
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-header bg-white border-bottom py-3">
                     <h6 class="mb-0 fw-bold">
@@ -50,12 +52,11 @@
                     <div class="mb-3">
                         <label asp-for="Description" class="form-label fw-semibold"></label>
                         <textarea asp-for="Description" class="form-control" rows="5"></textarea>
-                        <span asp-validation-for="Description" class="text-danger small"></span>
                     </div>
                 </div>
             </div>
 
-            <!-- Price & Stock ───────────────────────────────────────────── -->
+            <!-- Price & Stock -->
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-header bg-white border-bottom py-3">
                     <h6 class="mb-0 fw-bold">
@@ -90,7 +91,7 @@
                 </div>
             </div>
 
-            <!-- Thumbnail ──────────────────────────────────────────────── -->
+            <!-- Thumbnail -->
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-header bg-white border-bottom py-3">
                     <h6 class="mb-0 fw-bold">
@@ -98,13 +99,10 @@
                     </h6>
                 </div>
                 <div class="card-body">
-                    <div class="mb-3">
-                        <label asp-for="ThumbnailUrl" class="form-label fw-semibold"></label>
-                        <input asp-for="ThumbnailUrl" class="form-control"
-                               placeholder="https://... hoặc /images/product.jpg"
-                               oninput="previewImage(this.value)" />
-                        <span asp-validation-for="ThumbnailUrl" class="text-danger small"></span>
-                    </div>
+                    <label asp-for="ThumbnailUrl" class="form-label fw-semibold"></label>
+                    <input asp-for="ThumbnailUrl" class="form-control"
+                           placeholder="https://... hoặc /images/product.jpg"
+                           oninput="previewImage(this.value)" />
                     @if (!string.IsNullOrEmpty(Model.ThumbnailUrl))
                     {
                         <div id="imgPreview" class="mt-2">
@@ -122,45 +120,38 @@
                 </div>
             </div>
 
-            <!-- Attribute card ──────────────────────────────────────────── -->
-            @{
-                bool hasAttributes = Model.AvailableAttributes.Any();
-            }
+            <!-- Attributes card (server-side render on first load; JS replaces on category change) -->
             <div id="attributeCard" class="card border-0 shadow-sm mb-4"
                  style="@(hasAttributes ? "" : "display:none;")">
                 <div class="card-header bg-white border-bottom py-3">
                     <h6 class="mb-0 fw-bold">
-                        <i class="fa fa-sliders me-2 text-secondary"></i> Thuộc tính sản phẩm
+                        <i class="fa fa-check-square-o me-2 text-secondary"></i> Thuộc tính sản phẩm
                     </h6>
                 </div>
                 <div class="card-body">
                     <div id="attributeSection">
-
                         @* Server-side render (Edit mode: category already known) *@
-                        @if (hasAttributes)
+                        @foreach (var attr in Model.AvailableAttributes)
                         {
-                            foreach (var attr in Model.AvailableAttributes)
-                            {
-                                // Find which option in this group is currently selected
-                                var selectedOptId = Model.SelectedAttributeValueIds
-                                    .FirstOrDefault(id => attr.Options.Any(o => o.Id == id));
-
-                                <div class="mb-3 attr-group" data-attribute-id="@attr.AttributeId">
-                                    <label class="form-label fw-semibold">@attr.DisplayName</label>
-                                    <select name="SelectedAttributeValueIds" class="form-select">
-                                        <option value="">-- Chọn @attr.DisplayName --</option>
-                                        @foreach (var opt in attr.Options)
-                                        {
-                                            <option value="@opt.Id"
-                                                    selected="@(opt.Id == selectedOptId ? "selected" : null)">
+                            <div class="mb-3">
+                                <p class="fw-semibold mb-1">@attr.DisplayName</p>
+                                <div class="d-flex flex-wrap gap-2">
+                                    @foreach (var opt in attr.Options)
+                                    {
+                                        var isChecked = Model.SelectedAttributeValueIds.Contains(opt.Id);
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="checkbox"
+                                                   name="SelectedAttributeValueIds" value="@opt.Id"
+                                                   id="av_@opt.Id"
+                                                   checked="@(isChecked ? "checked" : null)" />
+                                            <label class="form-check-label" for="av_@opt.Id">
                                                 @opt.DisplayName
-                                            </option>
-                                        }
-                                    </select>
+                                            </label>
+                                        </div>
+                                    }
                                 </div>
-                            }
+                            </div>
                         }
-
                     </div>
                 </div>
             </div>
@@ -168,11 +159,11 @@
         </div>
 
         <!-- ═══════════════════════════════════════════════════════════════
-             RIGHT COLUMN — Status + Category
+             RIGHT COLUMN — Status + Category drill-down
         ════════════════════════════════════════════════════════════════ -->
         <div class="col-lg-4">
 
-            <!-- Status ──────────────────────────────────────────────────── -->
+            <!-- Status -->
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-header bg-white border-bottom py-3">
                     <h6 class="mb-0 fw-bold">
@@ -182,7 +173,7 @@
                 <div class="card-body">
                     <div class="form-check form-switch mb-3">
                         <input asp-for="IsActive" class="form-check-input" type="checkbox" role="switch" />
-                        <label asp-for="IsActive" class="form-check-label">Đang bán (hiển thị trên shop)</label>
+                        <label asp-for="IsActive" class="form-check-label">Đang bán</label>
                     </div>
                     <div class="form-check form-switch">
                         <input asp-for="IsFeatured" class="form-check-input" type="checkbox" role="switch" />
@@ -191,7 +182,7 @@
                 </div>
             </div>
 
-            <!-- Category (single dropdown) ─────────────────────────────── -->
+            <!-- Category drill-down -->
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-header bg-white border-bottom py-3">
                     <h6 class="mb-0 fw-bold">
@@ -199,19 +190,18 @@
                     </h6>
                 </div>
                 <div class="card-body">
-                    <label asp-for="CategoryId" class="form-label fw-semibold visually-hidden"></label>
-                    <select asp-for="CategoryId" class="form-select" id="categoryDropdown"
-                            onchange="onCategoryChange(this.value)">
-                        <option value="">-- Chọn danh mục --</option>
-                        @foreach (var cat in Model.AllCategories)
-                        {
-                            <option value="@cat.Id"
-                                    selected="@(Model.CategoryId == cat.Id ? "selected" : null)">
-                                @cat.Name
-                            </option>
-                        }
-                    </select>
-                    <span asp-validation-for="CategoryId" class="text-danger small"></span>
+                    <input type="hidden" asp-for="CategoryId" id="CategoryId" />
+                    <span asp-validation-for="CategoryId" class="text-danger small d-block mb-2"></span>
+
+                    <div id="categoryChainContainer"></div>
+
+                    <div id="leafDisplay" class="mt-2" style="display:none;">
+                        <small class="text-success fw-semibold">
+                            <i class="fa fa-check-circle me-1"></i>
+                            <span id="leafBreadcrumb"></span>
+                        </small>
+                    </div>
+
                     <p class="text-muted small mt-2 mb-0">
                         <i class="fa fa-info-circle me-1"></i>
                         Đổi danh mục sẽ cập nhật lại danh sách thuộc tính.
@@ -219,15 +209,13 @@
                 </div>
             </div>
 
-            <!-- Save buttons ─────────────────────────────────────────────── -->
+            <!-- Save -->
             <div class="d-grid gap-2">
                 <button type="submit" class="btn btn-primary">
                     <i class="fa fa-save me-2"></i> Lưu thay đổi
                 </button>
                 <a asp-area="Admin" asp-controller="Product" asp-action="Index"
-                   class="btn btn-outline-secondary">
-                    Huỷ
-                </a>
+                   class="btn btn-outline-secondary">Huỷ</a>
             </div>
 
         </div>
@@ -237,74 +225,201 @@
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
     <script>
-        // Currently selected attribute value IDs (from server)
-        const _existingSelectedIds = @Html.Raw(selectedIdsJson);
+    // ── Constants ─────────────────────────────────────────────────────────────
+    const CAT_API          = '/Admin/api/categories';
+    const _existingCatId   = @Html.Raw(existingCatId);          // int | null
+    const _existingSelIds  = @Html.Raw(selectedIdsJson);        // int[]
+    let   _maxDepth        = 0;
 
-        // ── Image preview ─────────────────────────────────────────────────────
-        function previewImage(url) {
-            const preview = document.getElementById('imgPreview');
-            const img     = document.getElementById('previewImg');
-            if (url) { img.src = url; preview.style.display = 'block'; }
-            else     { preview.style.display = 'none'; }
+    // ── Image preview ─────────────────────────────────────────────────────────
+    function previewImage(url) {
+        const p = document.getElementById('imgPreview');
+        const i = document.getElementById('previewImg');
+        if (url) { i.src = url; p.style.display = 'block'; }
+        else     { p.style.display = 'none'; }
+    }
+
+    // ═════════════════════════════════════════════════════════════════════════
+    // Category drill-down (same logic as Create)
+    // ═════════════════════════════════════════════════════════════════════════
+
+    function removeDepthsFrom(fromDepth) {
+        for (let d = fromDepth; d <= _maxDepth + 1; d++) {
+            const el = document.getElementById('cat-level-' + d);
+            if (el) el.remove();
+        }
+        _maxDepth = Math.max(fromDepth - 1, 0);
+    }
+
+    async function renderLevel(parentId, depth, preselectId) {
+        removeDepthsFrom(depth);
+
+        const url = parentId != null
+            ? `${CAT_API}/children?parentId=${parentId}`
+            : `${CAT_API}/children`;
+
+        const resp       = await fetch(url);
+        const categories = await resp.json();
+        if (!categories.length) return;
+
+        const container = document.getElementById('categoryChainContainer');
+        const wrapper   = document.createElement('div');
+        wrapper.id        = 'cat-level-' + depth;
+        wrapper.className = 'mb-2';
+
+        const label = document.createElement('small');
+        label.className   = 'form-text text-muted mb-1 d-block';
+        label.textContent = depth === 0 ? 'Danh mục gốc' : 'Danh mục con';
+        wrapper.appendChild(label);
+
+        const sel = document.createElement('select');
+        sel.className        = 'form-select form-select-sm';
+        sel.dataset.depth    = depth;
+        sel.dataset.parentId = parentId ?? '';
+        sel.addEventListener('change', function () { onLevelChange(this); });
+
+        const ph       = document.createElement('option');
+        ph.value       = '';
+        ph.textContent = '-- Chọn --';
+        sel.appendChild(ph);
+
+        categories.forEach(c => {
+            const opt               = document.createElement('option');
+            opt.value               = c.id;
+            opt.textContent         = c.name;
+            opt.dataset.hasChildren = c.hasChildren ? '1' : '0';
+            if (preselectId && c.id === preselectId) opt.selected = true;
+            sel.appendChild(opt);
+        });
+
+        wrapper.appendChild(sel);
+        container.appendChild(wrapper);
+        _maxDepth = Math.max(_maxDepth, depth);
+    }
+
+    async function onLevelChange(sel) {
+        const depth      = parseInt(sel.dataset.depth);
+        const categoryId = sel.value;
+
+        removeDepthsFrom(depth + 1);
+        clearLeaf();
+
+        if (!categoryId) return;
+
+        const opt         = sel.querySelector(`option[value="${categoryId}"]`);
+        const hasChildren = opt && opt.dataset.hasChildren === '1';
+
+        if (hasChildren) {
+            await renderLevel(parseInt(categoryId), depth + 1, null);
+        } else {
+            // Leaf selected — reload attributes via JS (don't use _existingSelIds when category changed)
+            const newCat = parseInt(categoryId);
+            const text   = await fetchBreadcrumbText(newCat);
+            setLeaf(newCat, text, []);  // empty selection when category changes
+        }
+    }
+
+    function setLeaf(categoryId, breadcrumbText, selectedIds) {
+        document.getElementById('CategoryId').value = categoryId;
+        document.getElementById('leafBreadcrumb').textContent = breadcrumbText;
+        document.getElementById('leafDisplay').style.display = 'block';
+        loadAttributes(categoryId, selectedIds);
+    }
+
+    function clearLeaf() {
+        document.getElementById('CategoryId').value = '';
+        document.getElementById('leafDisplay').style.display = 'none';
+        // Don't hide attribute card yet — keep server-rendered checkboxes visible
+        // until user actually picks a different category
+    }
+
+    async function fetchBreadcrumbText(categoryId) {
+        const resp = await fetch(`${CAT_API}/breadcrumb?categoryId=${categoryId}`);
+        const bc   = await resp.json();
+        return bc.map(b => b.name).join(' › ');
+    }
+
+    // Expand chain from root to leaf for the existing product category
+    async function preloadCategoryChain(leafCategoryId) {
+        const resp      = await fetch(`${CAT_API}/breadcrumb?categoryId=${leafCategoryId}`);
+        const breadcrumb = await resp.json();
+        if (!breadcrumb.length) return;
+
+        // Render root level pre-selecting first breadcrumb item
+        await renderLevel(null, 0, breadcrumb[0].id);
+
+        for (let i = 0; i < breadcrumb.length - 1; i++) {
+            const item     = breadcrumb[i];
+            const nextItem = breadcrumb[i + 1];
+            await renderLevel(item.id, i + 1, nextItem.id);
         }
 
-        // ── Category change → AJAX reload attributes ──────────────────────────
-        async function onCategoryChange(categoryId) {
-            const card    = document.getElementById('attributeCard');
-            const section = document.getElementById('attributeSection');
+        const leaf = breadcrumb[breadcrumb.length - 1];
+        document.getElementById('CategoryId').value = leaf.id;
+        document.getElementById('leafBreadcrumb').textContent =
+            breadcrumb.map(b => b.name).join(' › ');
+        document.getElementById('leafDisplay').style.display = 'block';
+        // Note: attributes are already server-rendered; no need for loadAttributes here.
+    }
 
-            if (!categoryId) {
-                card.style.display = 'none';
-                section.innerHTML  = '';
-                return;
-            }
+    // ═════════════════════════════════════════════════════════════════════════
+    // Attribute loading — called only when user changes category via JS
+    // ═════════════════════════════════════════════════════════════════════════
 
-            try {
-                const resp  = await fetch(`/Admin/Product/GetAttributesByCategory?categoryId=${categoryId}`);
-                const attrs = await resp.json();
-                renderAttributes(section, attrs, _existingSelectedIds);
-                card.style.display = attrs.length > 0 ? 'block' : 'none';
-            } catch (e) {
-                console.error('Failed to load attributes', e);
-            }
+    async function loadAttributes(categoryId, selectedIds) {
+        const card    = document.getElementById('attributeCard');
+        const section = document.getElementById('attributeSection');
+        try {
+            const resp  = await fetch(`${CAT_API}/${categoryId}/attributes`);
+            const attrs = await resp.json();
+            renderAttributeCheckboxes(section, attrs, selectedIds);
+            card.style.display = attrs.length > 0 ? 'block' : 'none';
+        } catch (e) {
+            console.error('Failed to load attributes', e);
         }
+    }
 
-        // ── Render attribute dropdowns ────────────────────────────────────────
-        function renderAttributes(container, attrs, selectedIds) {
-            if (!attrs || attrs.length === 0) {
-                container.innerHTML = '<p class="text-muted small mb-0">Danh mục này không có thuộc tính.</p>';
-                return;
-            }
-
-            let html = '';
-            attrs.forEach(attr => {
-                // Find which option in this group is in selectedIds
-                const selectedId = selectedIds.find(id =>
-                    attr.options.some(o => o.id === id)
-                ) || 0;
-
-                let optHtml = `<option value="">-- Chọn ${escHtml(attr.displayName)} --</option>`;
-                attr.options.forEach(opt => {
-                    const sel = opt.id === selectedId ? ' selected' : '';
-                    optHtml += `<option value="${opt.id}"${sel}>${escHtml(opt.displayName)}</option>`;
-                });
-
-                html += `
-                <div class="mb-3 attr-group" data-attribute-id="${attr.attributeId}">
-                    <label class="form-label fw-semibold">${escHtml(attr.displayName)}</label>
-                    <select name="SelectedAttributeValueIds" class="form-select">
-                        ${optHtml}
-                    </select>
+    function renderAttributeCheckboxes(container, attrs, selectedIds) {
+        if (!attrs || !attrs.length) {
+            container.innerHTML =
+                '<p class="text-muted small mb-0">Danh mục này chưa có thuộc tính nào được cấu hình.</p>';
+            return;
+        }
+        let html = '';
+        attrs.forEach(attr => {
+            html += `<div class="mb-3">
+                <p class="fw-semibold mb-1">${escHtml(attr.displayName)}</p>
+                <div class="d-flex flex-wrap gap-2">`;
+            attr.values.forEach(v => {
+                const chk = (selectedIds.includes(v.id) || v.selected) ? ' checked' : '';
+                html += `<div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox"
+                           name="SelectedAttributeValueIds" value="${v.id}"
+                           id="av_${v.id}"${chk} />
+                    <label class="form-check-label" for="av_${v.id}">
+                        ${escHtml(v.displayName)}
+                    </label>
                 </div>`;
             });
+            html += `</div></div>`;
+        });
+        container.innerHTML = html;
+    }
 
-            container.innerHTML = html;
-        }
+    function escHtml(str) {
+        const d = document.createElement('div');
+        d.appendChild(document.createTextNode(str));
+        return d.innerHTML;
+    }
 
-        function escHtml(str) {
-            const d = document.createElement('div');
-            d.appendChild(document.createTextNode(str));
-            return d.innerHTML;
+    // ── Init ──────────────────────────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', async function () {
+        if (_existingCatId) {
+            // Expand the chain to show the product's current category
+            await preloadCategoryChain(_existingCatId);
+        } else {
+            await renderLevel(null, 0, null);
         }
+    });
     </script>
 }

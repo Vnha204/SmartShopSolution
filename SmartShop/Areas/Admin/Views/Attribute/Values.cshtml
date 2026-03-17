@@ -1,0 +1,168 @@
+@model SmartShop.Models.Attribute
+@{
+    ViewData["Title"] = $"Giá trị — {Model.DisplayName}";
+    Layout = "_AdminLayout";
+    // Track which value is being edited (from TempData or query string)
+    var editingId = Context.Request.Query.ContainsKey("editId")
+        ? int.Parse(Context.Request.Query["editId"]!)
+        : 0;
+}
+
+<div class="d-flex align-items-center mb-4 gap-3">
+    <a asp-area="Admin" asp-controller="Attribute" asp-action="Index"
+       class="btn btn-sm btn-outline-secondary">
+        <i class="fa fa-arrow-left me-1"></i> Quay lại
+    </a>
+    <div>
+        <h4 class="mb-0 fw-bold">Giá trị: @Model.DisplayName</h4>
+        <small class="text-muted">Thuộc tính: <code>@Model.Name</code></small>
+    </div>
+</div>
+
+<div class="row g-4">
+
+    <!-- ── LEFT: existing values table ───────────────────────────────────── -->
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+                <h6 class="mb-0 fw-bold">
+                    <i class="fa fa-list me-2 text-info"></i> Danh sách giá trị
+                    <span class="badge bg-primary ms-2">@Model.Values.Count</span>
+                </h6>
+            </div>
+            <div class="card-body p-0">
+                @if (!Model.Values.Any())
+                {
+                    <div class="text-center py-4 text-muted small">
+                        Chưa có giá trị nào. Thêm giá trị đầu tiên ở bên phải.
+                    </div>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="table admin-table mb-0">
+                            <thead>
+                                <tr>
+                                    <th style="width:60px;">ID</th>
+                                    <th>Value (nội bộ)</th>
+                                    <th>Tên hiển thị</th>
+                                    <th style="width:80px;">Thứ tự</th>
+                                    <th style="width:130px;">Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var val in Model.Values.OrderBy(v => v.SortOrder).ThenBy(v => v.DisplayName))
+                                {
+                                    var isEditing = editingId == val.Id;
+                                    <tr class="@(isEditing ? "table-warning" : "")">
+                                        @if (isEditing)
+                                        {
+                                            <!-- Inline edit row -->
+                                            <td class="text-muted small">@val.Id</td>
+                                            <td colspan="3">
+                                                <form asp-area="Admin" asp-controller="Attribute"
+                                                      asp-action="EditValue" method="post"
+                                                      class="d-flex gap-2 align-items-center flex-wrap">
+                                                    @Html.AntiForgeryToken()
+                                                    <input type="hidden" name="id" value="@val.Id" />
+                                                    <input type="text" name="value" value="@val.Value"
+                                                           class="form-control form-control-sm" style="width:130px;"
+                                                           placeholder="value" required />
+                                                    <input type="text" name="displayName" value="@val.DisplayName"
+                                                           class="form-control form-control-sm" style="width:150px;"
+                                                           placeholder="Tên hiển thị" required />
+                                                    <input type="number" name="sortOrder" value="@val.SortOrder"
+                                                           class="form-control form-control-sm" style="width:80px;"
+                                                           min="0" />
+                                                    <button type="submit" class="btn btn-sm btn-success">
+                                                        <i class="fa fa-check"></i>
+                                                    </button>
+                                                    <a href="@Url.Action("Values", "Attribute", new { id = Model.Id, area = "Admin" })"
+                                                       class="btn btn-sm btn-secondary">
+                                                        <i class="fa fa-times"></i>
+                                                    </a>
+                                                </form>
+                                            </td>
+                                            <td></td>
+                                        }
+                                        else
+                                        {
+                                            <td class="text-muted small">@val.Id</td>
+                                            <td><code>@val.Value</code></td>
+                                            <td>@val.DisplayName</td>
+                                            <td class="text-muted small">@val.SortOrder</td>
+                                            <td>
+                                                <div class="d-flex gap-1">
+                                                    <a href="@Url.Action("Values", "Attribute", new { id = Model.Id, area = "Admin", editId = val.Id })"
+                                                       class="btn btn-sm btn-outline-primary" title="Sửa">
+                                                        <i class="fa fa-pencil"></i>
+                                                    </a>
+                                                    <form asp-area="Admin" asp-controller="Attribute"
+                                                          asp-action="DeleteValue" method="post"
+                                                          onsubmit="return confirm('Xoá giá trị @val.DisplayName?')">
+                                                        @Html.AntiForgeryToken()
+                                                        <input type="hidden" name="id" value="@val.Id" />
+                                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Xoá">
+                                                            <i class="fa fa-trash"></i>
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </td>
+                                        }
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- ── RIGHT: add new value form ─────────────────────────────────────── -->
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-bottom py-3">
+                <h6 class="mb-0 fw-bold">
+                    <i class="fa fa-plus me-2 text-success"></i> Thêm giá trị mới
+                </h6>
+            </div>
+            <div class="card-body">
+                <form asp-area="Admin" asp-controller="Attribute" asp-action="AddValue" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="attributeId" value="@Model.Id" />
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">
+                            Value (nội bộ) <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" name="value" class="form-control"
+                               placeholder="vd: male, titanium" required />
+                        <div class="form-text">Chữ thường, không dấu, không khoảng trắng.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">
+                            Tên hiển thị <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" name="displayName" class="form-control"
+                               placeholder="vd: Nam, Titanium" required />
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">Thứ tự</label>
+                        <input type="number" name="sortOrder" class="form-control"
+                               value="0" min="0" />
+                    </div>
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-success">
+                            <i class="fa fa-plus me-2"></i> Thêm giá trị
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+</div>

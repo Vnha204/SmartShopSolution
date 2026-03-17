@@ -368,6 +368,18 @@
                         </a>
                     </li>
                     <li class="nav-item">
+                        <a asp-area="Admin" asp-controller="Attribute" asp-action="Index"
+                           class="@(currentController == "Attribute" ? "active" : "")">
+                            <i class="fa fa-list-alt"></i> Thuộc tính
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a asp-area="Admin" asp-controller="CategoryAttribute" asp-action="Index"
+                           class="@(currentController == "CategoryAttribute" ? "active" : "")">
+                            <i class="fa fa-link"></i> Ánh xạ thuộc tính
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a asp-area="Admin" asp-controller="Order" asp-action="Index"
                            class="@(currentController == "Order" ? "active" : "")">
                             <i class="fa fa-shopping-cart"></i> Đơn hàng

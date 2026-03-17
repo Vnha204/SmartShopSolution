@@ -1,0 +1,72 @@
+@model List<SmartShop.Models.Category>
+@{
+    ViewData["Title"] = "Ánh xạ thuộc tính";
+    Layout = "_AdminLayout";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="mb-1 fw-bold">Ánh xạ Danh mục → Thuộc tính</h4>
+        <p class="text-muted small mb-0">
+            Chọn danh mục để cấu hình thuộc tính nào hiển thị khi tạo sản phẩm cho danh mục đó.
+        </p>
+    </div>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="card border-0 shadow-sm">
+        <div class="card-body text-center py-5 text-muted">
+            Chưa có danh mục nào đang hoạt động.
+        </div>
+    </div>
+}
+else
+{
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table admin-table mb-0">
+                    <thead>
+                        <tr>
+                            <th style="width:60px;">ID</th>
+                            <th>Danh mục</th>
+                            <th>Danh mục cha</th>
+                            <th>Thuộc tính đã ánh xạ</th>
+                            <th style="width:120px;">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var cat in Model)
+                        {
+                            <tr>
+                                <td class="text-muted small">@cat.Id</td>
+                                <td class="fw-semibold">@cat.Name</td>
+                                <td class="text-muted small">@(cat.Parent?.Name ?? "—")</td>
+                                <td>
+                                    @if (cat.CategoryAttributes.Any())
+                                    {
+                                        <span class="badge bg-success badge-status">
+                                            @cat.CategoryAttributes.Count thuộc tính
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted small">Chưa cấu hình</span>
+                                    }
+                                </td>
+                                <td>
+                                    <a asp-area="Admin" asp-controller="CategoryAttribute"
+                                       asp-action="Manage" asp-route-id="@cat.Id"
+                                       class="btn btn-sm btn-outline-primary">
+                                        <i class="fa fa-cog me-1"></i> Cấu hình
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+}

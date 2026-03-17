@@ -13,7 +13,6 @@ namespace SmartShop.Areas.Admin.Controllers
     public class ProductController : Controller
     {
         private readonly AppDbContext _context;
-
         public ProductController(AppDbContext context) => _context = context;
 
         // =====================================================================
@@ -27,38 +26,30 @@ namespace SmartShop.Areas.Admin.Controllers
                 .Include(p => p.ProductAttributeValues).ThenInclude(pav => pav.AttributeValue)
                 .AsQueryable();
 
-            // Name search
             if (!string.IsNullOrWhiteSpace(filter.SearchTerm))
                 query = query.Where(p => p.Name.Contains(filter.SearchTerm));
 
-            // Status filter
             if (filter.StatusFilter == "active")
                 query = query.Where(p => p.IsActive);
             else if (filter.StatusFilter == "inactive")
                 query = query.Where(p => !p.IsActive);
 
-            // Category filter
             if (filter.CategoryId.HasValue)
                 query = query.Where(p => p.ProductCategories.Any(pc => pc.CategoryId == filter.CategoryId.Value));
 
-            // Price range
             if (filter.MinPrice.HasValue)
                 query = query.Where(p => p.BasePrice >= filter.MinPrice.Value);
             if (filter.MaxPrice.HasValue)
                 query = query.Where(p => p.BasePrice <= filter.MaxPrice.Value);
 
-            // Attribute value filter — every selected value must appear on the product
             var activeAttrIds = filter.AttributeValueIds.Where(id => id > 0).ToList();
             foreach (var avId in activeAttrIds)
                 query = query.Where(p => p.ProductAttributeValues.Any(pav => pav.AttributeValueId == avId));
 
             filter.Products = await query.OrderByDescending(p => p.CreatedAt).ToListAsync();
 
-            // Populate filter-UI data
             filter.AllCategories = await _context.Categories
-                .Where(c => c.IsActive)
-                .OrderBy(c => c.Name)
-                .ToListAsync();
+                .Where(c => c.IsActive).OrderBy(c => c.Name).ToListAsync();
 
             filter.FilterAttributeGroups = await LoadFilterAttributeGroups();
 
@@ -67,30 +58,20 @@ namespace SmartShop.Areas.Admin.Controllers
 
         // =====================================================================
         // AJAX — GET /Admin/Product/GetAttributesByCategory?categoryId=X
-        // Returns JSON array of attribute groups for JS to render dynamically.
+        // Legacy endpoint kept for backward compat; now includes ancestor attrs.
         // =====================================================================
         [HttpGet]
         public async Task<IActionResult> GetAttributesByCategory(int categoryId)
         {
-            var catAttributes = await _context.CategoryAttributes
-                .Where(ca => ca.CategoryId == categoryId)
-                .Include(ca => ca.Attribute)
-                    .ThenInclude(a => a.Values)
-                .OrderBy(ca => ca.SortOrder)
-                .ToListAsync();
-
-            var result = catAttributes.Select(ca => new
+            var groups = await LoadAttributeGroups(categoryId);
+            var result = groups.Select(g => new
             {
-                attributeId = ca.AttributeId,
-                name        = ca.Attribute.Name,
-                displayName = ca.Attribute.DisplayName,
-                sortOrder   = ca.SortOrder,
-                options     = ca.Attribute.Values
-                    .OrderBy(v => v.SortOrder)
-                    .Select(v => new { id = v.Id, displayName = v.DisplayName })
-                    .ToList()
+                attributeId = g.AttributeId,
+                name        = g.Name,
+                displayName = g.DisplayName,
+                sortOrder   = g.SortOrder,
+                options     = g.Options.Select(o => new { id = o.Id, displayName = o.DisplayName })
             });
-
             return Json(result);
         }
 
@@ -113,16 +94,10 @@ namespace SmartShop.Areas.Admin.Controllers
         // =====================================================================
         // GET: Admin/Product/Create
         // =====================================================================
-        public async Task<IActionResult> Create()
+        public IActionResult Create()
         {
-            var vm = new ProductFormVM
-            {
-                AllCategories = await _context.Categories
-                    .Where(c => c.IsActive)
-                    .OrderBy(c => c.Name)
-                    .ToListAsync()
-            };
-            return View(vm);
+            // No AllCategories needed — drill-down uses /Admin/api/categories/*
+            return View(new ProductFormVM());
         }
 
         // =====================================================================
@@ -135,10 +110,22 @@ namespace SmartShop.Areas.Admin.Controllers
             if (await _context.Products.AnyAsync(p => p.Slug == vm.Slug))
                 ModelState.AddModelError("Slug", "Slug này đã tồn tại, vui lòng chọn slug khác.");
 
+            // Category must be a leaf (no active children)
+            if (vm.CategoryId.HasValue)
+            {
+                var hasChildren = await _context.Categories
+                    .AnyAsync(c => c.ParentId == vm.CategoryId.Value && c.IsActive);
+                if (hasChildren)
+                    ModelState.AddModelError("CategoryId",
+                        "Vui lòng chọn danh mục cấp cuối (danh mục không có danh mục con).");
+            }
+
+            // Validate attribute values belong to applicable attributes
+            if (vm.CategoryId.HasValue && vm.SelectedAttributeValueIds.Any(id => id > 0))
+                await ValidateAttributeValues(vm);
+
             if (!ModelState.IsValid)
             {
-                vm.AllCategories = await _context.Categories
-                    .Where(c => c.IsActive).OrderBy(c => c.Name).ToListAsync();
                 if (vm.CategoryId.HasValue)
                     vm.AvailableAttributes = await LoadAttributeGroups(vm.CategoryId.Value);
                 return View(vm);
@@ -162,7 +149,6 @@ namespace SmartShop.Areas.Admin.Controllers
             _context.Products.Add(product);
             await _context.SaveChangesAsync();
 
-            // Assign the selected category
             if (vm.CategoryId.HasValue)
             {
                 _context.ProductCategories.Add(new ProductCategory
@@ -172,7 +158,6 @@ namespace SmartShop.Areas.Admin.Controllers
                 });
             }
 
-            // Assign attribute values (skip empty / zero from unselected dropdowns)
             foreach (var avId in vm.SelectedAttributeValueIds.Where(id => id > 0).Distinct())
             {
                 _context.ProductAttributeValues.Add(new ProductAttributeValue
@@ -183,7 +168,6 @@ namespace SmartShop.Areas.Admin.Controllers
             }
 
             await _context.SaveChangesAsync();
-
             TempData["Success"] = $"Sản phẩm \"{product.Name}\" đã được thêm thành công!";
             return RedirectToAction(nameof(Index));
         }
@@ -200,7 +184,6 @@ namespace SmartShop.Areas.Admin.Controllers
 
             if (product == null) return NotFound();
 
-            // Primary category drives attribute loading (use first assigned category)
             var primaryCategoryId = product.ProductCategories
                 .Select(pc => pc.CategoryId)
                 .FirstOrDefault();
@@ -219,12 +202,10 @@ namespace SmartShop.Areas.Admin.Controllers
                 IsFeatured   = product.IsFeatured,
                 CategoryId   = primaryCategoryId > 0 ? primaryCategoryId : null,
                 SelectedAttributeValueIds = product.ProductAttributeValues
-                    .Select(pav => pav.AttributeValueId).ToList(),
-                AllCategories = await _context.Categories
-                    .Where(c => c.IsActive).OrderBy(c => c.Name).ToListAsync()
+                    .Select(pav => pav.AttributeValueId).ToList()
             };
 
-            // Pre-load attributes so they render server-side (no AJAX required on first load)
+            // Pre-load attribute groups (with ancestor union) for server-side render
             if (vm.CategoryId.HasValue)
                 vm.AvailableAttributes = await LoadAttributeGroups(vm.CategoryId.Value);
 
@@ -243,10 +224,22 @@ namespace SmartShop.Areas.Admin.Controllers
             if (await _context.Products.AnyAsync(p => p.Slug == vm.Slug && p.Id != id))
                 ModelState.AddModelError("Slug", "Slug này đã tồn tại, vui lòng chọn slug khác.");
 
+            // Category must be a leaf
+            if (vm.CategoryId.HasValue)
+            {
+                var hasChildren = await _context.Categories
+                    .AnyAsync(c => c.ParentId == vm.CategoryId.Value && c.IsActive);
+                if (hasChildren)
+                    ModelState.AddModelError("CategoryId",
+                        "Vui lòng chọn danh mục cấp cuối (danh mục không có danh mục con).");
+            }
+
+            // Validate attribute values
+            if (vm.CategoryId.HasValue && vm.SelectedAttributeValueIds.Any(id2 => id2 > 0))
+                await ValidateAttributeValues(vm);
+
             if (!ModelState.IsValid)
             {
-                vm.AllCategories = await _context.Categories
-                    .Where(c => c.IsActive).OrderBy(c => c.Name).ToListAsync();
                 if (vm.CategoryId.HasValue)
                     vm.AvailableAttributes = await LoadAttributeGroups(vm.CategoryId.Value);
                 return View(vm);
@@ -259,7 +252,6 @@ namespace SmartShop.Areas.Admin.Controllers
 
             if (product == null) return NotFound();
 
-            // Update scalar fields
             product.Name         = vm.Name;
             product.Slug         = vm.Slug.Trim().ToLower();
             product.Description  = vm.Description;
@@ -271,7 +263,7 @@ namespace SmartShop.Areas.Admin.Controllers
             product.IsFeatured   = vm.IsFeatured;
             product.UpdatedAt    = DateTime.UtcNow;
 
-            // ── Sync category (replace all with single selected) ──────────────
+            // Sync category
             _context.ProductCategories.RemoveRange(product.ProductCategories);
             if (vm.CategoryId.HasValue)
             {
@@ -282,7 +274,7 @@ namespace SmartShop.Areas.Admin.Controllers
                 });
             }
 
-            // ── Sync attribute values (remove-all then re-insert) ─────────────
+            // Sync attribute values (remove-all then re-insert avoids unique-index conflicts)
             _context.ProductAttributeValues.RemoveRange(product.ProductAttributeValues);
             foreach (var avId in vm.SelectedAttributeValueIds.Where(x => x > 0).Distinct())
             {
@@ -294,7 +286,6 @@ namespace SmartShop.Areas.Admin.Controllers
             }
 
             await _context.SaveChangesAsync();
-
             TempData["Success"] = $"Sản phẩm \"{product.Name}\" đã được cập nhật!";
             return RedirectToAction(nameof(Index));
         }
@@ -328,7 +319,6 @@ namespace SmartShop.Areas.Admin.Controllers
 
             _context.Products.Remove(product);
             await _context.SaveChangesAsync();
-
             TempData["Success"] = $"Sản phẩm \"{product.Name}\" đã được xoá!";
             return RedirectToAction(nameof(Index));
         }
@@ -338,18 +328,34 @@ namespace SmartShop.Areas.Admin.Controllers
         // =====================================================================
 
         /// <summary>
-        /// Loads attribute groups (with options) for a specific category, ordered by SortOrder.
+        /// Loads attribute groups for <paramref name="categoryId"/> PLUS all its
+        /// ancestor categories (union), so attributes defined on parent categories
+        /// are inherited by child products.  De-duplication: if the same Attribute
+        /// appears on both leaf and ancestor, the leaf-level mapping wins.
         /// </summary>
         private async Task<List<AttributeGroupVM>> LoadAttributeGroups(int categoryId)
         {
-            var catAttributes = await _context.CategoryAttributes
-                .Where(ca => ca.CategoryId == categoryId)
-                .Include(ca => ca.Attribute)
-                    .ThenInclude(a => a.Values)
-                .OrderBy(ca => ca.SortOrder)
+            var allCats = await _context.Categories
+                .Where(c => c.IsActive)
                 .ToListAsync();
 
-            return catAttributes.Select(ca => new AttributeGroupVM
+            var ancestorIds = GetAncestorIds(allCats, categoryId);
+
+            var catAttrs = await _context.CategoryAttributes
+                .Where(ca => ancestorIds.Contains(ca.CategoryId))
+                .Include(ca => ca.Attribute)
+                    .ThenInclude(a => a.Values)
+                .ToListAsync();
+
+            // De-duplicate: closest to leaf takes priority
+            var unique = catAttrs
+                .GroupBy(ca => ca.AttributeId)
+                .Select(g => g.OrderBy(ca => ancestorIds.IndexOf(ca.CategoryId)).First())
+                .OrderBy(ca => ca.SortOrder)
+                .ThenBy(ca => ca.Attribute.DisplayName)
+                .ToList();
+
+            return unique.Select(ca => new AttributeGroupVM
             {
                 AttributeId = ca.AttributeId,
                 Name        = ca.Attribute.Name,
@@ -357,14 +363,15 @@ namespace SmartShop.Areas.Admin.Controllers
                 SortOrder   = ca.SortOrder,
                 Options     = ca.Attribute.Values
                     .OrderBy(v => v.SortOrder)
+                    .ThenBy(v => v.DisplayName)
                     .Select(v => new AttributeValueOptionVM { Id = v.Id, DisplayName = v.DisplayName })
                     .ToList()
             }).ToList();
         }
 
         /// <summary>
-        /// Loads all attribute groups that have at least one CategoryAttribute mapping.
-        /// Used to populate the filter panel on the Index page.
+        /// All attribute groups that have at least one CategoryAttribute mapping —
+        /// used for the Index filter panel.
         /// </summary>
         private async Task<List<AttributeGroupVM>> LoadFilterAttributeGroups()
         {
@@ -386,6 +393,52 @@ namespace SmartShop.Areas.Admin.Controllers
                     .Select(v => new AttributeValueOptionVM { Id = v.Id, DisplayName = v.DisplayName })
                     .ToList()
             }).ToList();
+        }
+
+        /// <summary>
+        /// Returns [leaf_id, parent_id, …, root_id] for the given category.
+        /// </summary>
+        private static List<int> GetAncestorIds(List<Category> allCats, int categoryId)
+        {
+            var ids     = new List<int>();
+            var current = allCats.FirstOrDefault(c => c.Id == categoryId);
+            while (current != null)
+            {
+                ids.Add(current.Id);
+                current = current.ParentId.HasValue
+                    ? allCats.FirstOrDefault(c => c.Id == current.ParentId.Value)
+                    : null;
+            }
+            return ids;
+        }
+
+        /// <summary>
+        /// Validates that every submitted AttributeValueId belongs to an attribute
+        /// that is applicable to the product's chosen category (+ its ancestors).
+        /// Adds a ModelState error if any value is out of scope.
+        /// </summary>
+        private async Task ValidateAttributeValues(ProductFormVM vm)
+        {
+            var allCats     = await _context.Categories.Where(c => c.IsActive).ToListAsync();
+            var ancestorIds = GetAncestorIds(allCats, vm.CategoryId!.Value);
+
+            var applicableAttrIds = await _context.CategoryAttributes
+                .Where(ca => ancestorIds.Contains(ca.CategoryId))
+                .Select(ca => ca.AttributeId)
+                .Distinct()
+                .ToListAsync();
+
+            var validValueIds = (await _context.AttributeValues
+                .Where(v => applicableAttrIds.Contains(v.AttributeId))
+                .Select(v => v.Id)
+                .ToListAsync()).ToHashSet();
+
+            var submitted = vm.SelectedAttributeValueIds.Where(id => id > 0).ToList();
+            if (submitted.Any(id => !validValueIds.Contains(id)))
+            {
+                ModelState.AddModelError("SelectedAttributeValueIds",
+                    "Một số giá trị thuộc tính không thuộc danh mục đã chọn.");
+            }
         }
     }
 }

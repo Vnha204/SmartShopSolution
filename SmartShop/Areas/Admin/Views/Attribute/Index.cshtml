@@ -1,0 +1,86 @@
+@model List<SmartShop.Models.Attribute>
+@{
+    ViewData["Title"] = "Thuộc tính";
+    Layout = "_AdminLayout";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="mb-1 fw-bold">Thuộc tính (Attributes)</h4>
+        <p class="text-muted small mb-0">Quản lý các thuộc tính động cho sản phẩm (Giới tính, Chất liệu, …)</p>
+    </div>
+    <a asp-area="Admin" asp-controller="Attribute" asp-action="Create"
+       class="btn text-white px-4" style="background:#3498db;border:none;border-radius:8px;">
+        <i class="fa fa-plus me-2"></i> Thêm thuộc tính
+    </a>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="card border-0 shadow-sm">
+        <div class="card-body text-center py-5 text-muted">
+            <i class="fa fa-list-alt fa-2x d-block mb-2" style="opacity:.3;"></i>
+            Chưa có thuộc tính nào. Hãy thêm thuộc tính đầu tiên.
+        </div>
+    </div>
+}
+else
+{
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table admin-table mb-0">
+                    <thead>
+                        <tr>
+                            <th style="width:60px;">ID</th>
+                            <th>Tên (Name)</th>
+                            <th>Tên hiển thị</th>
+                            <th>Thứ tự</th>
+                            <th>Số giá trị</th>
+                            <th>Danh mục áp dụng</th>
+                            <th style="width:160px;">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var attr in Model)
+                        {
+                            <tr>
+                                <td class="text-muted small">@attr.Id</td>
+                                <td><code>@attr.Name</code></td>
+                                <td class="fw-semibold">@attr.DisplayName</td>
+                                <td class="text-muted small">@attr.SortOrder</td>
+                                <td>
+                                    <span class="badge bg-primary badge-status">@attr.Values.Count</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-light text-dark border badge-status">
+                                        @attr.CategoryAttributes.Count danh mục
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="d-flex gap-1">
+                                        <a asp-area="Admin" asp-controller="Attribute" asp-action="Values"
+                                           asp-route-id="@attr.Id"
+                                           class="btn btn-sm btn-outline-info" title="Quản lý giá trị">
+                                            <i class="fa fa-list"></i>
+                                        </a>
+                                        <a asp-area="Admin" asp-controller="Attribute" asp-action="Edit"
+                                           asp-route-id="@attr.Id"
+                                           class="btn btn-sm btn-outline-primary" title="Sửa">
+                                            <i class="fa fa-pencil"></i>
+                                        </a>
+                                        <a asp-area="Admin" asp-controller="Attribute" asp-action="Delete"
+                                           asp-route-id="@attr.Id"
+                                           class="btn btn-sm btn-outline-danger" title="Xoá">
+                                            <i class="fa fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+}
