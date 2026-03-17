@@ -12,7 +12,8 @@
     <h4 class="mb-0 fw-bold">Thêm sản phẩm mới</h4>
 </div>
 
-<form asp-area="Admin" asp-controller="Product" asp-action="Create" method="post">
+<form asp-area="Admin" asp-controller="Product" asp-action="Create"
+      method="post" enctype="multipart/form-data">
     @Html.AntiForgeryToken()
 
     <div class="row g-4">
@@ -96,10 +97,11 @@
                     </h6>
                 </div>
                 <div class="card-body">
-                    <label asp-for="ThumbnailUrl" class="form-label fw-semibold"></label>
-                    <input asp-for="ThumbnailUrl" class="form-control"
-                           placeholder="https://... hoặc /images/product.jpg"
-                           oninput="previewImage(this.value)" />
+                    <label class="form-label fw-semibold">Ảnh sản phẩm <span class="text-danger">*</span></label>
+                    <input type="file" id="thumbnailFileInput" name="ThumbnailFile"
+                           class="form-control" accept=".jpg,.jpeg,.png,.webp" />
+                    <div class="form-text text-muted">Định dạng: JPG, PNG, WebP. Tối đa 5 MB.</div>
+                    <span asp-validation-for="ThumbnailFile" class="text-danger small"></span>
                     <div id="imgPreview" class="mt-2" style="display:none;">
                         <img id="previewImg" src="" alt="Preview"
                              style="max-height:180px;border-radius:8px;border:1px solid #eee;object-fit:contain;" />
@@ -193,6 +195,7 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/admin-product-thumbnail.js"></script>
     <script>
     // ── Constants ─────────────────────────────────────────────────────────────
     const CAT_API   = '/Admin/api/categories';
@@ -205,14 +208,6 @@
             .replace(/đ/g, 'd').replace(/Đ/g, 'd')
             .replace(/[^a-z0-9\s-]/g, '').trim().replace(/\s+/g, '-');
         document.getElementById('Slug').value = s;
-    }
-
-    // ── Image preview ─────────────────────────────────────────────────────────
-    function previewImage(url) {
-        const p = document.getElementById('imgPreview');
-        const i = document.getElementById('previewImg');
-        if (url) { i.src = url; p.style.display = 'block'; }
-        else     { p.style.display = 'none'; }
     }
 
     // ═════════════════════════════════════════════════════════════════════════

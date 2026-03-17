@@ -4,6 +4,7 @@ using SmartShop.Data.Data;
 using SmartShop.Data.Repository;
 using SmartShop.Data.Repository.IRepository;
 using SmartShop.Models;
+using SmartShop.Services;
 using SmartShop.Utility;
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,6 +34,7 @@ builder.Services.ConfigureApplicationCookie(options =>
 });
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();

@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using SmartShop.Data.Data;
 using SmartShop.Models;
 using SmartShop.Models.ViewModels;
+using SmartShop.Services;
 using SmartShop.Utility;
 
 namespace SmartShop.Areas.Admin.Controllers
@@ -13,7 +14,21 @@ namespace SmartShop.Areas.Admin.Controllers
     public class ProductController : Controller
     {
         private readonly AppDbContext _context;
-        public ProductController(AppDbContext context) => _context = context;
+        private readonly ICloudinaryService _cloudinary;
+
+        private static readonly HashSet<string> _allowedExtensions =
+            new(StringComparer.OrdinalIgnoreCase) { ".jpg", ".jpeg", ".png", ".webp" };
+
+        private static readonly HashSet<string> _allowedContentTypes =
+            new(StringComparer.OrdinalIgnoreCase) { "image/jpeg", "image/png", "image/webp" };
+
+        private const long _maxFileSize = 5 * 1024 * 1024; // 5 MB
+
+        public ProductController(AppDbContext context, ICloudinaryService cloudinary)
+        {
+            _context   = context;
+            _cloudinary = cloudinary;
+        }
 
         // =====================================================================
         // GET: Admin/Product
@@ -107,6 +122,12 @@ namespace SmartShop.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(ProductFormVM vm)
         {
+            // Image is required on Create
+            if (vm.ThumbnailFile == null || vm.ThumbnailFile.Length == 0)
+                ModelState.AddModelError("ThumbnailFile", "Vui lòng chọn ảnh sản phẩm.");
+            else
+                ValidateThumbnailFile(vm.ThumbnailFile);
+
             if (await _context.Products.AnyAsync(p => p.Slug == vm.Slug))
                 ModelState.AddModelError("Slug", "Slug này đã tồn tại, vui lòng chọn slug khác.");
 
@@ -131,19 +152,36 @@ namespace SmartShop.Areas.Admin.Controllers
                 return View(vm);
             }
 
+            // Upload image to Cloudinary
+            string thumbnailUrl     = string.Empty;
+            string thumbnailPublicId = string.Empty;
+            try
+            {
+                (thumbnailUrl, thumbnailPublicId) =
+                    await _cloudinary.UploadImageAsync(vm.ThumbnailFile!);
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("ThumbnailFile", $"Upload ảnh thất bại: {ex.Message}");
+                if (vm.CategoryId.HasValue)
+                    vm.AvailableAttributes = await LoadAttributeGroups(vm.CategoryId.Value);
+                return View(vm);
+            }
+
             var product = new Product
             {
-                Name         = vm.Name,
-                Slug         = vm.Slug.Trim().ToLower(),
-                Description  = vm.Description,
-                BasePrice    = vm.BasePrice,
-                SalePrice    = vm.SalePrice,
-                ThumbnailUrl = vm.ThumbnailUrl,
-                Stock        = vm.Stock,
-                IsActive     = vm.IsActive,
-                IsFeatured   = vm.IsFeatured,
-                CreatedAt    = DateTime.UtcNow,
-                UpdatedAt    = DateTime.UtcNow
+                Name               = vm.Name,
+                Slug               = vm.Slug.Trim().ToLower(),
+                Description        = vm.Description,
+                BasePrice          = vm.BasePrice,
+                SalePrice          = vm.SalePrice,
+                ThumbnailUrl       = thumbnailUrl,
+                ThumbnailPublicId  = thumbnailPublicId,
+                Stock              = vm.Stock,
+                IsActive           = vm.IsActive,
+                IsFeatured         = vm.IsFeatured,
+                CreatedAt          = DateTime.UtcNow,
+                UpdatedAt          = DateTime.UtcNow
             };
 
             _context.Products.Add(product);
@@ -221,6 +259,10 @@ namespace SmartShop.Areas.Admin.Controllers
         {
             if (id != vm.Id) return BadRequest();
 
+            // Validate new image only when one is supplied
+            if (vm.ThumbnailFile != null && vm.ThumbnailFile.Length > 0)
+                ValidateThumbnailFile(vm.ThumbnailFile);
+
             if (await _context.Products.AnyAsync(p => p.Slug == vm.Slug && p.Id != id))
                 ModelState.AddModelError("Slug", "Slug này đã tồn tại, vui lòng chọn slug khác.");
 
@@ -242,6 +284,9 @@ namespace SmartShop.Areas.Admin.Controllers
             {
                 if (vm.CategoryId.HasValue)
                     vm.AvailableAttributes = await LoadAttributeGroups(vm.CategoryId.Value);
+                // Re-populate ThumbnailUrl so existing image preview still shows
+                var existing = await _context.Products.FindAsync(id);
+                if (existing != null) vm.ThumbnailUrl = existing.ThumbnailUrl;
                 return View(vm);
             }
 
@@ -252,16 +297,41 @@ namespace SmartShop.Areas.Admin.Controllers
 
             if (product == null) return NotFound();
 
-            product.Name         = vm.Name;
-            product.Slug         = vm.Slug.Trim().ToLower();
-            product.Description  = vm.Description;
-            product.BasePrice    = vm.BasePrice;
-            product.SalePrice    = vm.SalePrice;
-            product.ThumbnailUrl = vm.ThumbnailUrl;
-            product.Stock        = vm.Stock;
-            product.IsActive     = vm.IsActive;
-            product.IsFeatured   = vm.IsFeatured;
-            product.UpdatedAt    = DateTime.UtcNow;
+            // Handle image replacement
+            if (vm.ThumbnailFile != null && vm.ThumbnailFile.Length > 0)
+            {
+                try
+                {
+                    // Delete old Cloudinary asset (best-effort)
+                    await _cloudinary.DeleteImageAsync(product.ThumbnailPublicId);
+
+                    // Upload new
+                    var (newUrl, newPublicId) =
+                        await _cloudinary.UploadImageAsync(vm.ThumbnailFile);
+                    product.ThumbnailUrl      = newUrl;
+                    product.ThumbnailPublicId = newPublicId;
+                }
+                catch (Exception ex)
+                {
+                    ModelState.AddModelError("ThumbnailFile", $"Upload ảnh thất bại: {ex.Message}");
+                    vm.AvailableAttributes = vm.CategoryId.HasValue
+                        ? await LoadAttributeGroups(vm.CategoryId.Value)
+                        : new List<AttributeGroupVM>();
+                    vm.ThumbnailUrl = product.ThumbnailUrl;
+                    return View(vm);
+                }
+            }
+            // else: no new file → keep existing product.ThumbnailUrl / ThumbnailPublicId
+
+            product.Name      = vm.Name;
+            product.Slug      = vm.Slug.Trim().ToLower();
+            product.Description = vm.Description;
+            product.BasePrice = vm.BasePrice;
+            product.SalePrice = vm.SalePrice;
+            product.Stock     = vm.Stock;
+            product.IsActive  = vm.IsActive;
+            product.IsFeatured = vm.IsFeatured;
+            product.UpdatedAt = DateTime.UtcNow;
 
             // Sync category
             _context.ProductCategories.RemoveRange(product.ProductCategories);
@@ -316,6 +386,16 @@ namespace SmartShop.Areas.Admin.Controllers
                 .FirstOrDefaultAsync(p => p.Id == id);
 
             if (product == null) return NotFound();
+
+            // Delete Cloudinary image (best-effort — do not block deletion on failure)
+            try
+            {
+                await _cloudinary.DeleteImageAsync(product.ThumbnailPublicId);
+            }
+            catch
+            {
+                // intentionally swallowed — image cleanup failure should not prevent product removal
+            }
 
             _context.Products.Remove(product);
             await _context.SaveChangesAsync();
@@ -410,6 +490,31 @@ namespace SmartShop.Areas.Admin.Controllers
                     : null;
             }
             return ids;
+        }
+
+        /// <summary>
+        /// Validates file size and type; adds ModelState errors on failure.
+        /// </summary>
+        private void ValidateThumbnailFile(IFormFile file)
+        {
+            var ext = Path.GetExtension(file.FileName);
+            if (!_allowedExtensions.Contains(ext))
+            {
+                ModelState.AddModelError("ThumbnailFile",
+                    "Định dạng ảnh không hợp lệ. Chỉ chấp nhận: JPG, PNG, WebP.");
+                return;
+            }
+            if (!_allowedContentTypes.Contains(file.ContentType))
+            {
+                ModelState.AddModelError("ThumbnailFile",
+                    "Loại tệp không được hỗ trợ.");
+                return;
+            }
+            if (file.Length > _maxFileSize)
+            {
+                ModelState.AddModelError("ThumbnailFile",
+                    "Ảnh không được vượt quá 5 MB.");
+            }
         }
 
         /// <summary>

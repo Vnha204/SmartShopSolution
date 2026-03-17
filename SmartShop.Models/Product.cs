@@ -27,6 +27,7 @@ namespace SmartShop.Models
         public decimal? SalePrice { get; set; }
 
         public string? ThumbnailUrl { get; set; }
+        public string? ThumbnailPublicId { get; set; }
         public int Stock { get; set; } = 0;
         public bool IsActive { get; set; } = true;
         public bool IsFeatured { get; set; } = false;

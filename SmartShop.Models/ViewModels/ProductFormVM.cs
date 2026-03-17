@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http;
 using System.ComponentModel.DataAnnotations;
 
 namespace SmartShop.Models.ViewModels
@@ -28,8 +29,12 @@ namespace SmartShop.Models.ViewModels
         [Display(Name = "Giá khuyến mãi (₫)")]
         public decimal? SalePrice { get; set; }
 
-        [Display(Name = "URL ảnh thumbnail")]
+        // Stored Cloudinary URL — populated by controller after upload, not a user input
         public string? ThumbnailUrl { get; set; }
+
+        // File upload from form (Create: required; Edit: optional — leave blank to keep existing)
+        [Display(Name = "Ảnh sản phẩm")]
+        public IFormFile? ThumbnailFile { get; set; }
 
         [Range(0, int.MaxValue)]
         [Display(Name = "Tồn kho")]

@@ -17,7 +17,7 @@
 </div>
 
 <form asp-area="Admin" asp-controller="Product" asp-action="Edit"
-      asp-route-id="@Model.Id" method="post">
+      asp-route-id="@Model.Id" method="post" enctype="multipart/form-data">
     @Html.AntiForgeryToken()
     <input type="hidden" asp-for="Id" />
 
@@ -99,24 +99,18 @@
                     </h6>
                 </div>
                 <div class="card-body">
-                    <label asp-for="ThumbnailUrl" class="form-label fw-semibold"></label>
-                    <input asp-for="ThumbnailUrl" class="form-control"
-                           placeholder="https://... hoặc /images/product.jpg"
-                           oninput="previewImage(this.value)" />
-                    @if (!string.IsNullOrEmpty(Model.ThumbnailUrl))
-                    {
-                        <div id="imgPreview" class="mt-2">
-                            <img id="previewImg" src="@Model.ThumbnailUrl" alt="Preview"
-                                 style="max-height:180px;border-radius:8px;border:1px solid #eee;object-fit:contain;" />
-                        </div>
-                    }
-                    else
-                    {
-                        <div id="imgPreview" class="mt-2" style="display:none;">
-                            <img id="previewImg" src="" alt="Preview"
-                                 style="max-height:180px;border-radius:8px;border:1px solid #eee;object-fit:contain;" />
-                        </div>
-                    }
+                    @* Show existing Cloudinary image *@
+                    <div id="imgPreview" class="mb-3" style="@(string.IsNullOrEmpty(Model.ThumbnailUrl) ? "display:none;" : "")">
+                        <p class="form-text text-muted mb-1">Ảnh hiện tại:</p>
+                        <img id="previewImg" src="@(Model.ThumbnailUrl ?? "")" alt="Preview"
+                             style="max-height:180px;border-radius:8px;border:1px solid #eee;object-fit:contain;" />
+                    </div>
+
+                    <label class="form-label fw-semibold">Thay ảnh mới <span class="text-muted fw-normal">(tùy chọn)</span></label>
+                    <input type="file" id="thumbnailFileInput" name="ThumbnailFile"
+                           class="form-control" accept=".jpg,.jpeg,.png,.webp" />
+                    <div class="form-text text-muted">Định dạng: JPG, PNG, WebP. Tối đa 5 MB. Để trống để giữ ảnh hiện tại.</div>
+                    <span asp-validation-for="ThumbnailFile" class="text-danger small"></span>
                 </div>
             </div>
 
@@ -224,20 +218,13 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/admin-product-thumbnail.js"></script>
     <script>
     // ── Constants ─────────────────────────────────────────────────────────────
     const CAT_API          = '/Admin/api/categories';
     const _existingCatId   = @Html.Raw(existingCatId);          // int | null
     const _existingSelIds  = @Html.Raw(selectedIdsJson);        // int[]
     let   _maxDepth        = 0;
-
-    // ── Image preview ─────────────────────────────────────────────────────────
-    function previewImage(url) {
-        const p = document.getElementById('imgPreview');
-        const i = document.getElementById('previewImg');
-        if (url) { i.src = url; p.style.display = 'block'; }
-        else     { p.style.display = 'none'; }
-    }
 
     // ═════════════════════════════════════════════════════════════════════════
     // Category drill-down (same logic as Create)
