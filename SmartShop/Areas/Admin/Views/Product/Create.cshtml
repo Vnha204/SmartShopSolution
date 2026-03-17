@@ -271,6 +271,9 @@
         });
 
         wrapper.appendChild(sel);
+        // Guard: remove any element already at this depth (race-condition safety)
+        const stale = document.getElementById(wrapper.id);
+        if (stale) stale.remove();
         container.appendChild(wrapper);
         _maxDepth = Math.max(_maxDepth, depth);
     }
