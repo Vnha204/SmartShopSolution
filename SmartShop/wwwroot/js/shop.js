@@ -1,96 +1,246 @@
 /**
  * shop.js — client interaction for Shop filters
- * Handles: category drill-down, attribute checkboxes, price inputs, sort, clear.
+ *
+ * A) Duplication fix: shop.js is now loaded ONLY via @section Scripts in Index.cshtml.
+ *    The duplicate <script> in _Layout.cshtml has been removed.
+ *    Additionally, renderCatLevel() has a stale-element guard before appending.
+ *
+ * B) AJAX filtering: all filter changes (category, attribute, price, keyword, sort,
+ *    pagination) update products via fetch() without a full page reload.
+ *    - ShopController returns PartialView("_ShopAjaxPartial") when partial=1.
+ *    - JS replaces #sidebarAttrFilters and #shopResults from the parsed response.
+ *    - URL is kept in sync via history.pushState / popstate.
  */
 
 (function () {
     'use strict';
 
-    // ── Constants ────────────────────────────────────────────────────────────
-    var CAT_API      = '/Customers/api/categories';
+    var CAT_API   = '/Customers/api/categories';
+    var SHOP_PATH = '/Customers/Shop';
+
     var _maxCatDepth = 0;
+
+    // ── DOMContentLoaded init ─────────────────────────────────────────────────
 
     document.addEventListener('DOMContentLoaded', function () {
         var filterForm = document.getElementById('filterForm');
-        if (!filterForm) return;
+        if (!filterForm) return;   // not on shop page
 
-        // ── Category drill-down ──────────────────────────────────────────────
+        // Stamp current URL into history so popstate can restore it
+        history.replaceState({}, '', window.location.href);
 
+        // ── Category drill-down init ─────────────────────────────────────────
         var selectedInput = document.getElementById('selectedCategoryId');
         var existingCatId = selectedInput && selectedInput.value
-            ? parseInt(selectedInput.value)
+            ? parseInt(selectedInput.value, 10)
             : null;
 
         if (existingCatId) {
-            // Page loaded with a category already selected: re-expand the chain
             preloadCategoryChain(existingCatId);
         } else {
             renderCatLevel(null, 0);
         }
 
-        // Clear category button (visible after server reload with a category set)
-        var clearCatBtn = document.getElementById('clearCategory');
-        if (clearCatBtn) {
-            clearCatBtn.addEventListener('click', function () {
-                selectedInput.value = '';
-                // Hide server breadcrumb
-                var sb = document.getElementById('serverBreadcrumb');
-                if (sb) sb.style.display = 'none';
-                clearCatBtn.style.display = 'none';
-                removeCatDepthsFrom(0);
-                renderCatLevel(null, 0);
-                filterForm.submit();
-            });
-        }
-
-        // ── Auto-submit on attribute checkbox change ─────────────────────────
-        // (price inputs and newly rendered checkboxes are handled via delegation)
+        // ── Attribute checkboxes & price-range radios (delegation on form) ───
         filterForm.addEventListener('change', function (e) {
             var el = e.target;
             if (el.type === 'checkbox' && el.name === 'attributeValueIds') {
-                filterForm.submit();
+                submitAjax();
             }
             if (el.type === 'radio' && el.name === 'priceRange') {
                 applyPricePreset(el.value);
-                filterForm.submit();
+                submitAjax();
             }
         });
 
-        // ── Price inputs: submit on Enter / blur ─────────────────────────────
+        // ── Price text inputs: submit on Enter / blur ────────────────────────
         var minInp = filterForm.querySelector('input[name="minPrice"]');
         var maxInp = filterForm.querySelector('input[name="maxPrice"]');
         [minInp, maxInp].forEach(function (el) {
             if (!el) return;
             el.addEventListener('keydown', function (e) {
-                if (e.key === 'Enter') { e.preventDefault(); filterForm.submit(); }
+                if (e.key === 'Enter') { e.preventDefault(); submitAjax(); }
             });
-            el.addEventListener('blur', function () { filterForm.submit(); });
+            el.addEventListener('blur', function () { submitAjax(); });
         });
 
-        // ── Clear filters buttons ────────────────────────────────────────────
-        document.querySelectorAll('#clearFilters, #clearFiltersEmpty').forEach(function (btn) {
-            if (!btn) return;
-            btn.addEventListener('click', function (e) {
-                e.preventDefault();
-                filterForm.reset();
-                if (selectedInput) selectedInput.value = '';
-                window.location.href = window.location.pathname;
-            });
-        });
-
-        // ── SortBy select ────────────────────────────────────────────────────
-        var sortByEl = document.getElementById('sortBy');
-        if (sortByEl) {
-            sortByEl.addEventListener('change', function () {
-                var params = new URLSearchParams(window.location.search);
-                params.set('sortBy', sortByEl.value);
-                window.location.search = params.toString();
+        // ── Keyword input: submit on Enter ───────────────────────────────────
+        var kwInp = filterForm.querySelector('input[name="keyword"]');
+        if (kwInp) {
+            kwInp.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter') { e.preventDefault(); submitAjax(); }
             });
         }
+
+        // ── "Áp dụng bộ lọc" submit button ──────────────────────────────────
+        filterForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            submitAjax();
+        });
+
+        // ── SortBy (inside #shopResults — may be replaced; use delegation) ───
+        document.addEventListener('change', function (e) {
+            if (e.target.id === 'sortBy') {
+                submitAjax();
+            }
+        });
+
+        // ── Pagination clicks (inside #shopResults — use delegation) ─────────
+        document.addEventListener('click', function (e) {
+            var link = e.target.closest('.page-link[data-page]');
+            if (link) {
+                e.preventDefault();
+                var page = link.dataset.page;
+                if (page) submitAjax({ page: page });
+            }
+        });
+
+        // ── Clear ALL filters ────────────────────────────────────────────────
+        document.addEventListener('click', function (e) {
+            var btn = e.target.closest('#clearFilters, #clearFiltersEmpty');
+            if (!btn) return;
+            e.preventDefault();
+            filterForm.reset();
+            var si = document.getElementById('selectedCategoryId');
+            if (si) si.value = '';
+            removeCatDepthsFrom(0);
+            renderCatLevel(null, 0);
+            history.pushState({}, '', window.location.pathname);
+            submitAjax();
+        });
+
+        // ── Clear category (server-rendered button; shown on initial full load) ──
+        document.addEventListener('click', function (e) {
+            var btn = e.target.closest('#clearCategory');
+            if (!btn) return;
+            e.preventDefault();
+            var si = document.getElementById('selectedCategoryId');
+            if (si) si.value = '';
+            var sb = document.getElementById('serverBreadcrumb');
+            if (sb) sb.style.display = 'none';
+            btn.style.display = 'none';
+            removeCatDepthsFrom(0);
+            renderCatLevel(null, 0);
+            submitAjax();
+        });
+
+        // ── Popstate: browser back / forward ────────────────────────────────
+        window.addEventListener('popstate', function () {
+            loadFromUrl(window.location.search);
+        });
     });
 
     // =========================================================================
-    // Category drill-down functions
+    // AJAX helpers
+    // =========================================================================
+
+    /** Collect current form state into URLSearchParams. */
+    function buildParams(overrides) {
+        var params = new URLSearchParams();
+
+        var si = document.getElementById('selectedCategoryId');
+        if (si && si.value) params.set('selectedCategoryId', si.value);
+
+        var filterForm = document.getElementById('filterForm');
+        if (filterForm) {
+            var minInp = filterForm.querySelector('input[name="minPrice"]');
+            var maxInp = filterForm.querySelector('input[name="maxPrice"]');
+            if (minInp && minInp.value !== '') params.set('minPrice', minInp.value);
+            if (maxInp && maxInp.value !== '') params.set('maxPrice', maxInp.value);
+
+            var kw = filterForm.querySelector('input[name="keyword"]');
+            if (kw && kw.value) params.set('keyword', kw.value);
+
+            filterForm.querySelectorAll('input[name="attributeValueIds"]:checked')
+                .forEach(function (cb) { params.append('attributeValueIds', cb.value); });
+        }
+
+        // sortBy lives inside #shopResults (replaced by AJAX) — query live DOM
+        var sortEl = document.getElementById('sortBy');
+        if (sortEl && sortEl.value) params.set('sortBy', sortEl.value);
+
+        params.set('page', '1');
+
+        if (overrides) {
+            Object.keys(overrides).forEach(function (k) { params.set(k, overrides[k]); });
+        }
+
+        return params;
+    }
+
+    /** Fetch the partial and swap #sidebarAttrFilters + #shopResults. */
+    function submitAjax(overrides) {
+        var params   = buildParams(overrides);
+        var queryStr = params.toString();
+
+        fetch(SHOP_PATH + '?' + queryStr + '&partial=1', {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(function (r) { return r.text(); })
+        .then(function (html) {
+            applyPartialHtml(html);
+            // Push URL without partial=1
+            history.pushState({}, '', window.location.pathname + (queryStr ? '?' + queryStr : ''));
+        })
+        .catch(function (err) { console.error('Shop AJAX error', err); });
+    }
+
+    /** Restore state from URL (used by popstate). */
+    function loadFromUrl(search) {
+        var params = new URLSearchParams(search);
+
+        // Restore sidebar inputs
+        var si = document.getElementById('selectedCategoryId');
+        if (si) si.value = params.get('selectedCategoryId') || '';
+
+        var filterForm = document.getElementById('filterForm');
+        if (filterForm) {
+            var kw = filterForm.querySelector('input[name="keyword"]');
+            if (kw) kw.value = params.get('keyword') || '';
+            var minInp = filterForm.querySelector('input[name="minPrice"]');
+            if (minInp) minInp.value = params.get('minPrice') || '';
+            var maxInp = filterForm.querySelector('input[name="maxPrice"]');
+            if (maxInp) maxInp.value = params.get('maxPrice') || '';
+        }
+
+        // Rebuild category chain
+        var catId = params.get('selectedCategoryId');
+        removeCatDepthsFrom(0);
+        if (catId) {
+            preloadCategoryChain(parseInt(catId, 10));
+        } else {
+            renderCatLevel(null, 0);
+        }
+
+        // Fetch and apply partial
+        params.set('partial', '1');
+        fetch(SHOP_PATH + '?' + params.toString(), {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(function (r) { return r.text(); })
+        .then(function (html) { applyPartialHtml(html); })
+        .catch(function (err) { console.error('Popstate fetch error', err); });
+    }
+
+    /** Parse partial HTML and swap the two target zones. */
+    function applyPartialHtml(html) {
+        var doc = new DOMParser().parseFromString(html, 'text/html');
+
+        var ajaxAttrs    = doc.getElementById('ajaxAttrFilters');
+        var sidebarAttrs = document.getElementById('sidebarAttrFilters');
+        if (ajaxAttrs && sidebarAttrs) {
+            sidebarAttrs.innerHTML = ajaxAttrs.innerHTML;
+        }
+
+        var ajaxGrid    = doc.getElementById('ajaxProductGrid');
+        var shopResults = document.getElementById('shopResults');
+        if (ajaxGrid && shopResults) {
+            shopResults.innerHTML = ajaxGrid.innerHTML;
+        }
+    }
+
+    // =========================================================================
+    // Category drill-down
     // =========================================================================
 
     function removeCatDepthsFrom(fromDepth) {
@@ -123,20 +273,23 @@
                 sel.dataset.depth = depth;
                 sel.addEventListener('change', function () { onCatLevelChange(this); });
 
-                var placeholder       = document.createElement('option');
-                placeholder.value     = '';
-                placeholder.textContent = depth === 0 ? '-- Chọn danh mục --' : '-- Danh mục con --';
-                sel.appendChild(placeholder);
+                var ph           = document.createElement('option');
+                ph.value         = '';
+                ph.textContent   = depth === 0 ? '-- Chọn danh mục --' : '-- Danh mục con --';
+                sel.appendChild(ph);
 
                 cats.forEach(function (c) {
-                    var opt               = document.createElement('option');
-                    opt.value             = c.id;
-                    opt.textContent       = c.name;
+                    var opt                 = document.createElement('option');
+                    opt.value               = c.id;
+                    opt.textContent         = c.name;
                     opt.dataset.hasChildren = c.hasChildren ? '1' : '0';
                     sel.appendChild(opt);
                 });
 
                 wrapper.appendChild(sel);
+                // Race-condition guard: remove any stale element at this depth
+                var stale = document.getElementById(wrapper.id);
+                if (stale) stale.remove();
                 container.appendChild(wrapper);
                 _maxCatDepth = Math.max(_maxCatDepth, depth);
             })
@@ -144,8 +297,8 @@
     }
 
     function onCatLevelChange(sel) {
-        var depth      = parseInt(sel.dataset.depth);
-        var categoryId = sel.value ? parseInt(sel.value) : null;
+        var depth      = parseInt(sel.dataset.depth, 10);
+        var categoryId = sel.value ? parseInt(sel.value, 10) : null;
 
         removeCatDepthsFrom(depth + 1);
 
@@ -161,16 +314,13 @@
         var hasChildren = opt && opt.dataset.hasChildren === '1';
 
         if (hasChildren) {
-            // Not a leaf: render children, but allow manual submit via button
             renderCatLevel(categoryId, depth + 1);
         } else {
-            // Leaf: auto-submit so server can load matching attributes
-            var filterForm = document.getElementById('filterForm');
-            if (filterForm) filterForm.submit();
+            // Leaf selected — AJAX update (no full page reload)
+            submitAjax();
         }
     }
 
-    // Restores the drill-down UI when a category is already selected (page reload).
     function preloadCategoryChain(leafCategoryId) {
         fetch(CAT_API + '/breadcrumb?categoryId=' + leafCategoryId)
             .then(function (r) { return r.json(); })
@@ -179,8 +329,6 @@
                     renderCatLevel(null, 0);
                     return;
                 }
-
-                // Render root level, then walk breadcrumb selecting each item
                 renderCatLevel(null, 0).then(function () {
                     return walkBreadcrumb(breadcrumb, 0);
                 });
@@ -204,7 +352,7 @@
     }
 
     // =========================================================================
-    // Price preset helper — maps "min-max" value to individual inputs
+    // Price preset helper
     // =========================================================================
 
     function applyPricePreset(value) {

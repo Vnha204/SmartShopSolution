@@ -152,6 +152,11 @@ namespace SmartShop.Areas.Customers.Controllers
                         IsSelected   = filter.MinPrice == 2_000_000 && filter.MaxPrice == null }
             };
 
+            bool isPartial = Request.Headers["X-Requested-With"] == "XMLHttpRequest"
+                          || Request.Query["partial"] == "1";
+            if (isPartial)
+                return PartialView("_ShopAjaxPartial", vm);
+
             return View(vm);
         }
 
