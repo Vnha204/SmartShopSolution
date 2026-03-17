@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace SmartShop.Models.ViewModels
 {
     /// <summary>
-    /// ViewModel cho trang Shop - hiển thị danh sách sản phẩm với bộ lọc
+    /// ViewModel cho trang Shop — danh sách sản phẩm + bộ lọc động
     /// </summary>
     public class ShopViewModel
     {
@@ -18,16 +18,30 @@ namespace SmartShop.Models.ViewModels
         public int CurrentPage { get; set; } = 1;
         public int PageSize { get; set; } = 12;
 
-        // ===== Bộ lọc =====
-        public List<CategoryFilterVM> Categories { get; set; } = new();
+        // ===== Bộ lọc thuộc tính (chỉ khi đã chọn danh mục) =====
         public List<AttributeFilterVM> Attributes { get; set; } = new();
+
+        // ===== Khoảng giá =====
         public List<PriceRangeVM> PriceRanges { get; set; } = new();
+
+        // ===== Breadcrumb danh mục đã chọn (root → leaf) =====
+        public List<CategoryBreadcrumbItemVM> SelectedCategoryBreadcrumb { get; set; } = new();
 
         // ===== Giá trị bộ lọc đã chọn =====
         public ShopFilterVM Filter { get; set; } = new();
-        
+
         // ===== Sắp xếp =====
         public string SortBy { get; set; } = "newest";
+    }
+
+    /// <summary>
+    /// Một bước trong breadcrumb danh mục
+    /// </summary>
+    public class CategoryBreadcrumbItemVM
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string Slug { get; set; } = string.Empty;
     }
 
     /// <summary>
@@ -44,38 +58,15 @@ namespace SmartShop.Models.ViewModels
         public int Stock { get; set; }
         public bool IsFeatured { get; set; }
 
-        /// <summary>
-        /// Giá hiển thị (ưu tiên SalePrice nếu có)
-        /// </summary>
         public decimal DisplayPrice => SalePrice ?? BasePrice;
-
-        /// <summary>
-        /// Có đang giảm giá không
-        /// </summary>
         public bool IsOnSale => SalePrice.HasValue && SalePrice < BasePrice;
-
-        /// <summary>
-        /// Phần trăm giảm giá
-        /// </summary>
-        public int DiscountPercent => IsOnSale 
-            ? (int)Math.Round((1 - (SalePrice!.Value / BasePrice)) * 100) 
+        public int DiscountPercent => IsOnSale
+            ? (int)Math.Round((1 - (SalePrice!.Value / BasePrice)) * 100)
             : 0;
     }
 
     /// <summary>
-    /// Danh mục cho bộ lọc
-    /// </summary>
-    public class CategoryFilterVM
-    {
-        public int Id { get; set; }
-        public string Name { get; set; } = string.Empty;
-        public string Slug { get; set; } = string.Empty;
-        public int ProductCount { get; set; }
-        public bool IsSelected { get; set; }
-    }
-
-    /// <summary>
-    /// Thuộc tính (Attribute) cho bộ lọc - ví dụ: Kiểu gọng, Chất liệu, Giới tính
+    /// Thuộc tính (Attribute) cho bộ lọc — ví dụ: Kiểu gọng, Chất liệu, Giới tính
     /// </summary>
     public class AttributeFilterVM
     {
@@ -91,7 +82,8 @@ namespace SmartShop.Models.ViewModels
     public class AttributeValueFilterVM
     {
         public int Id { get; set; }
-        public string Value { get; set; } = string.Empty;
+        public string Value { get; set; } = string.Empty;        // code, e.g. 'titanium'
+        public string DisplayName { get; set; } = string.Empty;  // label, e.g. 'Titanium'
         public int ProductCount { get; set; }
         public bool IsSelected { get; set; }
     }
@@ -107,8 +99,8 @@ namespace SmartShop.Models.ViewModels
         public int ProductCount { get; set; }
         public bool IsSelected { get; set; }
 
-        public string Value => MaxPrice.HasValue 
-            ? $"{MinPrice}-{MaxPrice}" 
+        public string Value => MaxPrice.HasValue
+            ? $"{MinPrice}-{MaxPrice}"
             : $"{MinPrice}+";
     }
 
@@ -117,7 +109,11 @@ namespace SmartShop.Models.ViewModels
     /// </summary>
     public class ShopFilterVM
     {
-        public List<int> CategoryIds { get; set; } = new();
+        /// <summary>
+        /// ID danh mục lá đã chọn. Sản phẩm sẽ gồm danh mục này và tất cả con cháu.
+        /// </summary>
+        public int? SelectedCategoryId { get; set; }
+
         public List<int> AttributeValueIds { get; set; } = new();
         public decimal? MinPrice { get; set; }
         public decimal? MaxPrice { get; set; }

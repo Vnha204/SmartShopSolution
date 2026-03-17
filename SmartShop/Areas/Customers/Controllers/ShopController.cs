@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SmartShop.Data.Data;
 using SmartShop.Models;
@@ -17,136 +17,266 @@ namespace SmartShop.Areas.Customers.Controllers
         }
 
         // GET: /Customers/Shop
-        public async Task<IActionResult> Index([FromQuery] ShopFilterVM filter, string sortBy = "newest", int page = 1, int pageSize = 12)
+        public async Task<IActionResult> Index(
+            [FromQuery] ShopFilterVM filter,
+            string sortBy = "newest",
+            int page = 1,
+            int pageSize = 12)
         {
+            filter ??= new ShopFilterVM();
+            filter.AttributeValueIds ??= new List<int>();
+
             var vm = new ShopViewModel
             {
                 CurrentPage = page,
-                PageSize = pageSize,
-                SortBy = sortBy
+                PageSize    = pageSize,
+                SortBy      = sortBy,
+                Filter      = filter
             };
 
-            // Base query
-            var query = _db.Products
+            // ─────────────────────────────────────────────────────────────────
+            // 1. Resolve category + all descendants
+            // ─────────────────────────────────────────────────────────────────
+            List<int> descendantCatIds = new();
+            List<Category>? allActiveCats = null;
+
+            if (filter.SelectedCategoryId.HasValue)
+            {
+                allActiveCats = await _db.Categories
+                    .Where(c => c.IsActive)
+                    .ToListAsync();
+
+                descendantCatIds = GetDescendantIds(allActiveCats, filter.SelectedCategoryId.Value);
+
+                vm.SelectedCategoryBreadcrumb = BuildBreadcrumb(allActiveCats, filter.SelectedCategoryId.Value)
+                    .Select(c => new CategoryBreadcrumbItemVM { Id = c.Id, Name = c.Name, Slug = c.Slug })
+                    .ToList();
+            }
+
+            // ─────────────────────────────────────────────────────────────────
+            // 2. Base query — category descendants + keyword + price
+            //    (attribute filter NOT applied here — used for attribute counts)
+            // ─────────────────────────────────────────────────────────────────
+            var baseQ = _db.Products
                 .Where(p => p.IsActive)
-                .Include(p => p.ProductCategories)
-                .Include(p => p.ProductAttributeValues)
                 .AsQueryable();
 
-            // Filter by categories
-            if (filter?.CategoryIds != null && filter.CategoryIds.Any())
+            if (descendantCatIds.Any())
+                baseQ = baseQ.Where(p =>
+                    p.ProductCategories.Any(pc => descendantCatIds.Contains(pc.CategoryId)));
+
+            if (!string.IsNullOrWhiteSpace(filter.Keyword))
+                baseQ = baseQ.Where(p => p.Name.Contains(filter.Keyword));
+
+            if (filter.MinPrice.HasValue)
+                baseQ = baseQ.Where(p => (p.SalePrice ?? p.BasePrice) >= filter.MinPrice.Value);
+
+            if (filter.MaxPrice.HasValue)
+                baseQ = baseQ.Where(p => (p.SalePrice ?? p.BasePrice) <= filter.MaxPrice.Value);
+
+            // ─────────────────────────────────────────────────────────────────
+            // 3. Load dynamic attributes with counts from base query context
+            // ─────────────────────────────────────────────────────────────────
+            if (filter.SelectedCategoryId.HasValue)
             {
-                query = query.Where(p => p.ProductCategories.Any(pc => filter.CategoryIds.Contains(pc.CategoryId)));
-                vm.Filter.CategoryIds = filter.CategoryIds;
+                var baseIds = (await baseQ.Select(p => p.Id).ToListAsync()).ToHashSet();
+                vm.Attributes = await LoadShopAttributes(
+                    filter.SelectedCategoryId.Value,
+                    allActiveCats!,
+                    baseIds,
+                    filter.AttributeValueIds);
             }
 
-            // Filter by attribute values
-            if (filter?.AttributeValueIds != null && filter.AttributeValueIds.Any())
-            {
-                query = query.Where(p => p.ProductAttributeValues.Any(av => filter.AttributeValueIds.Contains(av.AttributeValueId)));
-                vm.Filter.AttributeValueIds = filter.AttributeValueIds;
-            }
+            // ─────────────────────────────────────────────────────────────────
+            // 4. Full filtered query — add attribute filter on top of base
+            // ─────────────────────────────────────────────────────────────────
+            var filteredQ = baseQ;
+            var activeAvIds = filter.AttributeValueIds.Where(id => id > 0).ToList();
+            if (activeAvIds.Any())
+                filteredQ = filteredQ.Where(p =>
+                    p.ProductAttributeValues.Any(pav => activeAvIds.Contains(pav.AttributeValueId)));
 
-            // Price filter
-            if (filter?.MinPrice != null)
+            // ─────────────────────────────────────────────────────────────────
+            // 5. Sort
+            // ─────────────────────────────────────────────────────────────────
+            filteredQ = sortBy switch
             {
-                query = query.Where(p => (p.SalePrice ?? p.BasePrice) >= filter.MinPrice.Value);
-                vm.Filter.MinPrice = filter.MinPrice;
-            }
-            if (filter?.MaxPrice != null)
-            {
-                query = query.Where(p => (p.SalePrice ?? p.BasePrice) <= filter.MaxPrice.Value);
-                vm.Filter.MaxPrice = filter.MaxPrice;
-            }
-
-            // Keyword (if implemented)
-            if (!string.IsNullOrWhiteSpace(filter?.Keyword))
-            {
-                query = query.Where(p => p.Name.Contains(filter.Keyword));
-                vm.Filter.Keyword = filter.Keyword;
-            }
-
-            // Sorting
-            query = sortBy switch
-            {
-                "price-asc" => query.OrderBy(p => (p.SalePrice ?? p.BasePrice)),
-                "price-desc" => query.OrderByDescending(p => (p.SalePrice ?? p.BasePrice)),
-                "popular" => query.OrderByDescending(p => p.IsFeatured),
-                _ => query.OrderByDescending(p => p.CreatedAt)
+                "price-asc"  => filteredQ.OrderBy(p => (p.SalePrice ?? p.BasePrice)),
+                "price-desc" => filteredQ.OrderByDescending(p => (p.SalePrice ?? p.BasePrice)),
+                "popular"    => filteredQ.OrderByDescending(p => p.IsFeatured),
+                _            => filteredQ.OrderByDescending(p => p.CreatedAt)
             };
 
-            // Count and pagination
-            var total = await query.CountAsync();
+            // ─────────────────────────────────────────────────────────────────
+            // 6. Count + paginate
+            // ─────────────────────────────────────────────────────────────────
+            var total = await filteredQ.CountAsync();
             vm.TotalProducts = total;
-            vm.TotalPages = (int)Math.Ceiling(total / (double)pageSize);
-            vm.CurrentPage = Math.Clamp(page, 1, Math.Max(1, vm.TotalPages));
+            vm.TotalPages    = (int)Math.Ceiling(total / (double)pageSize);
+            vm.CurrentPage   = Math.Clamp(page, 1, Math.Max(1, vm.TotalPages));
 
-            var products = await query
+            var products = await filteredQ
                 .Skip((vm.CurrentPage - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
 
             vm.Products = products.Select(p => new ProductItemVM
             {
-                Id = p.Id,
-                Name = p.Name,
-                Slug = p.Slug,
+                Id           = p.Id,
+                Name         = p.Name,
+                Slug         = p.Slug,
                 ThumbnailUrl = p.ThumbnailUrl,
-                BasePrice = p.BasePrice,
-                SalePrice = p.SalePrice,
-                Stock = p.Stock,
-                IsFeatured = p.IsFeatured
+                BasePrice    = p.BasePrice,
+                SalePrice    = p.SalePrice,
+                Stock        = p.Stock,
+                IsFeatured   = p.IsFeatured
             }).ToList();
 
-            // Build category filter data
-            var categories = await _db.Categories
-                .Select(c => new CategoryFilterVM
-                {
-                    Id = c.Id,
-                    Name = c.Name,
-                    Slug = c.Slug,
-                    ProductCount = _db.ProductCategories.Count(pc => pc.CategoryId == c.Id)
-                }).ToListAsync();
-
-            // Mark selected categories
-            foreach (var cat in categories)
-            {
-                if (vm.Filter.CategoryIds.Contains(cat.Id)) cat.IsSelected = true;
-            }
-
-            vm.Categories = categories;
-
-            // Build simple attributes - fetch Attributes and values with product counts
-            var attributes = await _db.Attributes
-                .Include(a => a.Values)
-                .ToListAsync();
-
-            vm.Attributes = attributes.Select(a => new AttributeFilterVM
-            {
-                Id = a.Id,
-                Name = a.Name,
-                DisplayName = a.DisplayName ?? a.Name,
-                Values = a.Values.Select(v => new AttributeValueFilterVM
-                {
-                    Id = v.Id,
-                    Value = v.Value,
-                    ProductCount = _db.ProductAttributeValues.Count(pav => pav.AttributeValueId == v.Id),
-                    IsSelected = vm.Filter.AttributeValueIds.Contains(v.Id)
-                }).ToList()
-            }).ToList();
-
-            // Price ranges (example presets)
+            // ─────────────────────────────────────────────────────────────────
+            // 7. Price range presets (counted against all active products)
+            // ─────────────────────────────────────────────────────────────────
+            var allActive = _db.Products.Where(p => p.IsActive);
             vm.PriceRanges = new List<PriceRangeVM>
             {
-                new PriceRangeVM { MinPrice = 0, MaxPrice = 500000, Label = "Dưới 500.000₫", ProductCount = _db.Products.Count(p => (p.SalePrice ?? p.BasePrice) <= 500000) },
-                new PriceRangeVM { MinPrice = 500000, MaxPrice = 1000000, Label = "500.000₫ - 1.000.000₫", ProductCount = _db.Products.Count(p => (p.SalePrice ?? p.BasePrice) > 500000 && (p.SalePrice ?? p.BasePrice) <= 1000000) },
-                new PriceRangeVM { MinPrice = 1000000, MaxPrice = 2000000, Label = "1.000.000₫ - 2.000.000₫", ProductCount = _db.Products.Count(p => (p.SalePrice ?? p.BasePrice) > 1000000 && (p.SalePrice ?? p.BasePrice) <= 2000000) },
-                new PriceRangeVM { MinPrice = 2000000, MaxPrice = null, Label = "Trên 2.000.000₫", ProductCount = _db.Products.Count(p => (p.SalePrice ?? p.BasePrice) > 2000000) }
+                new() { MinPrice = 0,       MaxPrice = 500_000,   Label = "Dưới 500.000₫",
+                        ProductCount = allActive.Count(p => (p.SalePrice ?? p.BasePrice) <= 500_000),
+                        IsSelected   = filter.MinPrice == 0 && filter.MaxPrice == 500_000 },
+                new() { MinPrice = 500_000, MaxPrice = 1_000_000, Label = "500.000₫ – 1.000.000₫",
+                        ProductCount = allActive.Count(p => (p.SalePrice ?? p.BasePrice) > 500_000 && (p.SalePrice ?? p.BasePrice) <= 1_000_000),
+                        IsSelected   = filter.MinPrice == 500_000 && filter.MaxPrice == 1_000_000 },
+                new() { MinPrice = 1_000_000, MaxPrice = 2_000_000, Label = "1.000.000₫ – 2.000.000₫",
+                        ProductCount = allActive.Count(p => (p.SalePrice ?? p.BasePrice) > 1_000_000 && (p.SalePrice ?? p.BasePrice) <= 2_000_000),
+                        IsSelected   = filter.MinPrice == 1_000_000 && filter.MaxPrice == 2_000_000 },
+                new() { MinPrice = 2_000_000, MaxPrice = null,    Label = "Trên 2.000.000₫",
+                        ProductCount = allActive.Count(p => (p.SalePrice ?? p.BasePrice) > 2_000_000),
+                        IsSelected   = filter.MinPrice == 2_000_000 && filter.MaxPrice == null }
             };
 
-            vm.SortBy = sortBy;
-
             return View(vm);
+        }
+
+        // =====================================================================
+        // Private helpers
+        // =====================================================================
+
+        /// <summary>
+        /// BFS from <paramref name="categoryId"/> downwards; returns the given ID
+        /// plus all descendant IDs.
+        /// </summary>
+        private static List<int> GetDescendantIds(List<Category> allCats, int categoryId)
+        {
+            var result = new List<int>();
+            var queue  = new Queue<int>();
+            queue.Enqueue(categoryId);
+
+            while (queue.Count > 0)
+            {
+                var id = queue.Dequeue();
+                result.Add(id);
+                foreach (var child in allCats.Where(c => c.ParentId == id))
+                    queue.Enqueue(child.Id);
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Returns [root, …, leaf] breadcrumb for the given category.
+        /// </summary>
+        private static List<Category> BuildBreadcrumb(List<Category> allCats, int categoryId)
+        {
+            var chain   = new List<Category>();
+            var current = allCats.FirstOrDefault(c => c.Id == categoryId);
+            while (current != null)
+            {
+                chain.Insert(0, current);
+                current = current.ParentId.HasValue
+                    ? allCats.FirstOrDefault(c => c.Id == current.ParentId.Value)
+                    : null;
+            }
+            return chain;
+        }
+
+        /// <summary>
+        /// Returns [leaf, parent, …, root] ancestor chain for attribute lookup.
+        /// </summary>
+        private static List<int> GetAncestorIds(List<Category> allCats, int categoryId)
+        {
+            var ids     = new List<int>();
+            var current = allCats.FirstOrDefault(c => c.Id == categoryId);
+            while (current != null)
+            {
+                ids.Add(current.Id);
+                current = current.ParentId.HasValue
+                    ? allCats.FirstOrDefault(c => c.Id == current.ParentId.Value)
+                    : null;
+            }
+            return ids;
+        }
+
+        /// <summary>
+        /// Loads attribute groups applicable to <paramref name="categoryId"/> (including
+        /// ancestors) with per-value product counts computed within
+        /// <paramref name="baseProductIds"/> (the pre-attribute-filtered context).
+        /// </summary>
+        private async Task<List<AttributeFilterVM>> LoadShopAttributes(
+            int categoryId,
+            List<Category> allActiveCats,
+            HashSet<int> baseProductIds,
+            List<int> selectedValueIds)
+        {
+            var ancestorIds = GetAncestorIds(allActiveCats, categoryId);
+
+            var catAttrs = await _db.CategoryAttributes
+                .Where(ca => ancestorIds.Contains(ca.CategoryId))
+                .Include(ca => ca.Attribute)
+                    .ThenInclude(a => a.Values)
+                .ToListAsync();
+
+            if (!catAttrs.Any())
+                return new List<AttributeFilterVM>();
+
+            // De-duplicate: closest to leaf wins
+            var uniqueAttrs = catAttrs
+                .GroupBy(ca => ca.AttributeId)
+                .Select(g => g.OrderBy(ca => ancestorIds.IndexOf(ca.CategoryId)).First())
+                .OrderBy(ca => ca.SortOrder)
+                .ThenBy(ca => ca.Attribute.DisplayName)
+                .ToList();
+
+            // Collect all relevant value IDs so we can do one count query
+            var allValueIds = uniqueAttrs
+                .SelectMany(ca => ca.Attribute.Values.Select(v => v.Id))
+                .ToList();
+
+            // Count products (within base context) per attribute value in one DB call
+            var countsByValueId = await _db.ProductAttributeValues
+                .Where(pav => allValueIds.Contains(pav.AttributeValueId)
+                           && baseProductIds.Contains(pav.ProductId))
+                .GroupBy(pav => pav.AttributeValueId)
+                .Select(g => new { Id = g.Key, Count = g.Count() })
+                .ToListAsync();
+
+            var countDict = countsByValueId.ToDictionary(x => x.Id, x => x.Count);
+
+            return uniqueAttrs.Select(ca => new AttributeFilterVM
+            {
+                Id          = ca.AttributeId,
+                Name        = ca.Attribute.Name,
+                DisplayName = ca.Attribute.DisplayName,
+                Values = ca.Attribute.Values
+                    .OrderBy(v => v.SortOrder)
+                    .ThenBy(v => v.DisplayName)
+                    .Select(v => new AttributeValueFilterVM
+                    {
+                        Id           = v.Id,
+                        Value        = v.Value,
+                        DisplayName  = v.DisplayName,
+                        ProductCount = countDict.GetValueOrDefault(v.Id, 0),
+                        IsSelected   = selectedValueIds.Contains(v.Id)
+                    })
+                    .ToList()
+            }).ToList();
         }
     }
 }
