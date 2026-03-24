@@ -1,6 +1,8 @@
-﻿@model IEnumerable<SmartShop.Models.Order>
+@model IEnumerable<SmartShop.Models.Order>
+@using SmartShop.Utility
 @{
     ViewData["Title"] = "Quản lý đơn hàng";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
 <div class="d-flex justify-content-between align-items-center mb-4">
@@ -12,52 +14,116 @@
 
 @if (TempData["Success"] != null)
 {
-    <div class="alert alert-success alert-custom alert-dismissible fade show">
+    <div class="alert alert-success alert-dismissible fade show">
         <i class="fa fa-check-circle me-2"></i> @TempData["Success"]
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
 }
-
 @if (TempData["Error"] != null)
 {
-    <div class="alert alert-danger alert-custom alert-dismissible fade show">
+    <div class="alert alert-danger alert-dismissible fade show">
         <i class="fa fa-exclamation-circle me-2"></i> @TempData["Error"]
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
 }
 
-<!-- Filter tabs -->
+<!-- Filter form -->
+<div class="card card-custom mb-4">
+    <div class="card-body py-3">
+        <form asp-area="Admin" asp-controller="Order" asp-action="Index" method="get"
+              class="row g-2 align-items-end order-filter-form">
+            <div class="col-sm-3">
+                <label class="form-label small mb-1">Mã đơn</label>
+                <input type="text" name="q" value="@ViewBag.Q" class="form-control form-control-sm"
+                       placeholder="OD20240101..." />
+            </div>
+            <div class="col-sm-2">
+                <label class="form-label small mb-1">Trạng thái</label>
+                <select name="status" class="form-select form-select-sm">
+                    <option value="">-- Tất cả --</option>
+                    @foreach (var s in SmartShop.Models.OrderStatus.DisplayNames)
+                    {
+                        if (string.Equals((string?)ViewBag.Status, s.Key))
+                        {
+                            <option value="@s.Key" selected>@s.Value</option>
+                        }
+                        else
+                        {
+                            <option value="@s.Key">@s.Value</option>
+                        }
+                    }
+                </select>
+            </div>
+            <div class="col-sm-2">
+                <label class="form-label small mb-1">Thanh toán</label>
+                <select name="paymentStatus" class="form-select form-select-sm">
+                    <option value="">-- Tất cả --</option>
+                    @foreach (var ps in new[] { ("unpaid","Chưa TT"), ("pending","Chờ TT"), ("paid","Đã TT") })
+                    {
+                        if (string.Equals((string?)ViewBag.PaymentStatus, ps.Item1))
+                        {
+                            <option value="@ps.Item1" selected>@ps.Item2</option>
+                        }
+                        else
+                        {
+                            <option value="@ps.Item1">@ps.Item2</option>
+                        }
+                    }
+                </select>
+            </div>
+            <div class="col-sm-2">
+                <label class="form-label small mb-1">Từ ngày</label>
+                <input type="date" name="from" value="@ViewBag.From" class="form-control form-control-sm" />
+            </div>
+            <div class="col-sm-2">
+                <label class="form-label small mb-1">Đến ngày</label>
+                <input type="date" name="to" value="@ViewBag.To" class="form-control form-control-sm" />
+            </div>
+            <div class="col-sm-1 d-flex gap-1">
+                <button type="submit" class="btn btn-primary btn-sm">
+                    <i class="fa fa-search"></i>
+                </button>
+                <a asp-area="Admin" asp-controller="Order" asp-action="Index"
+                   class="btn btn-outline-secondary btn-sm" title="Xóa lọc">
+                    <i class="fa fa-times"></i>
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Status tabs (client-side filter) -->
 <div class="card card-custom mb-4">
     <div class="card-body p-0">
         <ul class="nav nav-tabs border-0 px-3 pt-3" id="orderTabs">
             <li class="nav-item">
-                <a class="nav-link active" href="#" onclick="filterOrders('all', this)">
+                <a class="nav-link active" href="#" data-order-filter="all">
                     Tất cả <span class="badge bg-secondary ms-1">@Model.Count()</span>
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="#" onclick="filterOrders('pending', this)">
+                <a class="nav-link" href="#" data-order-filter="pending">
                     Chờ xác nhận
                     <span class="badge ms-1 bg-warning text-dark">@Model.Count(o => o.Status == "pending")</span>
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="#" onclick="filterOrders('confirmed', this)">
+                <a class="nav-link" href="#" data-order-filter="confirmed">
                     Đã xác nhận <span class="badge bg-info ms-1">@Model.Count(o => o.Status == "confirmed")</span>
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="#" onclick="filterOrders('shipping', this)">
+                <a class="nav-link" href="#" data-order-filter="shipping">
                     Đang giao <span class="badge bg-primary ms-1">@Model.Count(o => o.Status == "shipping")</span>
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="#" onclick="filterOrders('delivered', this)">
+                <a class="nav-link" href="#" data-order-filter="delivered">
                     Đã giao <span class="badge bg-success ms-1">@Model.Count(o => o.Status == "delivered")</span>
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="#" onclick="filterOrders('cancelled', this)">
+                <a class="nav-link" href="#" data-order-filter="cancelled">
                     Đã huỷ <span class="badge bg-danger ms-1">@Model.Count(o => o.Status == "cancelled")</span>
                 </a>
             </li>
@@ -99,9 +165,7 @@
                         {
                             <tr data-status="@order.Status">
                                 <td class="text-muted small">@order.Id</td>
-                                <td>
-                                    <span class="fw-semibold">#@order.OrderCode</span>
-                                </td>
+                                <td><span class="fw-semibold">#@order.OrderCode</span></td>
                                 <td>
                                     <div class="fw-semibold small">@(order.User?.FullName ?? "—")</div>
                                     <div class="text-muted" style="font-size:11px;">@(order.User?.Email ?? "")</div>
@@ -111,16 +175,14 @@
                                         @order.OrderItems.Count sản phẩm
                                     </span>
                                 </td>
-                                <td class="fw-semibold text-success">
-                                    @order.TotalPrice.ToString("N0") ₫
-                                </td>
+                                <td class="fw-semibold text-success">@order.TotalPrice.ToString("N0") ₫</td>
                                 <td>
-                                    <span class="badge badge-status @StatusBadgeHelper.GetPaymentStatusBadge(order.PaymentStatus)">
-                                        @(order.PaymentStatus == "paid" ? "Đã thanh toán" : "Chưa TT")
+                                    <span class="badge @StatusBadgeHelper.GetPaymentStatusBadge(order.PaymentStatus)">
+                                        @(order.PaymentStatus switch { "paid" => "Đã TT", "pending" => "Chờ TT", _ => "Chưa TT" })
                                     </span>
                                 </td>
                                 <td>
-                                    <span class="badge badge-status @StatusBadgeHelper.GetOrderStatusBadge(order.Status)">
+                                    <span class="badge @StatusBadgeHelper.GetOrderStatusBadge(order.Status)">
                                         @OrderStatus.DisplayNames.GetValueOrDefault(order.Status, order.Status)
                                     </span>
                                 </td>
@@ -130,7 +192,7 @@
                                 </td>
                                 <td>
                                     <div class="d-flex gap-1">
-                                        <a asp-area="Admin" asp-controller="Order" asp-action="Detail"
+                                        <a asp-area="Admin" asp-controller="Order" asp-action="Details"
                                            asp-route-id="@order.Id"
                                            class="btn btn-sm btn-outline-primary" title="Xem chi tiết">
                                             <i class="fa fa-eye"></i>
@@ -168,3 +230,7 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script src="~/js/admin/orders.js" asp-append-version="true"></script>
+}

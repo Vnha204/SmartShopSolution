@@ -126,7 +126,8 @@
                             <span data-field="total">@Model.Total.ToString("N0")₫</span>
                         </div>
 
-                        <a href="#" class="btn-checkout">
+                        <a asp-area="Customers" asp-controller="Checkout" asp-action="Index"
+                           class="btn-checkout">
                             Tiến hành đặt hàng
                         </a>
 

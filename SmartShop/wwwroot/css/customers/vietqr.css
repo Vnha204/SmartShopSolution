@@ -1,0 +1,233 @@
+/* ===== VietQR payment page ===== */
+
+.vietqr-section {
+    padding: 40px 0 60px;
+}
+
+.vietqr-title {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+}
+
+.vietqr-subtitle {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+}
+
+/* ── Status banner ── */
+.vietqr-status-banner {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.85rem 1.25rem;
+    border-radius: var(--border-radius);
+    margin-bottom: 1.5rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.vietqr-status-pending {
+    background: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffc107;
+}
+
+.vietqr-status-paid {
+    background: #d1e7dd;
+    color: #0f5132;
+    border: 1px solid #198754;
+}
+
+/* ── Cards ── */
+.vietqr-card {
+    background: var(--bg-white);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-sm);
+    padding: 1.5rem;
+    margin-bottom: 1.25rem;
+}
+
+.vietqr-card-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--primary-color);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* ── Bank info table ── */
+.bank-info-table {
+    width: 100%;
+    font-size: 0.9rem;
+    border-collapse: collapse;
+}
+
+.bank-info-table tr + tr td {
+    border-top: 1px solid var(--border-color);
+}
+
+.bank-info-table td {
+    padding: 0.6rem 0;
+}
+
+.bank-info-table td:first-child {
+    color: var(--text-muted);
+    width: 45%;
+}
+
+.bank-info-table td:last-child {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+/* ── Transfer content highlight ── */
+.transfer-content-box {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: var(--primary-light);
+    border: 1.5px solid var(--primary-color);
+    border-radius: var(--border-radius-sm);
+    padding: 0.75rem 1rem;
+    margin-top: 0.75rem;
+}
+
+.transfer-content-code {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    letter-spacing: 0.04em;
+    flex: 1;
+}
+
+.btn-copy {
+    background: none;
+    border: 1px solid var(--primary-color);
+    color: var(--primary-color);
+    border-radius: var(--border-radius-sm);
+    padding: 0.25rem 0.6rem;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    white-space: nowrap;
+}
+
+.btn-copy:hover {
+    background: var(--primary-color);
+    color: #fff;
+}
+
+/* ── QR code panel ── */
+.vietqr-qr-panel {
+    background: var(--bg-white);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-sm);
+    padding: 1.5rem;
+    text-align: center;
+    position: sticky;
+    top: 120px;
+}
+
+.vietqr-qr-panel-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--primary-color);
+}
+
+.vietqr-qr-img {
+    display: block;
+    margin: 0 auto 1rem;
+    max-width: 220px;
+    width: 100%;
+    border-radius: var(--border-radius-sm);
+    border: 1px solid var(--border-color);
+}
+
+.vietqr-amount {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: var(--primary-color);
+    margin-bottom: 0.25rem;
+}
+
+.vietqr-amount-label {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+}
+
+/* ── Steps ── */
+.vietqr-steps {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    counter-reset: step;
+}
+
+.vietqr-steps li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.6rem 0;
+    font-size: 0.88rem;
+    color: var(--text-primary);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.vietqr-steps li:last-child {
+    border-bottom: none;
+}
+
+.step-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--primary-color);
+    color: #fff;
+    font-size: 0.75rem;
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+/* ── Action buttons ── */
+.vietqr-actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-top: 1.25rem;
+}
+
+.btn-vietqr-orders {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.6rem 1.25rem;
+    border: 1.5px solid var(--border-color);
+    border-radius: var(--border-radius);
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-decoration: none;
+    background: var(--bg-white);
+    transition: border-color 0.2s, background 0.2s;
+}
+
+.btn-vietqr-orders:hover {
+    border-color: var(--primary-color);
+    background: var(--primary-light);
+    color: var(--primary-color);
+}

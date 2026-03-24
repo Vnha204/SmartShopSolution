@@ -1,0 +1,184 @@
+@model CheckoutViewModel
+@{
+    ViewData["Title"] = "Thanh toán";
+    ViewData["ActivePage"] = "Shop";
+    ViewData["BodyClass"] = "position_head";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<section class="checkout-section">
+    <div class="container">
+        <h1 class="checkout-title">Thanh toán</h1>
+
+        <form asp-area="Customers" asp-controller="Checkout" asp-action="PlaceOrder" method="post">
+            @Html.AntiForgeryToken()
+
+            <div class="row g-4">
+
+                <!-- ── Left column: address / payment / note ── -->
+                <div class="col-lg-7">
+
+                    <!-- Address -->
+                    <div class="checkout-card">
+                        <div class="checkout-card-title">
+                            <i class="fa fa-map-marker"></i> Địa chỉ giao hàng
+                        </div>
+
+                        @if (Model.Addresses.Any())
+                        {
+                            <div class="address-radio-list">
+                                @foreach (var addr in Model.Addresses)
+                                {
+                                    var isSelected = Model.SelectedAddressId == addr.Id;
+                                    <label class="address-radio-item @(isSelected ? "selected" : "")">
+                                        <input type="radio" name="SelectedAddressId" value="@addr.Id"
+                                               @(isSelected ? "checked" : "") />
+                                        <div>
+                                            <div class="address-label-name">
+                                                @addr.FullName &nbsp;|&nbsp; @addr.PhoneNumber
+                                                @if (addr.IsDefault)
+                                                {
+                                                    <span class="badge-default">Mặc định</span>
+                                                }
+                                            </div>
+                                            <div class="address-label-detail">
+                                                @addr.StreetLine, @addr.Ward, @addr.District, @addr.Province
+                                            </div>
+                                        </div>
+                                    </label>
+                                }
+                            </div>
+                            <span asp-validation-for="SelectedAddressId" class="text-danger d-block mt-1"></span>
+
+                            <!-- Toggle for adding a new address even when existing ones exist -->
+                            <button type="button" id="btnToggleNewAddress" class="btn-toggle-new-address">
+                                <i class="fa fa-plus"></i> Thêm địa chỉ mới
+                            </button>
+                        }
+
+                        <!-- New address form: always visible when no existing addresses -->
+                        <div id="newAddressForm" @(Model.Addresses.Any() ? "style=\"display:none\"" : "")>
+                            @if (Model.Addresses.Any())
+                            {
+                                <!-- Hidden radio so SelectedAddressId is null when using new address -->
+                                <input type="radio" id="radioNewAddress" name="SelectedAddressId" value="" style="display:none" />
+                            }
+
+                            <div class="row g-2">
+                                <div class="col-sm-6">
+                                    <label class="form-label">Họ và tên <span class="text-danger">*</span></label>
+                                    <input asp-for="NewFullName" class="form-control form-control-sm" placeholder="Nguyễn Văn A" />
+                                    <span asp-validation-for="NewFullName" class="text-danger"></span>
+                                </div>
+                                <div class="col-sm-6">
+                                    <label class="form-label">Số điện thoại <span class="text-danger">*</span></label>
+                                    <input asp-for="NewPhone" class="form-control form-control-sm" placeholder="09xxxxxxxx" />
+                                    <span asp-validation-for="NewPhone" class="text-danger"></span>
+                                </div>
+                                <div class="col-sm-4">
+                                    <label class="form-label">Tỉnh / Thành phố <span class="text-danger">*</span></label>
+                                    <input asp-for="NewProvince" class="form-control form-control-sm" placeholder="Hà Nội" />
+                                    <span asp-validation-for="NewProvince" class="text-danger"></span>
+                                </div>
+                                <div class="col-sm-4">
+                                    <label class="form-label">Quận / Huyện <span class="text-danger">*</span></label>
+                                    <input asp-for="NewDistrict" class="form-control form-control-sm" placeholder="Đống Đa" />
+                                    <span asp-validation-for="NewDistrict" class="text-danger"></span>
+                                </div>
+                                <div class="col-sm-4">
+                                    <label class="form-label">Phường / Xã <span class="text-danger">*</span></label>
+                                    <input asp-for="NewWard" class="form-control form-control-sm" placeholder="Láng Hạ" />
+                                    <span asp-validation-for="NewWard" class="text-danger"></span>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label">Địa chỉ cụ thể <span class="text-danger">*</span></label>
+                                    <input asp-for="NewStreetLine" class="form-control form-control-sm" placeholder="Số nhà, tên đường..." />
+                                    <span asp-validation-for="NewStreetLine" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Payment method -->
+                    <div class="checkout-card">
+                        <div class="checkout-card-title">
+                            <i class="fa fa-credit-card"></i> Phương thức thanh toán
+                        </div>
+                        <div class="payment-option-list">
+                            <label class="payment-option @(Model.PaymentMethod == "cod" ? "selected" : "")">
+                                <input type="radio" asp-for="PaymentMethod" value="cod" />
+                                <div>
+                                    <div class="payment-option-label"><i class="fa fa-money"></i> Tiền mặt (COD)</div>
+                                    <div class="payment-option-sub">Thanh toán khi nhận hàng</div>
+                                </div>
+                            </label>
+                            <label class="payment-option @(Model.PaymentMethod == "vietqr" ? "selected" : "")">
+                                <input type="radio" asp-for="PaymentMethod" value="vietqr" />
+                                <div>
+                                    <div class="payment-option-label"><i class="fa fa-qrcode"></i> VietQR</div>
+                                    <div class="payment-option-sub">Chuyển khoản qua QR code</div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Note -->
+                    <div class="checkout-card">
+                        <div class="checkout-card-title">
+                            <i class="fa fa-sticky-note-o"></i> Ghi chú đơn hàng
+                        </div>
+                        <textarea asp-for="Note" class="form-control form-control-sm"
+                                  rows="3" placeholder="Yêu cầu đặc biệt, hướng dẫn giao hàng..."></textarea>
+                    </div>
+
+                </div>
+
+                <!-- ── Right column: order summary ── -->
+                <div class="col-lg-5">
+                    <div class="checkout-summary">
+                        <div class="checkout-summary-title">Tóm tắt đơn hàng</div>
+
+                        @foreach (var item in Model.Items)
+                        {
+                            <div class="checkout-item-row">
+                                @if (!string.IsNullOrEmpty(item.ThumbnailUrl))
+                                {
+                                    <img src="@item.ThumbnailUrl" class="checkout-item-thumb" alt="@item.ProductName" />
+                                }
+                                else
+                                {
+                                    <div class="checkout-item-thumb-placeholder">
+                                        <i class="fa fa-image"></i>
+                                    </div>
+                                }
+                                <div class="checkout-item-name">@item.ProductName</div>
+                                <div class="checkout-item-qty">x@item.Quantity</div>
+                                <div class="checkout-item-price">@item.Subtotal.ToString("N0")₫</div>
+                            </div>
+                        }
+
+                        <div class="checkout-total-row">
+                            <span>Tổng cộng</span>
+                            <span class="total-amount">@Model.Total.ToString("N0")₫</span>
+                        </div>
+
+                        <button type="submit" class="btn-place-order">
+                            <i class="fa fa-check-circle"></i>
+                            @(Model.PaymentMethod == "vietqr" ? "Tiến hành thanh toán QR" : "Đặt hàng")
+                        </button>
+
+                        <a asp-area="Customers" asp-controller="Cart" asp-action="Index"
+                           class="btn btn-outline-secondary btn-sm w-100 mt-2 text-center">
+                            <i class="fa fa-arrow-left me-1"></i> Quay lại giỏ hàng
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+        </form>
+    </div>
+</section>
+
+@section Scripts {
+    <script src="~/js/customers/checkout.js" asp-append-version="true"></script>
+}
