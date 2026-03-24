@@ -17,14 +17,12 @@ namespace SmartShop.Data.Repository
     {
         protected readonly AppDbContext _context;
         protected readonly DbSet<T> _dbSet;
-        private AppDbContext context;
 
         public Repository(AppDbContext context)
         {
             _context = context;
             _dbSet = context.Set<T>();
         }
-
 
         public async Task<T?> GetByIdAsync(int id)
             => await _dbSet.FindAsync(id);
@@ -37,6 +35,21 @@ namespace SmartShop.Data.Repository
 
         public async Task<T?> FirstOrDefaultAsync(Expression<Func<T, bool>> predicate)
             => await _dbSet.FirstOrDefaultAsync(predicate);
+
+        public async Task<bool> AnyAsync(Expression<Func<T, bool>> predicate)
+            => await _dbSet.AnyAsync(predicate);
+
+        public async Task<int> CountAsync()
+            => await _dbSet.CountAsync();
+
+        public async Task<int> CountAsync(Expression<Func<T, bool>> predicate)
+            => await _dbSet.CountAsync(predicate);
+
+        public IQueryable<T> Query()
+            => _dbSet.AsQueryable();
+
+        public IQueryable<T> Query(Expression<Func<T, bool>> predicate)
+            => _dbSet.Where(predicate);
 
         public async Task AddAsync(T entity)
             => await _dbSet.AddAsync(entity);

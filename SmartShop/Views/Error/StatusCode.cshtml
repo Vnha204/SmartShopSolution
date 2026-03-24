@@ -1,0 +1,18 @@
+@model int
+@{
+    ViewData["Title"] = $"Lỗi {Model}";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var message = Model switch
+    {
+        404 => "Không tìm thấy trang bạn yêu cầu.",
+        403 => "Bạn không có quyền truy cập trang này.",
+        401 => "Bạn cần đăng nhập để tiếp tục.",
+        _   => "Đã xảy ra lỗi trong quá trình xử lý yêu cầu."
+    };
+}
+
+<div class="container" style="padding: 60px 0; text-align: center;">
+    <h1 class="text-danger" style="font-size: 72px; font-weight: 700;">@Model</h1>
+    <h2>@message</h2>
+    <a href="/" class="btn btn-primary mt-3">Về trang chủ</a>
+</div>

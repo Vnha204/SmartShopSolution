@@ -65,5 +65,19 @@ namespace SmartShop.Data.Repository
                 .OrderByDescending(p => p.CreatedAt)
                 .Take(take)
                 .ToListAsync();
+
+        public async Task<Product?> GetWithFullDetailsAsync(int id)
+            => await _context.Products
+                .Include(p => p.ProductCategories).ThenInclude(pc => pc.Category)
+                .Include(p => p.ProductAttributeValues)
+                    .ThenInclude(pav => pav.AttributeValue)
+                        .ThenInclude(av => av.Attribute)
+                .FirstOrDefaultAsync(p => p.Id == id);
+
+        public async Task<Product?> GetWithCategoriesAndAttributesAsync(int id)
+            => await _context.Products
+                .Include(p => p.ProductCategories)
+                .Include(p => p.ProductAttributeValues)
+                .FirstOrDefaultAsync(p => p.Id == id);
     }
 }

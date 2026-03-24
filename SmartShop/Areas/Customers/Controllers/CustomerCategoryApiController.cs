@@ -1,34 +1,29 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using SmartShop.Data.Data;
+using SmartShop.Data.Repository.IRepository;
 using SmartShop.Models;
 
 namespace SmartShop.Areas.Customers.Controllers
 {
-    /// <summary>
-    /// Lightweight JSON API used by the Customer Shop view
-    /// for the hierarchical category drill-down sidebar.
-    ///
-    /// Routes (all under /Customers/api/categories/...):
-    ///   GET /Customers/api/categories/children?parentId=   → child categories
-    ///   GET /Customers/api/categories/breadcrumb?categoryId=  → root→leaf path
-    /// </summary>
     [Area("Customers")]
     [Route("Customers/api/categories")]
     public class CustomerCategoryApiController : Controller
     {
-        private readonly AppDbContext _db;
-        public CustomerCategoryApiController(AppDbContext db) => _db = db;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly ILogger<CustomerCategoryApiController> _logger;
 
-        // =====================================================================
+        public CustomerCategoryApiController(IUnitOfWork unitOfWork,
+            ILogger<CustomerCategoryApiController> logger)
+        {
+            _unitOfWork = unitOfWork;
+            _logger = logger;
+        }
+
         // GET /Customers/api/categories/children?parentId=
-        // Returns direct active children of parentId (or root when omitted).
-        // =====================================================================
         [HttpGet("children")]
         public async Task<IActionResult> GetChildren([FromQuery] int? parentId)
         {
-            var allCats = await _db.Categories
-                .Where(c => c.IsActive)
+            var allCats = await _unitOfWork.Categories.Query(c => c.IsActive)
                 .OrderBy(c => c.SortOrder)
                 .ThenBy(c => c.Name)
                 .ToListAsync();
@@ -47,22 +42,14 @@ namespace SmartShop.Areas.Customers.Controllers
             return Json(children);
         }
 
-        // =====================================================================
         // GET /Customers/api/categories/breadcrumb?categoryId=
-        // Returns ordered array root → leaf for the given category.
-        // =====================================================================
         [HttpGet("breadcrumb")]
         public async Task<IActionResult> GetBreadcrumb([FromQuery] int categoryId)
         {
-            var allCats = await _db.Categories
-                .Where(c => c.IsActive)
-                .ToListAsync();
-
+            var allCats = await _unitOfWork.Categories.Query(c => c.IsActive).ToListAsync();
             var breadcrumb = BuildBreadcrumb(allCats, categoryId);
             return Json(breadcrumb.Select(c => new { id = c.Id, name = c.Name, slug = c.Slug }));
         }
-
-        // ── Private helpers ───────────────────────────────────────────────────
 
         private static List<Category> BuildBreadcrumb(List<Category> allCats, int categoryId)
         {

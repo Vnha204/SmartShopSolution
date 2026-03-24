@@ -10,13 +10,14 @@ namespace SmartShop.Areas.Admin.Controllers
     public class MemberController : Controller
     {
         private readonly UserManager<AppUser> _userManager;
+        private readonly ILogger<MemberController> _logger;
 
-        public MemberController(UserManager<AppUser> userManager)
+        public MemberController(UserManager<AppUser> userManager, ILogger<MemberController> logger)
         {
             _userManager = userManager;
+            _logger = logger;
         }
 
-        // GET: Admin/Member
         public async Task<IActionResult> Index()
         {
             var users = _userManager.Users
@@ -29,11 +30,11 @@ namespace SmartShop.Areas.Admin.Controllers
                 var roles = await _userManager.GetRolesAsync(u);
                 model.Add(new MemberListItem
                 {
-                    Id = u.Id,
-                    Email = u.Email ?? string.Empty,
-                    FullName = u.FullName,
-                    Role = roles.FirstOrDefault() ?? "User",
-                    CreatedAt = u.CreatedAt,
+                    Id         = u.Id,
+                    Email      = u.Email ?? string.Empty,
+                    FullName   = u.FullName,
+                    Role       = roles.FirstOrDefault() ?? "User",
+                    CreatedAt  = u.CreatedAt,
                     IsLockedOut = u.LockoutEnd.HasValue && u.LockoutEnd > DateTimeOffset.UtcNow
                 });
             }
@@ -41,7 +42,6 @@ namespace SmartShop.Areas.Admin.Controllers
             return View(model);
         }
 
-        // POST: Admin/Member/ToggleActive
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ToggleActive(string id)
@@ -53,15 +53,15 @@ namespace SmartShop.Areas.Admin.Controllers
 
             if (isCurrentlyLocked)
             {
-                // Unlock
                 await _userManager.SetLockoutEndDateAsync(user, null);
+                _logger.LogInformation("Account unlocked: {Email}", user.Email);
                 TempData["Success"] = $"Tài khoản {user.Email} đã được kích hoạt lại.";
             }
             else
             {
-                // Lock indefinitely
                 await _userManager.SetLockoutEnabledAsync(user, true);
                 await _userManager.SetLockoutEndDateAsync(user, DateTimeOffset.MaxValue);
+                _logger.LogInformation("Account locked: {Email}", user.Email);
                 TempData["Success"] = $"Tài khoản {user.Email} đã bị vô hiệu hoá.";
             }
 

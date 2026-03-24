@@ -1,0 +1,16 @@
+@model SmartShop.Models.ErrorViewModel
+@{
+    ViewData["Title"] = "Đã xảy ra lỗi";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container" style="padding: 60px 0; text-align: center;">
+    <h1 class="text-danger" style="font-size: 72px; font-weight: 700;">500</h1>
+    <h2>Đã xảy ra lỗi máy chủ</h2>
+    <p class="text-muted">Có lỗi xảy ra trong quá trình xử lý yêu cầu của bạn. Vui lòng thử lại sau.</p>
+    @if (Model.ShowRequestId)
+    {
+        <p><small class="text-muted">Mã yêu cầu: <code>@Model.RequestId</code></small></p>
+    }
+    <a href="/" class="btn btn-primary mt-3">Về trang chủ</a>
+</div>

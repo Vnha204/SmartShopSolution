@@ -24,5 +24,11 @@ namespace SmartShop.Data.Repository.IRepository
 
         /// <summary>Lấy sản phẩm nổi bật.</summary>
         Task<IEnumerable<Product>> GetFeaturedAsync(int take = 8);
+
+        /// <summary>Full eager-load for Details view (Categories→Category, AttributeValues→Attribute).</summary>
+        Task<Product?> GetWithFullDetailsAsync(int id);
+
+        /// <summary>Lighter eager-load for Edit form (ProductCategories + ProductAttributeValues only).</summary>
+        Task<Product?> GetWithCategoriesAndAttributesAsync(int id);
     }
 }

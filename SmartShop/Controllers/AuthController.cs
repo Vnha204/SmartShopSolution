@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using SmartShop.Models;
 using SmartShop.Models.ViewModels;
@@ -10,11 +10,14 @@ namespace SmartShop.Controllers
     {
         private readonly UserManager<AppUser> _userManager;
         private readonly SignInManager<AppUser> _signInManager;
+        private readonly ILogger<AuthController> _logger;
 
-        public AuthController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager)
+        public AuthController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager,
+            ILogger<AuthController> logger)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _logger = logger;
         }
 
         // ===== REGISTER =====
@@ -40,6 +43,7 @@ namespace SmartShop.Controllers
 
             if (result.Succeeded)
             {
+                _logger.LogInformation("New customer registered: {Email}", model.Email);
                 await _userManager.AddToRoleAsync(user, SD.Role_Customer);
                 await _signInManager.SignInAsync(user, isPersistent: false);
                 return RedirectToAction("Index", "Home", new { area = "Customers" });
@@ -71,6 +75,7 @@ namespace SmartShop.Controllers
 
             if (result.Succeeded)
             {
+                _logger.LogInformation("User logged in: {Email}", model.Email);
                 var user = await _userManager.FindByEmailAsync(model.Email);
                 if (user != null && await _userManager.IsInRoleAsync(user, SD.Role_Admin))
                     return RedirectToAction("Index", "Dashboard", new { area = "Admin" });

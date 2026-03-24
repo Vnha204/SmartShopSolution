@@ -1,30 +1,35 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using SmartShop.Data.Data;
+using SmartShop.Data.Repository.IRepository;
+using SmartShop.Models;
 using SmartShop.Utility;
 
 namespace SmartShop.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    [Authorize(Roles = SD.Role_Admin)]  // ⚡ Chặn Customer truy cập
+    [Authorize(Roles = SD.Role_Admin)]
     public class DashboardController : Controller
     {
-        private readonly AppDbContext _context;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly UserManager<AppUser> _userManager;
+        private readonly ILogger<DashboardController> _logger;
 
-        public DashboardController(AppDbContext context)
+        public DashboardController(IUnitOfWork unitOfWork, UserManager<AppUser> userManager,
+            ILogger<DashboardController> logger)
         {
-            _context = context;
+            _unitOfWork = unitOfWork;
+            _userManager = userManager;
+            _logger = logger;
         }
 
         public async Task<IActionResult> Index()
         {
-            ViewBag.TotalProducts = await _context.Products.CountAsync();
-            ViewBag.TotalCategories = await _context.Categories.CountAsync();
-            ViewBag.TotalOrders = await _context.Orders.CountAsync();
-            ViewBag.PendingOrders = await _context.Orders
-                .CountAsync(o => o.Status == "pending");
-            ViewBag.TotalUsers = _context.Users.Count();
+            ViewBag.TotalProducts   = await _unitOfWork.Products.CountAsync();
+            ViewBag.TotalCategories = await _unitOfWork.Categories.CountAsync();
+            ViewBag.TotalOrders     = await _unitOfWork.Orders.CountAsync();
+            ViewBag.PendingOrders   = await _unitOfWork.Orders.CountAsync(o => o.Status == "pending");
+            ViewBag.TotalUsers      = _userManager.Users.Count();
 
             return View();
         }

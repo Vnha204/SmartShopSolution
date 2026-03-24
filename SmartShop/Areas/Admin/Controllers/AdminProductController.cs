@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using SmartShop.Data.Data;
+using SmartShop.Data.Repository.IRepository;
 using SmartShop.Models;
 using SmartShop.Models.ViewModels;
 using SmartShop.Services;
@@ -13,8 +13,9 @@ namespace SmartShop.Areas.Admin.Controllers
     [Authorize(Roles = SD.Role_Admin)]
     public class ProductController : Controller
     {
-        private readonly AppDbContext _context;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly ICloudinaryService _cloudinary;
+        private readonly ILogger<ProductController> _logger;
 
         private static readonly HashSet<string> _allowedExtensions =
             new(StringComparer.OrdinalIgnoreCase) { ".jpg", ".jpeg", ".png", ".webp" };
@@ -24,22 +25,22 @@ namespace SmartShop.Areas.Admin.Controllers
 
         private const long _maxFileSize = 5 * 1024 * 1024; // 5 MB
 
-        public ProductController(AppDbContext context, ICloudinaryService cloudinary)
+        public ProductController(IUnitOfWork unitOfWork, ICloudinaryService cloudinary,
+            ILogger<ProductController> logger)
         {
-            _context   = context;
+            _unitOfWork = unitOfWork;
             _cloudinary = cloudinary;
+            _logger = logger;
         }
 
         // =====================================================================
         // GET: Admin/Product
-        // Server-side filtering: name, status, category, attributes, price range
         // =====================================================================
         public async Task<IActionResult> Index(ProductIndexVM filter)
         {
-            var query = _context.Products
+            IQueryable<Product> query = _unitOfWork.Products.Query()
                 .Include(p => p.ProductCategories).ThenInclude(pc => pc.Category)
-                .Include(p => p.ProductAttributeValues).ThenInclude(pav => pav.AttributeValue)
-                .AsQueryable();
+                .Include(p => p.ProductAttributeValues).ThenInclude(pav => pav.AttributeValue);
 
             if (!string.IsNullOrWhiteSpace(filter.SearchTerm))
                 query = query.Where(p => p.Name.Contains(filter.SearchTerm));
@@ -63,8 +64,8 @@ namespace SmartShop.Areas.Admin.Controllers
 
             filter.Products = await query.OrderByDescending(p => p.CreatedAt).ToListAsync();
 
-            filter.AllCategories = await _context.Categories
-                .Where(c => c.IsActive).OrderBy(c => c.Name).ToListAsync();
+            filter.AllCategories = await _unitOfWork.Categories.Query(c => c.IsActive)
+                .OrderBy(c => c.Name).ToListAsync();
 
             filter.FilterAttributeGroups = await LoadFilterAttributeGroups();
 
@@ -73,7 +74,6 @@ namespace SmartShop.Areas.Admin.Controllers
 
         // =====================================================================
         // AJAX — GET /Admin/Product/GetAttributesByCategory?categoryId=X
-        // Legacy endpoint kept for backward compat; now includes ancestor attrs.
         // =====================================================================
         [HttpGet]
         public async Task<IActionResult> GetAttributesByCategory(int categoryId)
@@ -95,13 +95,7 @@ namespace SmartShop.Areas.Admin.Controllers
         // =====================================================================
         public async Task<IActionResult> Details(int id)
         {
-            var product = await _context.Products
-                .Include(p => p.ProductCategories).ThenInclude(pc => pc.Category)
-                .Include(p => p.ProductAttributeValues)
-                    .ThenInclude(pav => pav.AttributeValue)
-                        .ThenInclude(av => av.Attribute)
-                .FirstOrDefaultAsync(p => p.Id == id);
-
+            var product = await _unitOfWork.Products.GetWithFullDetailsAsync(id);
             if (product == null) return NotFound();
             return View(product);
         }
@@ -111,7 +105,6 @@ namespace SmartShop.Areas.Admin.Controllers
         // =====================================================================
         public IActionResult Create()
         {
-            // No AllCategories needed — drill-down uses /Admin/api/categories/*
             return View(new ProductFormVM());
         }
 
@@ -122,26 +115,21 @@ namespace SmartShop.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(ProductFormVM vm)
         {
-            // Image is required on Create
             if (vm.ThumbnailFile == null || vm.ThumbnailFile.Length == 0)
                 ModelState.AddModelError("ThumbnailFile", "Vui lòng chọn ảnh sản phẩm.");
             else
                 ValidateThumbnailFile(vm.ThumbnailFile);
 
-            if (await _context.Products.AnyAsync(p => p.Slug == vm.Slug))
+            if (await _unitOfWork.Products.AnyAsync(p => p.Slug == vm.Slug))
                 ModelState.AddModelError("Slug", "Slug này đã tồn tại, vui lòng chọn slug khác.");
 
-            // Category must be a leaf (no active children)
             if (vm.CategoryId.HasValue)
             {
-                var hasChildren = await _context.Categories
-                    .AnyAsync(c => c.ParentId == vm.CategoryId.Value && c.IsActive);
-                if (hasChildren)
+                if (await _unitOfWork.Categories.AnyAsync(c => c.ParentId == vm.CategoryId.Value && c.IsActive))
                     ModelState.AddModelError("CategoryId",
                         "Vui lòng chọn danh mục cấp cuối (danh mục không có danh mục con).");
             }
 
-            // Validate attribute values belong to applicable attributes
             if (vm.CategoryId.HasValue && vm.SelectedAttributeValueIds.Any(id => id > 0))
                 await ValidateAttributeValues(vm);
 
@@ -152,8 +140,7 @@ namespace SmartShop.Areas.Admin.Controllers
                 return View(vm);
             }
 
-            // Upload image to Cloudinary
-            string thumbnailUrl     = string.Empty;
+            string thumbnailUrl      = string.Empty;
             string thumbnailPublicId = string.Empty;
             try
             {
@@ -162,6 +149,7 @@ namespace SmartShop.Areas.Admin.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Image upload failed during product create");
                 ModelState.AddModelError("ThumbnailFile", $"Upload ảnh thất bại: {ex.Message}");
                 if (vm.CategoryId.HasValue)
                     vm.AvailableAttributes = await LoadAttributeGroups(vm.CategoryId.Value);
@@ -170,26 +158,26 @@ namespace SmartShop.Areas.Admin.Controllers
 
             var product = new Product
             {
-                Name               = vm.Name,
-                Slug               = vm.Slug.Trim().ToLower(),
-                Description        = vm.Description,
-                BasePrice          = vm.BasePrice,
-                SalePrice          = vm.SalePrice,
-                ThumbnailUrl       = thumbnailUrl,
-                ThumbnailPublicId  = thumbnailPublicId,
-                Stock              = vm.Stock,
-                IsActive           = vm.IsActive,
-                IsFeatured         = vm.IsFeatured,
-                CreatedAt          = DateTime.UtcNow,
-                UpdatedAt          = DateTime.UtcNow
+                Name              = vm.Name,
+                Slug              = vm.Slug.Trim().ToLower(),
+                Description       = vm.Description,
+                BasePrice         = vm.BasePrice,
+                SalePrice         = vm.SalePrice,
+                ThumbnailUrl      = thumbnailUrl,
+                ThumbnailPublicId = thumbnailPublicId,
+                Stock             = vm.Stock,
+                IsActive          = vm.IsActive,
+                IsFeatured        = vm.IsFeatured,
+                CreatedAt         = DateTime.UtcNow,
+                UpdatedAt         = DateTime.UtcNow
             };
 
-            _context.Products.Add(product);
-            await _context.SaveChangesAsync();
+            await _unitOfWork.Products.AddAsync(product);
+            await _unitOfWork.SaveAsync();
 
             if (vm.CategoryId.HasValue)
             {
-                _context.ProductCategories.Add(new ProductCategory
+                await _unitOfWork.ProductCategories.AddAsync(new ProductCategory
                 {
                     ProductId  = product.Id,
                     CategoryId = vm.CategoryId.Value
@@ -198,14 +186,15 @@ namespace SmartShop.Areas.Admin.Controllers
 
             foreach (var avId in vm.SelectedAttributeValueIds.Where(id => id > 0).Distinct())
             {
-                _context.ProductAttributeValues.Add(new ProductAttributeValue
+                await _unitOfWork.ProductAttributeValues.AddAsync(new ProductAttributeValue
                 {
                     ProductId        = product.Id,
                     AttributeValueId = avId
                 });
             }
 
-            await _context.SaveChangesAsync();
+            await _unitOfWork.SaveAsync();
+            _logger.LogInformation("Product created: {Name} (Id={Id})", product.Name, product.Id);
             TempData["Success"] = $"Sản phẩm \"{product.Name}\" đã được thêm thành công!";
             return RedirectToAction(nameof(Index));
         }
@@ -215,11 +204,7 @@ namespace SmartShop.Areas.Admin.Controllers
         // =====================================================================
         public async Task<IActionResult> Edit(int id)
         {
-            var product = await _context.Products
-                .Include(p => p.ProductCategories)
-                .Include(p => p.ProductAttributeValues)
-                .FirstOrDefaultAsync(p => p.Id == id);
-
+            var product = await _unitOfWork.Products.GetWithCategoriesAndAttributesAsync(id);
             if (product == null) return NotFound();
 
             var primaryCategoryId = product.ProductCategories
@@ -243,7 +228,6 @@ namespace SmartShop.Areas.Admin.Controllers
                     .Select(pav => pav.AttributeValueId).ToList()
             };
 
-            // Pre-load attribute groups (with ancestor union) for server-side render
             if (vm.CategoryId.HasValue)
                 vm.AvailableAttributes = await LoadAttributeGroups(vm.CategoryId.Value);
 
@@ -259,24 +243,19 @@ namespace SmartShop.Areas.Admin.Controllers
         {
             if (id != vm.Id) return BadRequest();
 
-            // Validate new image only when one is supplied
             if (vm.ThumbnailFile != null && vm.ThumbnailFile.Length > 0)
                 ValidateThumbnailFile(vm.ThumbnailFile);
 
-            if (await _context.Products.AnyAsync(p => p.Slug == vm.Slug && p.Id != id))
+            if (await _unitOfWork.Products.AnyAsync(p => p.Slug == vm.Slug && p.Id != id))
                 ModelState.AddModelError("Slug", "Slug này đã tồn tại, vui lòng chọn slug khác.");
 
-            // Category must be a leaf
             if (vm.CategoryId.HasValue)
             {
-                var hasChildren = await _context.Categories
-                    .AnyAsync(c => c.ParentId == vm.CategoryId.Value && c.IsActive);
-                if (hasChildren)
+                if (await _unitOfWork.Categories.AnyAsync(c => c.ParentId == vm.CategoryId.Value && c.IsActive))
                     ModelState.AddModelError("CategoryId",
                         "Vui lòng chọn danh mục cấp cuối (danh mục không có danh mục con).");
             }
 
-            // Validate attribute values
             if (vm.CategoryId.HasValue && vm.SelectedAttributeValueIds.Any(id2 => id2 > 0))
                 await ValidateAttributeValues(vm);
 
@@ -284,35 +263,26 @@ namespace SmartShop.Areas.Admin.Controllers
             {
                 if (vm.CategoryId.HasValue)
                     vm.AvailableAttributes = await LoadAttributeGroups(vm.CategoryId.Value);
-                // Re-populate ThumbnailUrl so existing image preview still shows
-                var existing = await _context.Products.FindAsync(id);
+                var existing = await _unitOfWork.Products.GetByIdAsync(id);
                 if (existing != null) vm.ThumbnailUrl = existing.ThumbnailUrl;
                 return View(vm);
             }
 
-            var product = await _context.Products
-                .Include(p => p.ProductCategories)
-                .Include(p => p.ProductAttributeValues)
-                .FirstOrDefaultAsync(p => p.Id == id);
-
+            var product = await _unitOfWork.Products.GetWithCategoriesAndAttributesAsync(id);
             if (product == null) return NotFound();
 
-            // Handle image replacement
             if (vm.ThumbnailFile != null && vm.ThumbnailFile.Length > 0)
             {
                 try
                 {
-                    // Delete old Cloudinary asset (best-effort)
                     await _cloudinary.DeleteImageAsync(product.ThumbnailPublicId);
-
-                    // Upload new
-                    var (newUrl, newPublicId) =
-                        await _cloudinary.UploadImageAsync(vm.ThumbnailFile);
+                    var (newUrl, newPublicId) = await _cloudinary.UploadImageAsync(vm.ThumbnailFile);
                     product.ThumbnailUrl      = newUrl;
                     product.ThumbnailPublicId = newPublicId;
                 }
                 catch (Exception ex)
                 {
+                    _logger.LogError(ex, "Image upload failed during product edit id={Id}", id);
                     ModelState.AddModelError("ThumbnailFile", $"Upload ảnh thất bại: {ex.Message}");
                     vm.AvailableAttributes = vm.CategoryId.HasValue
                         ? await LoadAttributeGroups(vm.CategoryId.Value)
@@ -321,41 +291,39 @@ namespace SmartShop.Areas.Admin.Controllers
                     return View(vm);
                 }
             }
-            // else: no new file → keep existing product.ThumbnailUrl / ThumbnailPublicId
 
-            product.Name      = vm.Name;
-            product.Slug      = vm.Slug.Trim().ToLower();
+            product.Name        = vm.Name;
+            product.Slug        = vm.Slug.Trim().ToLower();
             product.Description = vm.Description;
-            product.BasePrice = vm.BasePrice;
-            product.SalePrice = vm.SalePrice;
-            product.Stock     = vm.Stock;
-            product.IsActive  = vm.IsActive;
-            product.IsFeatured = vm.IsFeatured;
-            product.UpdatedAt = DateTime.UtcNow;
+            product.BasePrice   = vm.BasePrice;
+            product.SalePrice   = vm.SalePrice;
+            product.Stock       = vm.Stock;
+            product.IsActive    = vm.IsActive;
+            product.IsFeatured  = vm.IsFeatured;
+            product.UpdatedAt   = DateTime.UtcNow;
 
-            // Sync category
-            _context.ProductCategories.RemoveRange(product.ProductCategories);
+            _unitOfWork.ProductCategories.RemoveRange(product.ProductCategories);
             if (vm.CategoryId.HasValue)
             {
-                _context.ProductCategories.Add(new ProductCategory
+                await _unitOfWork.ProductCategories.AddAsync(new ProductCategory
                 {
                     ProductId  = id,
                     CategoryId = vm.CategoryId.Value
                 });
             }
 
-            // Sync attribute values (remove-all then re-insert avoids unique-index conflicts)
-            _context.ProductAttributeValues.RemoveRange(product.ProductAttributeValues);
+            _unitOfWork.ProductAttributeValues.RemoveRange(product.ProductAttributeValues);
             foreach (var avId in vm.SelectedAttributeValueIds.Where(x => x > 0).Distinct())
             {
-                _context.ProductAttributeValues.Add(new ProductAttributeValue
+                await _unitOfWork.ProductAttributeValues.AddAsync(new ProductAttributeValue
                 {
                     ProductId        = id,
                     AttributeValueId = avId
                 });
             }
 
-            await _context.SaveChangesAsync();
+            await _unitOfWork.SaveAsync();
+            _logger.LogInformation("Product updated: {Name} (Id={Id})", product.Name, product.Id);
             TempData["Success"] = $"Sản phẩm \"{product.Name}\" đã được cập nhật!";
             return RedirectToAction(nameof(Index));
         }
@@ -365,7 +333,7 @@ namespace SmartShop.Areas.Admin.Controllers
         // =====================================================================
         public async Task<IActionResult> Delete(int id)
         {
-            var product = await _context.Products
+            var product = await _unitOfWork.Products.Query()
                 .Include(p => p.ProductCategories).ThenInclude(pc => pc.Category)
                 .FirstOrDefaultAsync(p => p.Id == id);
 
@@ -380,25 +348,21 @@ namespace SmartShop.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var product = await _context.Products
-                .Include(p => p.ProductCategories)
-                .Include(p => p.ProductAttributeValues)
-                .FirstOrDefaultAsync(p => p.Id == id);
-
+            var product = await _unitOfWork.Products.GetWithCategoriesAndAttributesAsync(id);
             if (product == null) return NotFound();
 
-            // Delete Cloudinary image (best-effort — do not block deletion on failure)
             try
             {
                 await _cloudinary.DeleteImageAsync(product.ThumbnailPublicId);
             }
-            catch
+            catch (Exception ex)
             {
-                // intentionally swallowed — image cleanup failure should not prevent product removal
+                _logger.LogWarning(ex, "Cloudinary delete failed for product id={Id}, continuing", id);
             }
 
-            _context.Products.Remove(product);
-            await _context.SaveChangesAsync();
+            _unitOfWork.Products.Remove(product);
+            await _unitOfWork.SaveAsync();
+            _logger.LogInformation("Product deleted: {Name} (Id={Id})", product.Name, product.Id);
             TempData["Success"] = $"Sản phẩm \"{product.Name}\" đã được xoá!";
             return RedirectToAction(nameof(Index));
         }
@@ -407,27 +371,17 @@ namespace SmartShop.Areas.Admin.Controllers
         // Private helpers
         // =====================================================================
 
-        /// <summary>
-        /// Loads attribute groups for <paramref name="categoryId"/> PLUS all its
-        /// ancestor categories (union), so attributes defined on parent categories
-        /// are inherited by child products.  De-duplication: if the same Attribute
-        /// appears on both leaf and ancestor, the leaf-level mapping wins.
-        /// </summary>
         private async Task<List<AttributeGroupVM>> LoadAttributeGroups(int categoryId)
         {
-            var allCats = await _context.Categories
-                .Where(c => c.IsActive)
-                .ToListAsync();
-
+            var allCats = await _unitOfWork.Categories.Query(c => c.IsActive).ToListAsync();
             var ancestorIds = GetAncestorIds(allCats, categoryId);
 
-            var catAttrs = await _context.CategoryAttributes
+            var catAttrs = await _unitOfWork.CategoryAttributes.Query()
                 .Where(ca => ancestorIds.Contains(ca.CategoryId))
                 .Include(ca => ca.Attribute)
                     .ThenInclude(a => a.Values)
                 .ToListAsync();
 
-            // De-duplicate: closest to leaf takes priority
             var unique = catAttrs
                 .GroupBy(ca => ca.AttributeId)
                 .Select(g => g.OrderBy(ca => ancestorIds.IndexOf(ca.CategoryId)).First())
@@ -449,13 +403,9 @@ namespace SmartShop.Areas.Admin.Controllers
             }).ToList();
         }
 
-        /// <summary>
-        /// All attribute groups that have at least one CategoryAttribute mapping —
-        /// used for the Index filter panel.
-        /// </summary>
         private async Task<List<AttributeGroupVM>> LoadFilterAttributeGroups()
         {
-            var attrs = await _context.Attributes
+            var attrs = await _unitOfWork.Attributes.Query()
                 .Include(a => a.Values)
                 .Include(a => a.CategoryAttributes)
                 .Where(a => a.CategoryAttributes.Any())
@@ -475,9 +425,6 @@ namespace SmartShop.Areas.Admin.Controllers
             }).ToList();
         }
 
-        /// <summary>
-        /// Returns [leaf_id, parent_id, …, root_id] for the given category.
-        /// </summary>
         private static List<int> GetAncestorIds(List<Category> allCats, int categoryId)
         {
             var ids     = new List<int>();
@@ -492,9 +439,6 @@ namespace SmartShop.Areas.Admin.Controllers
             return ids;
         }
 
-        /// <summary>
-        /// Validates file size and type; adds ModelState errors on failure.
-        /// </summary>
         private void ValidateThumbnailFile(IFormFile file)
         {
             var ext = Path.GetExtension(file.FileName);
@@ -506,34 +450,25 @@ namespace SmartShop.Areas.Admin.Controllers
             }
             if (!_allowedContentTypes.Contains(file.ContentType))
             {
-                ModelState.AddModelError("ThumbnailFile",
-                    "Loại tệp không được hỗ trợ.");
+                ModelState.AddModelError("ThumbnailFile", "Loại tệp không được hỗ trợ.");
                 return;
             }
             if (file.Length > _maxFileSize)
-            {
-                ModelState.AddModelError("ThumbnailFile",
-                    "Ảnh không được vượt quá 5 MB.");
-            }
+                ModelState.AddModelError("ThumbnailFile", "Ảnh không được vượt quá 5 MB.");
         }
 
-        /// <summary>
-        /// Validates that every submitted AttributeValueId belongs to an attribute
-        /// that is applicable to the product's chosen category (+ its ancestors).
-        /// Adds a ModelState error if any value is out of scope.
-        /// </summary>
         private async Task ValidateAttributeValues(ProductFormVM vm)
         {
-            var allCats     = await _context.Categories.Where(c => c.IsActive).ToListAsync();
+            var allCats     = await _unitOfWork.Categories.Query(c => c.IsActive).ToListAsync();
             var ancestorIds = GetAncestorIds(allCats, vm.CategoryId!.Value);
 
-            var applicableAttrIds = await _context.CategoryAttributes
+            var applicableAttrIds = await _unitOfWork.CategoryAttributes.Query()
                 .Where(ca => ancestorIds.Contains(ca.CategoryId))
                 .Select(ca => ca.AttributeId)
                 .Distinct()
                 .ToListAsync();
 
-            var validValueIds = (await _context.AttributeValues
+            var validValueIds = (await _unitOfWork.AttributeValues.Query()
                 .Where(v => applicableAttrIds.Contains(v.AttributeId))
                 .Select(v => v.Id)
                 .ToListAsync()).ToHashSet();

@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using SmartShop.Data.Data;
+using SmartShop.Data.Repository.IRepository;
 using SmartShop.Models;
 using SmartShop.Utility;
 
@@ -11,16 +11,19 @@ namespace SmartShop.Areas.Admin.Controllers
     [Authorize(Roles = SD.Role_Admin)]
     public class CategoryAttributeController : Controller
     {
-        private readonly AppDbContext _context;
-        public CategoryAttributeController(AppDbContext context) => _context = context;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly ILogger<CategoryAttributeController> _logger;
 
-        // =====================================================================
+        public CategoryAttributeController(IUnitOfWork unitOfWork, ILogger<CategoryAttributeController> logger)
+        {
+            _unitOfWork = unitOfWork;
+            _logger = logger;
+        }
+
         // GET: Admin/CategoryAttribute
-        // Lists every active category with its mapped-attribute count
-        // =====================================================================
         public async Task<IActionResult> Index()
         {
-            var categories = await _context.Categories
+            var categories = await _unitOfWork.Categories.Query()
                 .Include(c => c.CategoryAttributes)
                 .Include(c => c.Parent)
                 .Where(c => c.IsActive)
@@ -32,62 +35,53 @@ namespace SmartShop.Areas.Admin.Controllers
             return View(categories);
         }
 
-        // =====================================================================
         // GET: Admin/CategoryAttribute/Manage/5
-        // Edit which Attributes are mapped to category {id}
-        // =====================================================================
         public async Task<IActionResult> Manage(int id)
         {
-            var category = await _context.Categories.FindAsync(id);
+            var category = await _unitOfWork.Categories.GetByIdAsync(id);
             if (category == null) return NotFound();
 
-            var allAttributes = await _context.Attributes
+            var allAttributes = await _unitOfWork.Attributes.Query()
                 .OrderBy(a => a.SortOrder)
                 .ThenBy(a => a.DisplayName)
                 .ToListAsync();
 
-            var mappedIds = (await _context.CategoryAttributes
+            var mappedIds = (await _unitOfWork.CategoryAttributes.Query()
                 .Where(ca => ca.CategoryId == id)
                 .Select(ca => ca.AttributeId)
                 .ToListAsync()).ToHashSet();
 
-            ViewBag.Category     = category;
+            ViewBag.Category      = category;
             ViewBag.AllAttributes = allAttributes;
-            ViewBag.MappedIds    = mappedIds;
+            ViewBag.MappedIds     = mappedIds;
             return View();
         }
 
-        // =====================================================================
         // POST: Admin/CategoryAttribute/Manage/5
-        // =====================================================================
         [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> Manage(int id, List<int>? enabledAttributeIds)
         {
-            var category = await _context.Categories.FindAsync(id);
+            var category = await _unitOfWork.Categories.GetByIdAsync(id);
             if (category == null) return NotFound();
 
-            var existing = await _context.CategoryAttributes
-                .Where(ca => ca.CategoryId == id)
-                .ToListAsync();
-
+            var existing    = (await _unitOfWork.CategoryAttributes.FindAsync(ca => ca.CategoryId == id)).ToList();
             var existingIds = existing.Select(ca => ca.AttributeId).ToHashSet();
             var newIds      = (enabledAttributeIds ?? new List<int>()).ToHashSet();
 
-            // Remove unchecked
             var toRemove = existing.Where(ca => !newIds.Contains(ca.AttributeId)).ToList();
-            _context.CategoryAttributes.RemoveRange(toRemove);
+            _unitOfWork.CategoryAttributes.RemoveRange(toRemove);
 
-            // Add newly checked
             foreach (var attrId in newIds.Except(existingIds))
             {
-                _context.CategoryAttributes.Add(new CategoryAttribute
+                await _unitOfWork.CategoryAttributes.AddAsync(new CategoryAttribute
                 {
                     CategoryId  = id,
                     AttributeId = attrId
                 });
             }
 
-            await _context.SaveChangesAsync();
+            await _unitOfWork.SaveAsync();
+            _logger.LogInformation("CategoryAttribute mapping updated for category Id={Id}", id);
             TempData["Success"] = $"Đã cập nhật ánh xạ thuộc tính cho danh mục \"{category.Name}\".";
             return RedirectToAction(nameof(Index));
         }

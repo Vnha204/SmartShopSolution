@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using SmartShop.Data.Data;
+using SmartShop.Data.Repository.IRepository;
 using SmartShop.Models;
 using SmartShop.Models.ViewModels;
 
@@ -9,11 +9,13 @@ namespace SmartShop.Areas.Customers.Controllers
     [Area("Customers")]
     public class ShopController : Controller
     {
-        private readonly AppDbContext _db;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly ILogger<ShopController> _logger;
 
-        public ShopController(AppDbContext db)
+        public ShopController(IUnitOfWork unitOfWork, ILogger<ShopController> logger)
         {
-            _db = db;
+            _unitOfWork = unitOfWork;
+            _logger = logger;
         }
 
         // GET: /Customers/Shop
@@ -34,17 +36,13 @@ namespace SmartShop.Areas.Customers.Controllers
                 Filter      = filter
             };
 
-            // ─────────────────────────────────────────────────────────────────
             // 1. Resolve category + all descendants
-            // ─────────────────────────────────────────────────────────────────
             List<int> descendantCatIds = new();
             List<Category>? allActiveCats = null;
 
             if (filter.SelectedCategoryId.HasValue)
             {
-                allActiveCats = await _db.Categories
-                    .Where(c => c.IsActive)
-                    .ToListAsync();
+                allActiveCats = await _unitOfWork.Categories.Query(c => c.IsActive).ToListAsync();
 
                 descendantCatIds = GetDescendantIds(allActiveCats, filter.SelectedCategoryId.Value);
 
@@ -53,13 +51,8 @@ namespace SmartShop.Areas.Customers.Controllers
                     .ToList();
             }
 
-            // ─────────────────────────────────────────────────────────────────
             // 2. Base query — category descendants + keyword + price
-            //    (attribute filter NOT applied here — used for attribute counts)
-            // ─────────────────────────────────────────────────────────────────
-            var baseQ = _db.Products
-                .Where(p => p.IsActive)
-                .AsQueryable();
+            var baseQ = _unitOfWork.Products.Query(p => p.IsActive);
 
             if (descendantCatIds.Any())
                 baseQ = baseQ.Where(p =>
@@ -74,31 +67,40 @@ namespace SmartShop.Areas.Customers.Controllers
             if (filter.MaxPrice.HasValue)
                 baseQ = baseQ.Where(p => (p.SalePrice ?? p.BasePrice) <= filter.MaxPrice.Value);
 
-            // ─────────────────────────────────────────────────────────────────
-            // 3. Load dynamic attributes with counts from base query context
-            // ─────────────────────────────────────────────────────────────────
-            if (filter.SelectedCategoryId.HasValue)
-            {
-                var baseIds = (await baseQ.Select(p => p.Id).ToListAsync()).ToHashSet();
-                vm.Attributes = await LoadShopAttributes(
-                    filter.SelectedCategoryId.Value,
-                    allActiveCats!,
-                    baseIds,
-                    filter.AttributeValueIds);
-            }
-
-            // ─────────────────────────────────────────────────────────────────
-            // 4. Full filtered query — add attribute filter on top of base
-            // ─────────────────────────────────────────────────────────────────
+            // 4. Full filtered query — AND across attribute groups, OR within each group
             var filteredQ = baseQ;
             var activeAvIds = filter.AttributeValueIds.Where(id => id > 0).ToList();
             if (activeAvIds.Any())
-                filteredQ = filteredQ.Where(p =>
-                    p.ProductAttributeValues.Any(pav => activeAvIds.Contains(pav.AttributeValueId)));
+            {
+                var valueToAttrMap = await _unitOfWork.AttributeValues.Query()
+                    .Where(v => activeAvIds.Contains(v.Id))
+                    .Select(v => new { v.Id, v.AttributeId })
+                    .ToListAsync();
 
-            // ─────────────────────────────────────────────────────────────────
+                var valueIdsByAttr = valueToAttrMap
+                    .GroupBy(x => x.AttributeId)
+                    .ToDictionary(g => g.Key, g => g.Select(x => x.Id).ToList());
+
+                foreach (var kvp in valueIdsByAttr)
+                {
+                    var groupValueIds = kvp.Value; // local capture for EF expression tree
+                    filteredQ = filteredQ.Where(p =>
+                        p.ProductAttributeValues.Any(pav => groupValueIds.Contains(pav.AttributeValueId)));
+                }
+            }
+
+            // 3. Load dynamic attributes with counts from filtered query context (faceted search)
+            if (filter.SelectedCategoryId.HasValue)
+            {
+                var contextIds = (await filteredQ.Select(p => p.Id).ToListAsync()).ToHashSet();
+                vm.Attributes = await LoadShopAttributes(
+                    filter.SelectedCategoryId.Value,
+                    allActiveCats!,
+                    contextIds,
+                    filter.AttributeValueIds);
+            }
+
             // 5. Sort
-            // ─────────────────────────────────────────────────────────────────
             filteredQ = sortBy switch
             {
                 "price-asc"  => filteredQ.OrderBy(p => (p.SalePrice ?? p.BasePrice)),
@@ -107,9 +109,7 @@ namespace SmartShop.Areas.Customers.Controllers
                 _            => filteredQ.OrderByDescending(p => p.CreatedAt)
             };
 
-            // ─────────────────────────────────────────────────────────────────
             // 6. Count + paginate
-            // ─────────────────────────────────────────────────────────────────
             var total = await filteredQ.CountAsync();
             vm.TotalProducts = total;
             vm.TotalPages    = (int)Math.Ceiling(total / (double)pageSize);
@@ -132,23 +132,21 @@ namespace SmartShop.Areas.Customers.Controllers
                 IsFeatured   = p.IsFeatured
             }).ToList();
 
-            // ─────────────────────────────────────────────────────────────────
-            // 7. Price range presets (counted against all active products)
-            // ─────────────────────────────────────────────────────────────────
-            var allActive = _db.Products.Where(p => p.IsActive);
+            // 7. Price range presets
+            var allActiveQ = _unitOfWork.Products.Query(p => p.IsActive);
             vm.PriceRanges = new List<PriceRangeVM>
             {
-                new() { MinPrice = 0,       MaxPrice = 500_000,   Label = "Dưới 500.000₫",
-                        ProductCount = allActive.Count(p => (p.SalePrice ?? p.BasePrice) <= 500_000),
+                new() { MinPrice = 0,         MaxPrice = 500_000,   Label = "Dưới 500.000₫",
+                        ProductCount = allActiveQ.Count(p => (p.SalePrice ?? p.BasePrice) <= 500_000),
                         IsSelected   = filter.MinPrice == 0 && filter.MaxPrice == 500_000 },
-                new() { MinPrice = 500_000, MaxPrice = 1_000_000, Label = "500.000₫ – 1.000.000₫",
-                        ProductCount = allActive.Count(p => (p.SalePrice ?? p.BasePrice) > 500_000 && (p.SalePrice ?? p.BasePrice) <= 1_000_000),
+                new() { MinPrice = 500_000,   MaxPrice = 1_000_000, Label = "500.000₫ – 1.000.000₫",
+                        ProductCount = allActiveQ.Count(p => (p.SalePrice ?? p.BasePrice) > 500_000 && (p.SalePrice ?? p.BasePrice) <= 1_000_000),
                         IsSelected   = filter.MinPrice == 500_000 && filter.MaxPrice == 1_000_000 },
                 new() { MinPrice = 1_000_000, MaxPrice = 2_000_000, Label = "1.000.000₫ – 2.000.000₫",
-                        ProductCount = allActive.Count(p => (p.SalePrice ?? p.BasePrice) > 1_000_000 && (p.SalePrice ?? p.BasePrice) <= 2_000_000),
+                        ProductCount = allActiveQ.Count(p => (p.SalePrice ?? p.BasePrice) > 1_000_000 && (p.SalePrice ?? p.BasePrice) <= 2_000_000),
                         IsSelected   = filter.MinPrice == 1_000_000 && filter.MaxPrice == 2_000_000 },
-                new() { MinPrice = 2_000_000, MaxPrice = null,    Label = "Trên 2.000.000₫",
-                        ProductCount = allActive.Count(p => (p.SalePrice ?? p.BasePrice) > 2_000_000),
+                new() { MinPrice = 2_000_000, MaxPrice = null,      Label = "Trên 2.000.000₫",
+                        ProductCount = allActiveQ.Count(p => (p.SalePrice ?? p.BasePrice) > 2_000_000),
                         IsSelected   = filter.MinPrice == 2_000_000 && filter.MaxPrice == null }
             };
 
@@ -164,10 +162,6 @@ namespace SmartShop.Areas.Customers.Controllers
         // Private helpers
         // =====================================================================
 
-        /// <summary>
-        /// BFS from <paramref name="categoryId"/> downwards; returns the given ID
-        /// plus all descendant IDs.
-        /// </summary>
         private static List<int> GetDescendantIds(List<Category> allCats, int categoryId)
         {
             var result = new List<int>();
@@ -185,9 +179,6 @@ namespace SmartShop.Areas.Customers.Controllers
             return result;
         }
 
-        /// <summary>
-        /// Returns [root, …, leaf] breadcrumb for the given category.
-        /// </summary>
         private static List<Category> BuildBreadcrumb(List<Category> allCats, int categoryId)
         {
             var chain   = new List<Category>();
@@ -202,9 +193,6 @@ namespace SmartShop.Areas.Customers.Controllers
             return chain;
         }
 
-        /// <summary>
-        /// Returns [leaf, parent, …, root] ancestor chain for attribute lookup.
-        /// </summary>
         private static List<int> GetAncestorIds(List<Category> allCats, int categoryId)
         {
             var ids     = new List<int>();
@@ -219,11 +207,6 @@ namespace SmartShop.Areas.Customers.Controllers
             return ids;
         }
 
-        /// <summary>
-        /// Loads attribute groups applicable to <paramref name="categoryId"/> (including
-        /// ancestors) with per-value product counts computed within
-        /// <paramref name="baseProductIds"/> (the pre-attribute-filtered context).
-        /// </summary>
         private async Task<List<AttributeFilterVM>> LoadShopAttributes(
             int categoryId,
             List<Category> allActiveCats,
@@ -232,7 +215,7 @@ namespace SmartShop.Areas.Customers.Controllers
         {
             var ancestorIds = GetAncestorIds(allActiveCats, categoryId);
 
-            var catAttrs = await _db.CategoryAttributes
+            var catAttrs = await _unitOfWork.CategoryAttributes.Query()
                 .Where(ca => ancestorIds.Contains(ca.CategoryId))
                 .Include(ca => ca.Attribute)
                     .ThenInclude(a => a.Values)
@@ -241,7 +224,6 @@ namespace SmartShop.Areas.Customers.Controllers
             if (!catAttrs.Any())
                 return new List<AttributeFilterVM>();
 
-            // De-duplicate: closest to leaf wins
             var uniqueAttrs = catAttrs
                 .GroupBy(ca => ca.AttributeId)
                 .Select(g => g.OrderBy(ca => ancestorIds.IndexOf(ca.CategoryId)).First())
@@ -249,13 +231,11 @@ namespace SmartShop.Areas.Customers.Controllers
                 .ThenBy(ca => ca.Attribute.DisplayName)
                 .ToList();
 
-            // Collect all relevant value IDs so we can do one count query
             var allValueIds = uniqueAttrs
                 .SelectMany(ca => ca.Attribute.Values.Select(v => v.Id))
                 .ToList();
 
-            // Count products (within base context) per attribute value in one DB call
-            var countsByValueId = await _db.ProductAttributeValues
+            var countsByValueId = await _unitOfWork.ProductAttributeValues.Query()
                 .Where(pav => allValueIds.Contains(pav.AttributeValueId)
                            && baseProductIds.Contains(pav.ProductId))
                 .GroupBy(pav => pav.AttributeValueId)

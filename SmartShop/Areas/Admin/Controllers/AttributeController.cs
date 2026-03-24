@@ -1,11 +1,10 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using SmartShop.Data.Data;
+using SmartShop.Data.Repository.IRepository;
 using SmartShop.Models;
 using SmartShop.Utility;
 
-// Alias to avoid collision with System.Attribute
 using ModelAttribute = SmartShop.Models.Attribute;
 
 namespace SmartShop.Areas.Admin.Controllers
@@ -14,15 +13,19 @@ namespace SmartShop.Areas.Admin.Controllers
     [Authorize(Roles = SD.Role_Admin)]
     public class AttributeController : Controller
     {
-        private readonly AppDbContext _context;
-        public AttributeController(AppDbContext context) => _context = context;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly ILogger<AttributeController> _logger;
 
-        // =====================================================================
+        public AttributeController(IUnitOfWork unitOfWork, ILogger<AttributeController> logger)
+        {
+            _unitOfWork = unitOfWork;
+            _logger = logger;
+        }
+
         // GET: Admin/Attribute
-        // =====================================================================
         public async Task<IActionResult> Index()
         {
-            var attrs = await _context.Attributes
+            var attrs = await _unitOfWork.Attributes.Query()
                 .Include(a => a.Values)
                 .Include(a => a.CategoryAttributes)
                 .OrderBy(a => a.SortOrder)
@@ -31,63 +34,55 @@ namespace SmartShop.Areas.Admin.Controllers
             return View(attrs);
         }
 
-        // =====================================================================
         // GET: Admin/Attribute/Create
-        // =====================================================================
         public IActionResult Create() => View(new ModelAttribute());
 
-        // =====================================================================
         // POST: Admin/Attribute/Create
-        // =====================================================================
         [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(ModelAttribute model)
         {
-            if (await _context.Attributes.AnyAsync(a => a.Name == model.Name))
+            if (await _unitOfWork.Attributes.AnyAsync(a => a.Name == model.Name))
                 ModelState.AddModelError("Name", "Tên (Name) thuộc tính đã tồn tại.");
 
             if (!ModelState.IsValid) return View(model);
 
-            _context.Attributes.Add(model);
-            await _context.SaveChangesAsync();
+            await _unitOfWork.Attributes.AddAsync(model);
+            await _unitOfWork.SaveAsync();
+            _logger.LogInformation("Attribute created: {Name}", model.DisplayName);
             TempData["Success"] = $"Thuộc tính \"{model.DisplayName}\" đã được thêm.";
             return RedirectToAction(nameof(Index));
         }
 
-        // =====================================================================
         // GET: Admin/Attribute/Edit/5
-        // =====================================================================
         public async Task<IActionResult> Edit(int id)
         {
-            var attr = await _context.Attributes.FindAsync(id);
+            var attr = await _unitOfWork.Attributes.GetByIdAsync(id);
             if (attr == null) return NotFound();
             return View(attr);
         }
 
-        // =====================================================================
         // POST: Admin/Attribute/Edit/5
-        // =====================================================================
         [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, ModelAttribute model)
         {
             if (id != model.Id) return BadRequest();
 
-            if (await _context.Attributes.AnyAsync(a => a.Name == model.Name && a.Id != id))
+            if (await _unitOfWork.Attributes.AnyAsync(a => a.Name == model.Name && a.Id != id))
                 ModelState.AddModelError("Name", "Tên (Name) thuộc tính đã tồn tại.");
 
             if (!ModelState.IsValid) return View(model);
 
-            _context.Attributes.Update(model);
-            await _context.SaveChangesAsync();
+            _unitOfWork.Attributes.Update(model);
+            await _unitOfWork.SaveAsync();
+            _logger.LogInformation("Attribute updated: {Name} (Id={Id})", model.DisplayName, id);
             TempData["Success"] = $"Đã cập nhật thuộc tính \"{model.DisplayName}\".";
             return RedirectToAction(nameof(Index));
         }
 
-        // =====================================================================
         // GET: Admin/Attribute/Delete/5
-        // =====================================================================
         public async Task<IActionResult> Delete(int id)
         {
-            var attr = await _context.Attributes
+            var attr = await _unitOfWork.Attributes.Query()
                 .Include(a => a.Values)
                     .ThenInclude(v => v.ProductAttributeValues)
                 .Include(a => a.CategoryAttributes)
@@ -96,40 +91,35 @@ namespace SmartShop.Areas.Admin.Controllers
             return View(attr);
         }
 
-        // =====================================================================
         // POST: Admin/Attribute/Delete/5
-        // =====================================================================
         [HttpPost, ActionName("Delete"), ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var attr = await _context.Attributes
+            var attr = await _unitOfWork.Attributes.Query()
                 .Include(a => a.Values)
                     .ThenInclude(v => v.ProductAttributeValues)
                 .Include(a => a.CategoryAttributes)
                 .FirstOrDefaultAsync(a => a.Id == id);
             if (attr == null) return NotFound();
 
-            _context.Attributes.Remove(attr);
-            await _context.SaveChangesAsync();
+            _unitOfWork.Attributes.Remove(attr);
+            await _unitOfWork.SaveAsync();
+            _logger.LogInformation("Attribute deleted: Id={Id}", id);
             TempData["Success"] = "Đã xoá thuộc tính.";
             return RedirectToAction(nameof(Index));
         }
 
-        // =====================================================================
-        // GET: Admin/Attribute/Values/5  — manage AttributeValues for one Attribute
-        // =====================================================================
+        // GET: Admin/Attribute/Values/5
         public async Task<IActionResult> Values(int id)
         {
-            var attr = await _context.Attributes
+            var attr = await _unitOfWork.Attributes.Query()
                 .Include(a => a.Values)
                 .FirstOrDefaultAsync(a => a.Id == id);
             if (attr == null) return NotFound();
             return View(attr);
         }
 
-        // =====================================================================
         // POST: Admin/Attribute/AddValue
-        // =====================================================================
         [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> AddValue(int attributeId, string value,
             string displayName, int sortOrder = 0)
@@ -140,33 +130,31 @@ namespace SmartShop.Areas.Admin.Controllers
                 return RedirectToAction(nameof(Values), new { id = attributeId });
             }
 
-            if (await _context.AttributeValues.AnyAsync(
+            if (await _unitOfWork.AttributeValues.AnyAsync(
                     v => v.AttributeId == attributeId && v.Value == value.Trim()))
             {
                 TempData["Error"] = $"Giá trị \"{value}\" đã tồn tại trong thuộc tính này.";
                 return RedirectToAction(nameof(Values), new { id = attributeId });
             }
 
-            _context.AttributeValues.Add(new AttributeValue
+            await _unitOfWork.AttributeValues.AddAsync(new AttributeValue
             {
                 AttributeId = attributeId,
                 Value       = value.Trim(),
                 DisplayName = displayName.Trim(),
                 SortOrder   = sortOrder
             });
-            await _context.SaveChangesAsync();
+            await _unitOfWork.SaveAsync();
             TempData["Success"] = $"Đã thêm giá trị \"{displayName}\".";
             return RedirectToAction(nameof(Values), new { id = attributeId });
         }
 
-        // =====================================================================
         // POST: Admin/Attribute/EditValue
-        // =====================================================================
         [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> EditValue(int id, string value,
             string displayName, int sortOrder = 0)
         {
-            var val = await _context.AttributeValues.FindAsync(id);
+            var val = await _unitOfWork.AttributeValues.GetByIdAsync(id);
             if (val == null) return NotFound();
 
             if (string.IsNullOrWhiteSpace(value) || string.IsNullOrWhiteSpace(displayName))
@@ -178,25 +166,23 @@ namespace SmartShop.Areas.Admin.Controllers
             val.Value       = value.Trim();
             val.DisplayName = displayName.Trim();
             val.SortOrder   = sortOrder;
-            await _context.SaveChangesAsync();
+            await _unitOfWork.SaveAsync();
             TempData["Success"] = $"Đã cập nhật giá trị \"{displayName}\".";
             return RedirectToAction(nameof(Values), new { id = val.AttributeId });
         }
 
-        // =====================================================================
         // POST: Admin/Attribute/DeleteValue
-        // =====================================================================
         [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteValue(int id)
         {
-            var val = await _context.AttributeValues
+            var val = await _unitOfWork.AttributeValues.Query()
                 .Include(v => v.ProductAttributeValues)
                 .FirstOrDefaultAsync(v => v.Id == id);
             if (val == null) return NotFound();
 
             var attributeId = val.AttributeId;
-            _context.AttributeValues.Remove(val);
-            await _context.SaveChangesAsync();
+            _unitOfWork.AttributeValues.Remove(val);
+            await _unitOfWork.SaveAsync();
             TempData["Success"] = "Đã xoá giá trị thuộc tính.";
             return RedirectToAction(nameof(Values), new { id = attributeId });
         }

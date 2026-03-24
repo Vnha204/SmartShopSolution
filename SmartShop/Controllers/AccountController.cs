@@ -1,8 +1,7 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using SmartShop.Data.Data;
+using SmartShop.Data.Repository.IRepository;
 using SmartShop.Models;
 
 namespace SmartShop.Controllers
@@ -11,12 +10,15 @@ namespace SmartShop.Controllers
     public class AccountController : Controller
     {
         private readonly UserManager<AppUser> _userManager;
-        private readonly AppDbContext _context;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly ILogger<AccountController> _logger;
 
-        public AccountController(UserManager<AppUser> userManager, AppDbContext context)
+        public AccountController(UserManager<AppUser> userManager, IUnitOfWork unitOfWork,
+            ILogger<AccountController> logger)
         {
             _userManager = userManager;
-            _context = context;
+            _unitOfWork = unitOfWork;
+            _logger = logger;
         }
 
         // ===== INDEX - Redirect to Profile =====
@@ -30,7 +32,6 @@ namespace SmartShop.Controllers
             return View(user);
         }
 
-        // AJAX Partial - Profile
         public async Task<IActionResult> ProfilePartial()
         {
             var user = await _userManager.GetUserAsync(User);
@@ -38,7 +39,6 @@ namespace SmartShop.Controllers
             return PartialView("_ProfilePartial", user);
         }
 
-        // AJAX Update Profile
         [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdateProfile(string fullName, string phoneNumber)
         {
@@ -49,12 +49,10 @@ namespace SmartShop.Controllers
             user.PhoneNumber = phoneNumber;
 
             var result = await _userManager.UpdateAsync(user);
-            
+
             if (result.Succeeded)
-            {
                 return Json(new { success = true, message = "Cập nhật thông tin thành công!" });
-            }
-            
+
             return Json(new { success = false, message = "Có lỗi xảy ra. Vui lòng thử lại!" });
         }
 
@@ -64,27 +62,16 @@ namespace SmartShop.Controllers
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return RedirectToAction("Login", "Auth");
 
-            var orders = await _context.Orders
-                .Where(o => o.UserId == user.Id)
-                .Include(o => o.OrderItems)
-                .OrderByDescending(o => o.CreatedAt)
-                .ToListAsync();
-
+            var orders = await _unitOfWork.Orders.GetByUserIdAsync(user.Id);
             return View(orders);
         }
 
-        // AJAX Partial - Orders
         public async Task<IActionResult> OrdersPartial()
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return Unauthorized();
 
-            var orders = await _context.Orders
-                .Where(o => o.UserId == user.Id)
-                .Include(o => o.OrderItems)
-                .OrderByDescending(o => o.CreatedAt)
-                .ToListAsync();
-
+            var orders = await _unitOfWork.Orders.GetByUserIdAsync(user.Id);
             return PartialView("_OrdersPartial", orders);
         }
 
@@ -94,29 +81,19 @@ namespace SmartShop.Controllers
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return RedirectToAction("Login", "Auth");
 
-            var addresses = await _context.Addresses
-                .Where(a => a.UserId == user.Id)
-                .OrderByDescending(a => a.IsDefault)
-                .ToListAsync();
-
+            var addresses = await _unitOfWork.Addresses.GetByUserIdAsync(user.Id);
             return View(addresses);
         }
 
-        // AJAX Partial - Addresses
         public async Task<IActionResult> AddressesPartial()
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return Unauthorized();
 
-            var addresses = await _context.Addresses
-                .Where(a => a.UserId == user.Id)
-                .OrderByDescending(a => a.IsDefault)
-                .ToListAsync();
-
+            var addresses = await _unitOfWork.Addresses.GetByUserIdAsync(user.Id);
             return PartialView("_AddressesPartial", addresses);
         }
 
-        // AJAX Add Address
         [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> AddAddressAjax(Address model)
         {
@@ -124,74 +101,58 @@ namespace SmartShop.Controllers
             if (user == null) return Json(new { success = false, message = "Chưa đăng nhập!" });
 
             if (!ModelState.IsValid)
-            {
                 return Json(new { success = false, message = "Vui lòng điền đầy đủ thông tin!" });
-            }
 
             model.UserId = user.Id;
 
             if (model.IsDefault)
             {
-                var existingAddresses = await _context.Addresses
-                    .Where(a => a.UserId == user.Id)
-                    .ToListAsync();
-                foreach (var addr in existingAddresses)
+                var existing = (await _unitOfWork.Addresses.FindAsync(a => a.UserId == user.Id)).ToList();
+                foreach (var addr in existing)
                     addr.IsDefault = false;
             }
 
-            _context.Addresses.Add(model);
-            await _context.SaveChangesAsync();
+            await _unitOfWork.Addresses.AddAsync(model);
+            await _unitOfWork.SaveAsync();
 
             return Json(new { success = true, message = "Đã thêm địa chỉ thành công!" });
         }
 
-        // AJAX Delete Address
         [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteAddressAjax(int id)
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return Json(new { success = false, message = "Chưa đăng nhập!" });
 
-            var address = await _context.Addresses
-                .FirstOrDefaultAsync(a => a.Id == id && a.UserId == user.Id);
-
+            var address = await _unitOfWork.Addresses.FirstOrDefaultAsync(a => a.Id == id && a.UserId == user.Id);
             if (address == null)
-            {
                 return Json(new { success = false, message = "Địa chỉ không tồn tại!" });
-            }
 
-            var isUsedInOrder = await _context.Orders.AnyAsync(o => o.AddressId == id);
-            if (isUsedInOrder)
-            {
+            if (await _unitOfWork.Addresses.IsUsedInOrderAsync(id))
                 return Json(new { success = false, message = "Không thể xóa địa chỉ đang được sử dụng trong đơn hàng!" });
-            }
 
-            _context.Addresses.Remove(address);
-            await _context.SaveChangesAsync();
+            _unitOfWork.Addresses.Remove(address);
+            await _unitOfWork.SaveAsync();
 
             return Json(new { success = true, message = "Đã xóa địa chỉ thành công!" });
         }
 
-        // AJAX Set Default Address
         [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> SetDefaultAddressAjax(int id)
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return Json(new { success = false, message = "Chưa đăng nhập!" });
 
-            var addresses = await _context.Addresses
-                .Where(a => a.UserId == user.Id)
-                .ToListAsync();
-
+            var addresses = (await _unitOfWork.Addresses.FindAsync(a => a.UserId == user.Id)).ToList();
             foreach (var addr in addresses)
                 addr.IsDefault = (addr.Id == id);
 
-            await _context.SaveChangesAsync();
+            await _unitOfWork.SaveAsync();
 
             return Json(new { success = true, message = "Đã cập nhật địa chỉ mặc định!" });
         }
 
-        // ===== Các method cũ để giữ backward compatibility =====
+        // ===== Backward compatibility (non-AJAX) =====
         [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> AddAddress(Address model)
         {
@@ -208,15 +169,13 @@ namespace SmartShop.Controllers
 
             if (model.IsDefault)
             {
-                var existingAddresses = await _context.Addresses
-                    .Where(a => a.UserId == user.Id)
-                    .ToListAsync();
-                foreach (var addr in existingAddresses)
+                var existing = (await _unitOfWork.Addresses.FindAsync(a => a.UserId == user.Id)).ToList();
+                foreach (var addr in existing)
                     addr.IsDefault = false;
             }
 
-            _context.Addresses.Add(model);
-            await _context.SaveChangesAsync();
+            await _unitOfWork.Addresses.AddAsync(model);
+            await _unitOfWork.SaveAsync();
 
             TempData["Success"] = "Đã thêm địa chỉ thành công!";
             return RedirectToAction(nameof(Addresses));
@@ -228,24 +187,21 @@ namespace SmartShop.Controllers
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return RedirectToAction("Login", "Auth");
 
-            var address = await _context.Addresses
-                .FirstOrDefaultAsync(a => a.Id == id && a.UserId == user.Id);
-
+            var address = await _unitOfWork.Addresses.FirstOrDefaultAsync(a => a.Id == id && a.UserId == user.Id);
             if (address == null)
             {
                 TempData["Error"] = "Địa chỉ không tồn tại!";
                 return RedirectToAction(nameof(Addresses));
             }
 
-            var isUsedInOrder = await _context.Orders.AnyAsync(o => o.AddressId == id);
-            if (isUsedInOrder)
+            if (await _unitOfWork.Addresses.IsUsedInOrderAsync(id))
             {
                 TempData["Error"] = "Không thể xóa địa chỉ đang được sử dụng trong đơn hàng!";
                 return RedirectToAction(nameof(Addresses));
             }
 
-            _context.Addresses.Remove(address);
-            await _context.SaveChangesAsync();
+            _unitOfWork.Addresses.Remove(address);
+            await _unitOfWork.SaveAsync();
 
             TempData["Success"] = "Đã xóa địa chỉ thành công!";
             return RedirectToAction(nameof(Addresses));
@@ -257,14 +213,11 @@ namespace SmartShop.Controllers
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return RedirectToAction("Login", "Auth");
 
-            var addresses = await _context.Addresses
-                .Where(a => a.UserId == user.Id)
-                .ToListAsync();
-
+            var addresses = (await _unitOfWork.Addresses.FindAsync(a => a.UserId == user.Id)).ToList();
             foreach (var addr in addresses)
                 addr.IsDefault = (addr.Id == id);
 
-            await _context.SaveChangesAsync();
+            await _unitOfWork.SaveAsync();
 
             TempData["Success"] = "Đã cập nhật địa chỉ mặc định!";
             return RedirectToAction(nameof(Addresses));

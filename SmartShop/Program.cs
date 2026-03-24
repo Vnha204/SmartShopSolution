@@ -6,11 +6,13 @@ using SmartShop.Data.Repository.IRepository;
 using SmartShop.Models;
 using SmartShop.Services;
 using SmartShop.Utility;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
 // ===== ASP.NET Core Identity =====
 builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
 {
@@ -18,7 +20,7 @@ builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
     options.Password.RequiredLength = 6;
     options.Password.RequireNonAlphanumeric = false;
     options.Password.RequireUppercase = false;
-    options.SignIn.RequireConfirmedAccount = false; // Tắt xác nhận email
+    options.SignIn.RequireConfirmedAccount = false;
 })
 .AddEntityFrameworkStores<AppDbContext>()
 .AddDefaultTokenProviders();
@@ -45,7 +47,6 @@ using (var scope = app.Services.CreateScope())
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<AppUser>>();
 
-    // Tạo roles nếu chưa có
     string[] roles = { SD.Role_Admin, SD.Role_Customer };
     foreach (var role in roles)
     {
@@ -53,7 +54,6 @@ using (var scope = app.Services.CreateScope())
             await roleManager.CreateAsync(new IdentityRole(role));
     }
 
-    // Tạo tài khoản Admin mặc định
     string adminEmail = "admin@smartshop.com";
     if (await userManager.FindByEmailAsync(adminEmail) == null)
     {
@@ -64,19 +64,25 @@ using (var scope = app.Services.CreateScope())
             FullName = "Admin SmartShop",
             EmailConfirmed = true
         };
-        var result = await userManager.CreateAsync(admin, "Admin@123");
+        var adminPassword = builder.Configuration["Seed:AdminPassword"] ?? "Admin@123";
+        var result = await userManager.CreateAsync(admin, adminPassword);
         if (result.Succeeded)
             await userManager.AddToRoleAsync(admin, SD.Role_Admin);
     }
 }
 
-// Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
+// ===== Middleware pipeline =====
+if (app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+    app.UseDeveloperExceptionPage();
+}
+else
+{
+    app.UseExceptionHandler("/Error");
     app.UseHsts();
 }
+
+app.UseStatusCodePagesWithReExecute("/Error/{0}");
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();

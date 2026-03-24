@@ -1,16 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace SmartShop.Data.Repository.IRepository
 {
     public interface IUnitOfWork : IDisposable
     {
         ICategoryRepository Categories { get; }
         IProductRepository Products { get; }
-        //IUserRepository Users { get; }
+        IOrderRepository Orders { get; }
+        IAddressRepository Addresses { get; }
+        IAttributeRepository Attributes { get; }
+        IAttributeValueRepository AttributeValues { get; }
+        ICategoryAttributeRepository CategoryAttributes { get; }
+        IProductCategoryRepository ProductCategories { get; }
+        IProductAttributeValueRepository ProductAttributeValues { get; }
 
         Task<int> SaveAsync();
     }

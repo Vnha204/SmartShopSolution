@@ -1,31 +1,34 @@
-﻿using SmartShop.Data.Data;
+using SmartShop.Data.Data;
 using SmartShop.Data.Repository.IRepository;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SmartShop.Data.Repository
 {
-    /// <summary>
-    /// Unit of Work — gom tất cả repositories, dùng chung 1 DbContext.
-    /// Inject IUnitOfWork vào Controller/Service thay vì inject từng repository riêng lẻ.
-    /// </summary>
     public class UnitOfWork : IUnitOfWork
     {
         private readonly AppDbContext _context;
 
         public ICategoryRepository Categories { get; private set; }
         public IProductRepository Products { get; private set; }
-        //public IUserRepository Users { get; private set; }
+        public IOrderRepository Orders { get; private set; }
+        public IAddressRepository Addresses { get; private set; }
+        public IAttributeRepository Attributes { get; private set; }
+        public IAttributeValueRepository AttributeValues { get; private set; }
+        public ICategoryAttributeRepository CategoryAttributes { get; private set; }
+        public IProductCategoryRepository ProductCategories { get; private set; }
+        public IProductAttributeValueRepository ProductAttributeValues { get; private set; }
 
         public UnitOfWork(AppDbContext context)
         {
             _context = context;
             Categories = new CategoryRepository(_context);
             Products = new ProductRepository(_context);
-            //Users = new UserRepository(_context);
+            Orders = new OrderRepository(_context);
+            Addresses = new AddressRepository(_context);
+            Attributes = new AttributeRepository(_context);
+            AttributeValues = new AttributeValueRepository(_context);
+            CategoryAttributes = new CategoryAttributeRepository(_context);
+            ProductCategories = new ProductCategoryRepository(_context);
+            ProductAttributeValues = new ProductAttributeValueRepository(_context);
         }
 
         public async Task<int> SaveAsync()
