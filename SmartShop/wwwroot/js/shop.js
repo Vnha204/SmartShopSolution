@@ -352,6 +352,91 @@
     }
 
     // =========================================================================
+    // Add to cart
+    // =========================================================================
+
+    /**
+     * Event delegation: works on buttons in the initial grid AND in AJAX-replaced grids.
+     * Sends an AJAX POST to CartController.Add with the antiforgery token from the
+     * <meta name="csrf-token"> tag injected by _Layout.cshtml.
+     * If the user is not authenticated the server redirects to login; we detect this
+     * via response.redirected and forward the browser there.
+     */
+    document.addEventListener('click', function (e) {
+        var btn = e.target.closest('.add_cart');
+        if (!btn) return;
+
+        var productId = btn.dataset.productId;
+        if (!productId) return;
+
+        var meta = document.querySelector('meta[name="csrf-token"]');
+        if (!meta) return; // layout not loaded (should not happen)
+
+        var originalHtml = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i>';
+
+        fetch('/Customers/Cart/Add', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-Requested-With': 'XMLHttpRequest',
+                'RequestVerificationToken': meta.content
+            },
+            body: 'productId=' + encodeURIComponent(productId) + '&quantity=1'
+        })
+        .then(function (r) {
+            // If the server redirected to the login page (unauthenticated), forward the browser
+            if (r.redirected && r.url.indexOf('/auth/login') !== -1) {
+                window.location.href = r.url;
+                return null;
+            }
+            return r.ok ? r.json() : null;
+        })
+        .then(function (data) {
+            if (!data) return;
+            showCartToast(data.success, data.message || (data.success ? 'Đã thêm vào giỏ hàng!' : 'Có lỗi xảy ra.'));
+            if (data.success) incrementCartBadge();
+        })
+        .catch(function () {
+            showCartToast(false, 'Có lỗi xảy ra. Vui lòng thử lại.');
+        })
+        .finally(function () {
+            btn.disabled = false;
+            btn.innerHTML = originalHtml;
+        });
+    });
+
+    /** Show a Bootstrap 5 toast with success (green) or error (red) styling. */
+    function showCartToast(success, message) {
+        var toastEl = document.getElementById('cartToast');
+        var body    = document.getElementById('cartToastBody');
+        if (!toastEl || !body) return;
+
+        body.textContent = message;
+        toastEl.className = 'toast align-items-center border-0 text-white '
+            + (success ? 'bg-success' : 'bg-danger');
+
+        bootstrap.Toast.getOrCreateInstance(toastEl, { delay: 2500 }).show();
+    }
+
+    /** Increment the cart badge in the navbar, or create it if it doesn't exist yet. */
+    function incrementCartBadge() {
+        var badge = document.querySelector('.cart-nav-link .cart-badge');
+        if (badge) {
+            badge.textContent = parseInt(badge.textContent || '0', 10) + 1;
+        } else {
+            var link = document.querySelector('.cart-nav-link');
+            if (link) {
+                var span = document.createElement('span');
+                span.className = 'cart-badge';
+                span.textContent = '1';
+                link.appendChild(span);
+            }
+        }
+    }
+
+    // =========================================================================
     // Price preset helper
     // =========================================================================
 

@@ -307,7 +307,7 @@ button {
 .header {
     width: 100%;
     padding: 30px 30px;
-    background: transparent;
+    background: #03cafc;
     position: absolute;
     z-index: 999;
     border-top: #090102 solid 11px;

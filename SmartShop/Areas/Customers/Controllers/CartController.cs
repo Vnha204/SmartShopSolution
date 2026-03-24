@@ -52,15 +52,19 @@ namespace SmartShop.Areas.Customers.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Add(int productId, int quantity = 1)
         {
+            bool isAjax = Request.Headers["X-Requested-With"] == "XMLHttpRequest";
+
             var product = await _unitOfWork.Products.GetByIdAsync(productId);
             if (product == null || !product.IsActive)
             {
+                if (isAjax) return Json(new { success = false, message = "Sản phẩm không tồn tại." });
                 TempData["Error"] = "Sản phẩm không tồn tại.";
                 return RedirectToAction("Index");
             }
 
             if (product.Stock <= 0)
             {
+                if (isAjax) return Json(new { success = false, message = $"\"{product.Name}\" đã hết hàng." });
                 TempData["Error"] = $"\"{product.Name}\" đã hết hàng.";
                 return RedirectToAction("Index");
             }
@@ -99,6 +103,8 @@ namespace SmartShop.Areas.Customers.Controllers
             await _unitOfWork.SaveAsync();
 
             _logger.LogInformation("User {UserId} added product {ProductId} to cart.", userId, productId);
+
+            if (isAjax) return Json(new { success = true, message = $"Đã thêm \"{product.Name}\" vào giỏ hàng." });
             TempData["Success"] = $"Đã thêm \"{product.Name}\" vào giỏ hàng.";
             return RedirectToAction("Index");
         }
@@ -108,11 +114,13 @@ namespace SmartShop.Areas.Customers.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Update(int cartItemId, int quantity)
         {
+            bool isAjax = Request.Headers["X-Requested-With"] == "XMLHttpRequest";
             var userId = _userManager.GetUserId(User)!;
             var item = await _unitOfWork.CartItems.GetByIdAsync(cartItemId);
 
             if (item == null)
             {
+                if (isAjax) return Json(new { success = false, message = "Không tìm thấy sản phẩm trong giỏ." });
                 TempData["Error"] = "Không tìm thấy sản phẩm trong giỏ.";
                 return RedirectToAction("Index");
             }
@@ -120,6 +128,7 @@ namespace SmartShop.Areas.Customers.Controllers
             var cart = await _unitOfWork.Carts.GetByUserIdAsync(userId);
             if (cart == null || item.CartId != cart.CartId)
             {
+                if (isAjax) return Json(new { success = false, message = "Thao tác không hợp lệ." });
                 TempData["Error"] = "Thao tác không hợp lệ.";
                 return RedirectToAction("Index");
             }
@@ -139,6 +148,7 @@ namespace SmartShop.Areas.Customers.Controllers
             _unitOfWork.Carts.Update(cart);
             await _unitOfWork.SaveAsync();
 
+            if (isAjax) return Json(new { success = true, message = "Đã cập nhật giỏ hàng.", cart = await BuildCartAjaxDataAsync(userId) });
             TempData["Success"] = "Đã cập nhật giỏ hàng.";
             return RedirectToAction("Index");
         }
@@ -148,11 +158,13 @@ namespace SmartShop.Areas.Customers.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Remove(int cartItemId)
         {
+            bool isAjax = Request.Headers["X-Requested-With"] == "XMLHttpRequest";
             var userId = _userManager.GetUserId(User)!;
             var item = await _unitOfWork.CartItems.GetByIdAsync(cartItemId);
 
             if (item == null)
             {
+                if (isAjax) return Json(new { success = false, message = "Không tìm thấy sản phẩm." });
                 TempData["Error"] = "Không tìm thấy sản phẩm.";
                 return RedirectToAction("Index");
             }
@@ -160,6 +172,7 @@ namespace SmartShop.Areas.Customers.Controllers
             var cart = await _unitOfWork.Carts.GetByUserIdAsync(userId);
             if (cart == null || item.CartId != cart.CartId)
             {
+                if (isAjax) return Json(new { success = false, message = "Thao tác không hợp lệ." });
                 TempData["Error"] = "Thao tác không hợp lệ.";
                 return RedirectToAction("Index");
             }
@@ -169,6 +182,7 @@ namespace SmartShop.Areas.Customers.Controllers
             _unitOfWork.Carts.Update(cart);
             await _unitOfWork.SaveAsync();
 
+            if (isAjax) return Json(new { success = true, message = "Đã xóa sản phẩm khỏi giỏ hàng.", cart = await BuildCartAjaxDataAsync(userId) });
             TempData["Success"] = "Đã xóa sản phẩm khỏi giỏ hàng.";
             return RedirectToAction("Index");
         }
@@ -178,6 +192,7 @@ namespace SmartShop.Areas.Customers.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Clear()
         {
+            bool isAjax = Request.Headers["X-Requested-With"] == "XMLHttpRequest";
             var userId = _userManager.GetUserId(User)!;
             var cart = await _unitOfWork.Carts.GetWithItemsAsync(userId);
 
@@ -189,8 +204,32 @@ namespace SmartShop.Areas.Customers.Controllers
                 await _unitOfWork.SaveAsync();
             }
 
+            if (isAjax) return Json(new { success = true, message = "Đã xóa tất cả sản phẩm trong giỏ hàng.", cart = await BuildCartAjaxDataAsync(userId) });
             TempData["Success"] = "Đã xóa tất cả sản phẩm trong giỏ hàng.";
             return RedirectToAction("Index");
+        }
+
+        private async Task<object> BuildCartAjaxDataAsync(string userId)
+        {
+            var cart = await _unitOfWork.Carts.GetWithItemsAsync(userId);
+            if (cart == null || !cart.Items.Any())
+                return new { badgeCount = 0, totalQuantity = 0, total = 0m, isEmpty = true, items = Array.Empty<object>() };
+
+            var items = cart.Items.Select(ci => new
+            {
+                cartItemId  = ci.CartItemId,
+                productName = ci.Product?.Name ?? string.Empty,
+                thumbnailUrl = ci.Product?.ThumbnailUrl,
+                quantity    = ci.Quantity,
+                stock       = ci.Product?.Stock ?? 0,
+                unitPrice   = ci.UnitPriceSnapshot,
+                subtotal    = ci.UnitPriceSnapshot * ci.Quantity
+            }).ToArray();
+
+            var total    = items.Sum(i => i.subtotal);
+            var totalQty = items.Sum(i => i.quantity);
+
+            return new { badgeCount = totalQty, totalQuantity = totalQty, total, isEmpty = false, items };
         }
     }
 }

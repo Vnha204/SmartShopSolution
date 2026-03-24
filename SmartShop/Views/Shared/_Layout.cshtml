@@ -1,4 +1,5 @@
 ﻿@inject Microsoft.Extensions.Configuration.IConfiguration _config
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery _af
 @{
     var bodyClass = ViewData["BodyClass"]?.ToString() ?? "";
 }
@@ -18,6 +19,8 @@
     <link rel="stylesheet" href="~/css/jquery.mCustomScrollbar.min.css" />
     <!-- Favicon -->
     <link rel="icon" href="~/images/fevicon.png" type="image/gif" />
+    <!-- CSRF token for AJAX requests -->
+    <meta name="csrf-token" content="@_af.GetAndStoreTokens(Context).RequestToken" />
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" />
     <!-- Fancybox -->
@@ -134,5 +137,16 @@
     }
     
     @await RenderSectionAsync("Scripts", required: false)
+
+    <!-- Cart toast notification -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index:1200">
+        <div id="cartToast" class="toast align-items-center border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body fw-semibold" id="cartToastBody"></div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto"
+                        data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

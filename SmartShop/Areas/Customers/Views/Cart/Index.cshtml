@@ -2,6 +2,7 @@
 @{
     ViewData["Title"] = "Giỏ hàng";
     ViewData["ActivePage"] = "Cart";
+    ViewData["BodyClass"] = "position_head";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
@@ -9,27 +10,9 @@
     <div class="container">
         <h1 class="cart-title">Giỏ hàng của bạn</h1>
 
-        <!-- Alert messages -->
-        <div class="cart-alerts">
-            @if (TempData["Success"] != null)
-            {
-                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    @TempData["Success"]
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            }
-            @if (TempData["Error"] != null)
-            {
-                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    @TempData["Error"]
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            }
-        </div>
-
         @if (!Model.Items.Any())
         {
-            <div class="cart-empty">
+            <div id="cart-body" class="cart-empty">
                 <i class="fa fa-shopping-cart"></i>
                 <p>Giỏ hàng của bạn đang trống.</p>
                 <a asp-area="Customers" asp-controller="Shop" asp-action="Index" class="btn btn-primary">
@@ -39,7 +22,7 @@
         }
         else
         {
-            <div class="row g-4">
+            <div id="cart-body" class="row g-4">
                 <!-- Cart items -->
                 <div class="col-lg-8">
                     <div class="cart-table">
@@ -56,7 +39,7 @@
                             <tbody>
                                 @foreach (var item in Model.Items)
                                 {
-                                    <tr>
+                                    <tr data-item-id="@item.CartItemId">
                                         <!-- Thumbnail -->
                                         <td style="width:90px">
                                             @if (!string.IsNullOrEmpty(item.ThumbnailUrl))
@@ -83,19 +66,22 @@
 
                                         <!-- Quantity stepper -->
                                         <td>
-                                            <form asp-area="Customers" asp-controller="Cart" asp-action="Update"
-                                                  method="post" class="d-inline">
-                                                @Html.AntiForgeryToken()
-                                                <input type="hidden" name="cartItemId" value="@item.CartItemId" />
-                                                <div class="qty-stepper">
-                                                    <button type="button" class="qty-minus" aria-label="Giảm">−</button>
-                                                    <input type="number" name="quantity" value="@item.Quantity"
-                                                           min="1" max="@item.Stock"
-                                                           data-stock="@item.Stock"
-                                                           aria-label="Số lượng" />
-                                                    <button type="button" class="qty-plus" aria-label="Tăng">+</button>
-                                                </div>
-                                            </form>
+                                            <div class="qty-stepper">
+                                                <button type="button" class="qty-minus"
+                                                        data-item-id="@item.CartItemId"
+                                                        aria-label="Giảm">−</button>
+                                                <input type="number" class="qty-input"
+                                                       value="@item.Quantity"
+                                                       min="1" max="@item.Stock"
+                                                       data-item-id="@item.CartItemId"
+                                                       data-stock="@item.Stock"
+                                                       aria-label="Số lượng"
+                                                       readonly />
+                                                <button type="button" class="qty-plus"
+                                                        data-item-id="@item.CartItemId"
+                                                        data-stock="@item.Stock"
+                                                        aria-label="Tăng">+</button>
+                                            </div>
                                         </td>
 
                                         <!-- Subtotal -->
@@ -105,15 +91,11 @@
 
                                         <!-- Remove -->
                                         <td>
-                                            <form asp-area="Customers" asp-controller="Cart" asp-action="Remove"
-                                                  method="post" class="d-inline">
-                                                @Html.AntiForgeryToken()
-                                                <input type="hidden" name="cartItemId" value="@item.CartItemId" />
-                                                <button type="submit" class="btn-remove-item" title="Xóa"
-                                                        onclick="return confirm('Xóa sản phẩm này?')">
-                                                    <i class="fa fa-trash"></i>
-                                                </button>
-                                            </form>
+                                            <button type="button" class="btn-remove-item"
+                                                    data-item-id="@item.CartItemId"
+                                                    title="Xóa">
+                                                <i class="fa fa-trash"></i>
+                                            </button>
                                         </td>
                                     </tr>
                                 }
@@ -136,26 +118,21 @@
 
                         <div class="cart-summary-row">
                             <span>Số lượng sản phẩm</span>
-                            <span>@Model.TotalQuantity</span>
+                            <span data-field="total-qty">@Model.TotalQuantity</span>
                         </div>
 
                         <div class="cart-summary-total">
                             <span>Tổng cộng</span>
-                            <span>@Model.Total.ToString("N0")₫</span>
+                            <span data-field="total">@Model.Total.ToString("N0")₫</span>
                         </div>
 
                         <a href="#" class="btn-checkout">
                             Tiến hành đặt hàng
                         </a>
 
-                        <form asp-area="Customers" asp-controller="Cart" asp-action="Clear"
-                              method="post" class="mt-2">
-                            @Html.AntiForgeryToken()
-                            <button type="submit" class="btn-clear-cart"
-                                    onclick="return confirm('Xóa toàn bộ giỏ hàng?')">
-                                Xóa tất cả
-                            </button>
-                        </form>
+                        <button type="button" id="btn-clear-cart" class="btn-clear-cart mt-2">
+                            Xóa tất cả
+                        </button>
                     </div>
                 </div>
             </div>

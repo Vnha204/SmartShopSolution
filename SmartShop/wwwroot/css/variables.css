@@ -1,9 +1,9 @@
 /* ===== CSS Variables - SmartShop Theme ===== */
 :root {
     /* Primary Colors */
-    --primary-color: #3498db;
-    --primary-hover: #2980b9;
-    --primary-light: rgba(52, 152, 219, 0.1);
+    --primary-color: #03cafc;
+    --primary-hover: #02a9d4;
+    --primary-light: rgba(3, 202, 252, 0.1);
     
     /* Status Colors */
     --success-color: #28a745;
@@ -206,8 +206,9 @@ order-item,
 /* ===== Navbar Alignment Fix ===== */
 .navigation .navbar-nav {
     display: flex;
-    align-items: center;
+    align-items: center;  /* vertically centre all items in the pill */
     gap: 0.5rem;
+    flex-wrap: nowrap;    /* never let items wrap and collide */
 }
 
 .navigation .navbar-nav .nav-item {
@@ -215,19 +216,15 @@ order-item,
     align-items: center;
 }
 
+/* Prevent long labels from wrapping and causing overlap */
 .navigation .navbar-nav .nav-link {
     display: flex;
     align-items: center;
-    padding: 0.5rem 1rem;
     white-space: nowrap;
 }
 
-/* User dropdown alignment */
-.navigation .navbar-nav .nav-item.dropdown {
-    margin-left: 0.5rem;
-}
-
-.navigation .navbar-nav .nav-item.dropdown .nav-link {
+/* Avatar link: Bootstrap p-0 already sets padding:0, but keep for explicitness */
+.navigation .navbar-nav .nav-item.dropdown > .nav-link {
     padding: 0;
 }
 
