@@ -2,11 +2,31 @@
 @using SmartShop.Models
 @inject SignInManager<AppUser> SignInManager
 @inject UserManager<AppUser> UserManager
+@inject SmartShop.Data.Repository.IRepository.IUnitOfWork _cartUow
 
 @if (SignInManager.IsSignedIn(User))
 {
     var user = await UserManager.GetUserAsync(User);
     var isAdmin = User.IsInRole("Admin");
+
+    var cartCount = 0;
+    if (user != null)
+    {
+        var userCart = await _cartUow.Carts.GetByUserIdAsync(user.Id);
+        if (userCart != null)
+            cartCount = await _cartUow.CartItems.CountAsync(ci => ci.CartId == userCart.CartId);
+    }
+
+    <li class="nav-item ms-2">
+        <a class="nav-link cart-nav-link" asp-area="Customers" asp-controller="Cart" asp-action="Index"
+           title="Giỏ hàng">
+            <i class="fa fa-shopping-cart"></i>
+            @if (cartCount > 0)
+            {
+                <span class="cart-badge">@cartCount</span>
+            }
+        </a>
+    </li>
 
     <li class="nav-item dropdown ms-2">
         <!-- Avatar tròn - căn chỉnh với navbar -->

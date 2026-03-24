@@ -1,8 +1,5 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SmartShop.Models
 {
@@ -17,6 +14,9 @@ namespace SmartShop.Models
         public Product? Product { get; set; }
 
         public int Quantity { get; set; }
+
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal UnitPriceSnapshot { get; set; }
 
         public DateTime AddedAt { get; set; } = DateTime.UtcNow;
     }

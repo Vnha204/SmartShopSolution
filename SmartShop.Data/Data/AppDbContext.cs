@@ -56,6 +56,11 @@ namespace SmartShop.Data.Data
             modelBuilder.Entity<Order>()
                 .HasIndex(o => o.OrderCode)
                 .IsUnique();
+
+            // One cart per user
+            modelBuilder.Entity<Cart>()
+                .HasIndex(c => c.UserId)
+                .IsUnique();
         }
     }
 }

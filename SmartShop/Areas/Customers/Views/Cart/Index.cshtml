@@ -1,0 +1,168 @@
+@model CartViewModel
+@{
+    ViewData["Title"] = "Giỏ hàng";
+    ViewData["ActivePage"] = "Cart";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<section class="cart-section">
+    <div class="container">
+        <h1 class="cart-title">Giỏ hàng của bạn</h1>
+
+        <!-- Alert messages -->
+        <div class="cart-alerts">
+            @if (TempData["Success"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    @TempData["Success"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    @TempData["Error"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+        </div>
+
+        @if (!Model.Items.Any())
+        {
+            <div class="cart-empty">
+                <i class="fa fa-shopping-cart"></i>
+                <p>Giỏ hàng của bạn đang trống.</p>
+                <a asp-area="Customers" asp-controller="Shop" asp-action="Index" class="btn btn-primary">
+                    Tiếp tục mua sắm
+                </a>
+            </div>
+        }
+        else
+        {
+            <div class="row g-4">
+                <!-- Cart items -->
+                <div class="col-lg-8">
+                    <div class="cart-table">
+                        <table class="table mb-0">
+                            <thead>
+                                <tr>
+                                    <th colspan="2">Sản phẩm</th>
+                                    <th>Đơn giá</th>
+                                    <th>Số lượng</th>
+                                    <th class="text-end">Thành tiền</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.Items)
+                                {
+                                    <tr>
+                                        <!-- Thumbnail -->
+                                        <td style="width:90px">
+                                            @if (!string.IsNullOrEmpty(item.ThumbnailUrl))
+                                            {
+                                                <img src="@item.ThumbnailUrl" class="cart-product-thumb" alt="@item.ProductName" />
+                                            }
+                                            else
+                                            {
+                                                <div class="cart-product-thumb-placeholder">
+                                                    <i class="fa fa-image"></i>
+                                                </div>
+                                            }
+                                        </td>
+
+                                        <!-- Name -->
+                                        <td>
+                                            <span class="cart-product-name">@item.ProductName</span>
+                                        </td>
+
+                                        <!-- Unit price -->
+                                        <td>
+                                            <span class="cart-price">@item.UnitPriceSnapshot.ToString("N0")₫</span>
+                                        </td>
+
+                                        <!-- Quantity stepper -->
+                                        <td>
+                                            <form asp-area="Customers" asp-controller="Cart" asp-action="Update"
+                                                  method="post" class="d-inline">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="cartItemId" value="@item.CartItemId" />
+                                                <div class="qty-stepper">
+                                                    <button type="button" class="qty-minus" aria-label="Giảm">−</button>
+                                                    <input type="number" name="quantity" value="@item.Quantity"
+                                                           min="1" max="@item.Stock"
+                                                           data-stock="@item.Stock"
+                                                           aria-label="Số lượng" />
+                                                    <button type="button" class="qty-plus" aria-label="Tăng">+</button>
+                                                </div>
+                                            </form>
+                                        </td>
+
+                                        <!-- Subtotal -->
+                                        <td class="text-end">
+                                            <span class="cart-subtotal">@item.Subtotal.ToString("N0")₫</span>
+                                        </td>
+
+                                        <!-- Remove -->
+                                        <td>
+                                            <form asp-area="Customers" asp-controller="Cart" asp-action="Remove"
+                                                  method="post" class="d-inline">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="cartItemId" value="@item.CartItemId" />
+                                                <button type="submit" class="btn-remove-item" title="Xóa"
+                                                        onclick="return confirm('Xóa sản phẩm này?')">
+                                                    <i class="fa fa-trash"></i>
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="mt-3 d-flex justify-content-between align-items-center">
+                        <a asp-area="Customers" asp-controller="Shop" asp-action="Index"
+                           class="btn btn-outline-secondary btn-sm">
+                            <i class="fa fa-arrow-left me-1"></i> Tiếp tục mua sắm
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Summary -->
+                <div class="col-lg-4">
+                    <div class="cart-summary">
+                        <div class="cart-summary-title">Tóm tắt đơn hàng</div>
+
+                        <div class="cart-summary-row">
+                            <span>Số lượng sản phẩm</span>
+                            <span>@Model.TotalQuantity</span>
+                        </div>
+
+                        <div class="cart-summary-total">
+                            <span>Tổng cộng</span>
+                            <span>@Model.Total.ToString("N0")₫</span>
+                        </div>
+
+                        <a href="#" class="btn-checkout">
+                            Tiến hành đặt hàng
+                        </a>
+
+                        <form asp-area="Customers" asp-controller="Cart" asp-action="Clear"
+                              method="post" class="mt-2">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn-clear-cart"
+                                    onclick="return confirm('Xóa toàn bộ giỏ hàng?')">
+                                Xóa tất cả
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</section>
+
+@section Scripts {
+    <script src="~/js/customers/cart.js" asp-append-version="true"></script>
+}
