@@ -193,7 +193,7 @@ html, body {
     }
 
     .admin-topbar .breadcrumb-item a {
-        color: #4a6cf7;
+        color: #03cafc;
         text-decoration: none;
     }
 
@@ -263,6 +263,11 @@ html, body {
     .stat-card .stat-icon {
         opacity: 0.3;
     }
+
+/* Brand-color stat card (replaces inline background on the orders stat card) */
+.stat-card-brand {
+    background: #03cafc !important;
+}
 
 /* TABLE */
 .admin-table thead th {

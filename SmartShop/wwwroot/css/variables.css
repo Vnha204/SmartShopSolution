@@ -232,3 +232,75 @@ order-item,
 #account-loading {
     display: none !important;
 }
+
+/* Themed link color (uses brand primary color) */
+.text-theme-link {
+    color: var(--primary-color) !important;
+}
+
+/* ===== Unified Button Theme =====
+   Use .btn-theme-primary to replace inline primary button styles.
+   Bootstrap .btn overrides ensure consistent rounded corners.
+   ============================================ */
+.btn-theme-primary {
+    background: var(--primary-color);
+    color: #fff !important;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: background 0.2s ease;
+}
+
+.btn-theme-primary:hover,
+.btn-theme-primary:focus {
+    background: var(--primary-hover);
+    color: #fff !important;
+}
+
+/* Rounded corners for ALL Bootstrap buttons site-wide */
+.btn {
+    border-radius: 8px !important;
+}
+
+/* Ensure Bootstrap btn-primary matches the brand color */
+.btn-primary {
+    background-color: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+}
+
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active {
+    background-color: var(--primary-hover) !important;
+    border-color: var(--primary-hover) !important;
+}
+
+/* Outline primary: brand border/text, fills brand on hover */
+.btn-outline-primary {
+    border-color: var(--primary-color) !important;
+    color: var(--primary-color) !important;
+}
+
+.btn-outline-primary:hover,
+.btn-outline-primary:focus {
+    background-color: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+    color: #fff !important;
+}
+
+/* ===== Shop / customer send_btn inherits rounded via .btn above =====
+   .read_more and .send_btn in style.css already have border-radius.
+   Keep .btn-primary-custom aligned with the theme. ===== */
+.btn-primary-custom {
+    background: var(--primary-color);
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-weight: 600;
+    transition: background 0.2s ease;
+}
+
+.btn-primary-custom:hover {
+    background: var(--primary-hover);
+    color: white;
+}

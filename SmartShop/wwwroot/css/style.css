@@ -423,7 +423,8 @@ button {
 }
 
     .read_more:hover {
-        background: #03cafc;
+        background: var(--primary-color);
+        border-color: var(--primary-color);
         color: #fff !important;
         transition: ease-in all 0.5s;
     }
@@ -505,6 +506,12 @@ button {
 .blu {
     color: #03cafc;
     text-transform: initial;
+}
+
+/* Contact page info icons */
+.contact-icon {
+    color: #03cafc;
+    margin-right: 10px;
 }
 
 .glasses .glasses_box {
@@ -754,7 +761,7 @@ button {
     }
 
 .send_btn {
-    background: #03cafc;
+    background: var(--primary-color);
     font-weight: 600;
     font-size: 18px;
     width: 100%;
@@ -767,7 +774,7 @@ button {
 }
 
     .send_btn:hover {
-        background: #4b4b4c;
+        background: var(--primary-hover);
         transition: ease-in all 0.5s;
     }
 
@@ -846,4 +853,40 @@ ul.location_icon {
 .position_head .glasses,
 .shop {
     margin-bottom: 90px;
+}
+
+/** filter buttons (Glasses page) **/
+
+.filter-btns {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.btn-filter {
+    background: #fff;
+    color: var(--primary-color);
+    border: 2px solid var(--primary-color);
+    border-radius: 30px;
+    padding: 8px 22px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.btn-filter:hover,
+.btn-filter.active {
+    background: var(--primary-color);
+    color: #fff;
+}
+
+/** add to cart button in shop grid **/
+
+.shop_item .send_btn {
+    width: auto;
+    height: auto;
+    padding: 9px 20px;
+    font-size: 14px;
+    border-radius: 30px;
+    text-transform: none;
 }
