@@ -39,6 +39,9 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
 builder.Services.AddSingleton<IQrCodeService, QrCodeService>();
 builder.Services.Configure<VietQRSettings>(builder.Configuration.GetSection("VietQR"));
+builder.Services.AddHttpClient("VietQR");
+builder.Services.AddMemoryCache();
+builder.Services.AddScoped<IVietQrApiClient, VietQrApiClient>();
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();

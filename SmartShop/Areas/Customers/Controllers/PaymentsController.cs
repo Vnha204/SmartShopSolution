@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using SmartShop.Data.Repository.IRepository;
 using SmartShop.Models;
@@ -13,21 +14,27 @@ namespace SmartShop.Areas.Customers.Controllers
     [Authorize]
     public class PaymentsController : Controller
     {
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly IUnitOfWork        _unitOfWork;
         private readonly UserManager<AppUser> _userManager;
-        private readonly IQrCodeService _qrCodeService;
-        private readonly VietQRSettings _vietQR;
+        private readonly IVietQrApiClient   _vietQrApi;
+        private readonly VietQRSettings     _vietQR;
+        private readonly IMemoryCache       _cache;
+        private readonly ILogger<PaymentsController> _logger;
 
         public PaymentsController(
             IUnitOfWork unitOfWork,
             UserManager<AppUser> userManager,
-            IQrCodeService qrCodeService,
-            IOptions<VietQRSettings> vietQROptions)
+            IVietQrApiClient vietQrApi,
+            IOptions<VietQRSettings> vietQROptions,
+            IMemoryCache cache,
+            ILogger<PaymentsController> logger)
         {
-            _unitOfWork    = unitOfWork;
-            _userManager   = userManager;
-            _qrCodeService = qrCodeService;
-            _vietQR        = vietQROptions.Value;
+            _unitOfWork  = unitOfWork;
+            _userManager = userManager;
+            _vietQrApi   = vietQrApi;
+            _vietQR      = vietQROptions.Value;
+            _cache       = cache;
+            _logger      = logger;
         }
 
         // GET /Customers/Payments/VietQR?orderId={id}
@@ -42,46 +49,44 @@ namespace SmartShop.Areas.Customers.Controllers
             if (!string.Equals(order.PaymentMethod, "vietqr", StringComparison.OrdinalIgnoreCase))
                 return RedirectToAction("Details", "Orders", new { orderId });
 
+            var transferContent = $"ORDER_{order.OrderCode}";
+
+            string? qrDataUrl = null;
+            if (!string.Equals(order.PaymentStatus, "paid", StringComparison.OrdinalIgnoreCase))
+            {
+                var cacheKey = $"vietqr_qr_{orderId}";
+                if (!_cache.TryGetValue(cacheKey, out qrDataUrl))
+                {
+                    try
+                    {
+                        qrDataUrl = await _vietQrApi.GetQrDataUrlAsync(
+                            bankBin:     _vietQR.BankBin,
+                            accountNo:   _vietQR.AccountNumber,
+                            accountName: _vietQR.AccountName,
+                            amount:      (long)order.TotalPrice,
+                            addInfo:     transferContent);
+
+                        _cache.Set(cacheKey, qrDataUrl, TimeSpan.FromMinutes(10));
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Failed to fetch VietQR for order {OrderId}", orderId);
+                        // qrDataUrl remains null — view will show an error message instead of the QR
+                    }
+                }
+            }
+
             var vm = new VietQRViewModel
             {
                 Order           = order,
                 BankName        = _vietQR.BankName,
                 AccountNumber   = _vietQR.AccountNumber,
                 AccountName     = _vietQR.AccountName,
-                TransferContent = $"ORDER_{order.OrderCode}"
+                TransferContent = transferContent,
+                QrDataUrl       = qrDataUrl
             };
 
             return View(vm);
-        }
-
-        // GET /Customers/Payments/VietQRImage?orderId={id}
-        // Returns image/png — owner-only
-        public async Task<IActionResult> VietQRImage(int orderId)
-        {
-            var order = await _unitOfWork.Orders.GetByIdAsync(orderId);
-            if (order == null) return NotFound();
-
-            var userId = _userManager.GetUserId(User)!;
-            if (order.UserId != userId) return Forbid();
-
-            var transferContent = $"ORDER_{order.OrderCode}";
-            var payload = BuildQrPayload(order, transferContent);
-            var png = _qrCodeService.GeneratePng(payload, pixelsPerModule: 8);
-
-            return File(png, "image/png");
-        }
-
-        // ── Private helpers ────────────────────────────────────────────────────
-
-        private string BuildQrPayload(Order order, string transferContent)
-        {
-            // Plain-text payload for demo QR — real integration would use EMVCo / VietQR spec
-            return string.Join("\n",
-                $"Ngan hang : {_vietQR.BankName}",
-                $"So TK     : {_vietQR.AccountNumber}",
-                $"Chu TK    : {_vietQR.AccountName}",
-                $"So tien   : {order.TotalPrice:N0} VND",
-                $"Noi dung  : {transferContent}");
         }
     }
 }

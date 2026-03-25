@@ -118,17 +118,24 @@
                         <i class="fa fa-qrcode me-1"></i> Mã QR thanh toán
                     </div>
 
-                    @if (!isPaid)
+                    @if (isPaid)
                     {
-                        <img src="@Url.Action("VietQRImage", "Payments", new { area = "Customers", orderId = Model.Order.Id })"
+                        <div style="padding:2rem 0; color:var(--success-color);">
+                            <i class="fa fa-check-circle fa-4x d-block mb-2"></i>
+                            <span class="fw-semibold">Đã thanh toán</span>
+                        </div>
+                    }
+                    else if (Model.QrDataUrl != null)
+                    {
+                        <img src="@Model.QrDataUrl"
                              class="vietqr-qr-img"
                              alt="VietQR code for ORDER_@Model.Order.OrderCode" />
                     }
                     else
                     {
-                        <div style="padding:2rem 0; color:var(--success-color);">
-                            <i class="fa fa-check-circle fa-4x d-block mb-2"></i>
-                            <span class="fw-semibold">Đã thanh toán</span>
+                        <div class="text-muted small py-3">
+                            <i class="fa fa-exclamation-triangle me-1 text-warning"></i>
+                            Không thể tải mã QR. Vui lòng nhập thủ công thông tin bên trái.
                         </div>
                     }
 
