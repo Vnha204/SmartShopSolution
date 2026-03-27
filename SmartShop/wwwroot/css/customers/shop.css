@@ -1,0 +1,165 @@
+/* ================================================================
+   shop.css — Shop page specific styles
+   Loaded only on the Shop page via @section Styles in Index.cshtml
+   ================================================================ */
+
+/* ─── Sidebar panel ───────────────────────────────────────────── */
+.shop_sidebar {
+    background: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+    position: sticky;
+    top: 110px;
+}
+
+/* ─── Filter groups ───────────────────────────────────────────── */
+.filter_group {
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 16px;
+    margin-bottom: 16px;
+}
+
+.filter_group:last-of-type {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.filter_group h5 {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 10px;
+    padding-bottom: 0;
+}
+
+.filter_group label {
+    cursor: pointer;
+    padding: 3px 0;
+}
+
+.price-presets label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* ─── Sale badge ──────────────────────────────────────────────── */
+.sale-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: var(--danger-color);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 12px;
+    z-index: 1;
+    letter-spacing: 0.3px;
+}
+
+/* ─── Clickable product card ──────────────────────────────────── */
+.shop-card-link {
+    display: block;
+    color: inherit;
+    text-decoration: none !important;
+}
+
+.shop-card-link:hover {
+    color: inherit;
+}
+
+.shop-card {
+    transition: transform 0.22s ease, box-shadow 0.22s ease;
+    cursor: pointer;
+}
+
+.shop-card-link:hover .shop-card {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.13);
+}
+
+/* ─── Search bar above product grid ───────────────────────────── */
+.shop-search-bar {
+    margin-bottom: 16px;
+}
+
+.shop-search-bar .input-group {
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+}
+
+.shop-search-bar .form-control {
+    border-right: none;
+    border-color: var(--border-color);
+    font-size: 14px;
+    padding: 10px 16px;
+    height: 44px;
+}
+
+.shop-search-bar .form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: none;
+    outline: none;
+}
+
+.shop-search-bar .btn-search {
+    background: var(--primary-color);
+    border: 1px solid var(--primary-color);
+    color: #fff;
+    padding: 0 20px;
+    height: 44px;
+    font-size: 15px;
+    transition: background 0.2s ease;
+    cursor: pointer;
+}
+
+.shop-search-bar .btn-search:hover {
+    background: var(--primary-hover);
+    border-color: var(--primary-hover);
+}
+
+/* ─── Circular pagination ─────────────────────────────────────── */
+.shop-pagination .page-link {
+    width: 38px;
+    height: 38px;
+    border-radius: 50% !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    margin: 0 3px;
+    font-weight: 500;
+    border-color: var(--border-color);
+    color: var(--primary-color);
+    transition: all 0.2s ease;
+}
+
+.shop-pagination .page-item.active .page-link {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: #fff;
+    box-shadow: 0 3px 10px rgba(3, 202, 252, 0.35);
+}
+
+.shop-pagination .page-item .page-link:hover {
+    background-color: var(--primary-light);
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+.shop-pagination .page-item.disabled .page-link {
+    color: var(--text-light);
+    border-color: var(--border-color);
+    pointer-events: none;
+    opacity: 0.55;
+}
+
+/* Prev / Next: pill-shaped so the text fits */
+.shop-pagination .page-item:first-child .page-link,
+.shop-pagination .page-item:last-child .page-link {
+    width: auto;
+    padding: 0 16px;
+    border-radius: 22px !important;
+}

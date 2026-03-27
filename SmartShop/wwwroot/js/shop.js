@@ -64,12 +64,16 @@
             el.addEventListener('blur', function () { submitAjax(); });
         });
 
-        // ── Keyword input: submit on Enter ───────────────────────────────────
-        var kwInp = filterForm.querySelector('input[name="keyword"]');
-        if (kwInp) {
-            kwInp.addEventListener('keydown', function (e) {
+        // ── Search bar above grid: submit on Enter or button click ───────────
+        var shopKwInp = document.getElementById('shopKeywordInput');
+        var shopKwBtn = document.getElementById('shopSearchBtn');
+        if (shopKwInp) {
+            shopKwInp.addEventListener('keydown', function (e) {
                 if (e.key === 'Enter') { e.preventDefault(); submitAjax(); }
             });
+        }
+        if (shopKwBtn) {
+            shopKwBtn.addEventListener('click', function () { submitAjax(); });
         }
 
         // ── "Áp dụng bộ lọc" submit button ──────────────────────────────────
@@ -103,6 +107,8 @@
             filterForm.reset();
             var si = document.getElementById('selectedCategoryId');
             if (si) si.value = '';
+            var shopKw = document.getElementById('shopKeywordInput');
+            if (shopKw) shopKw.value = '';
             removeCatDepthsFrom(0);
             renderCatLevel(null, 0);
             history.pushState({}, '', window.location.pathname);
@@ -148,7 +154,8 @@
             if (minInp && minInp.value !== '') params.set('minPrice', minInp.value);
             if (maxInp && maxInp.value !== '') params.set('maxPrice', maxInp.value);
 
-            var kw = filterForm.querySelector('input[name="keyword"]');
+            var kw = document.getElementById('shopKeywordInput')
+                  || filterForm.querySelector('input[name="keyword"]');
             if (kw && kw.value) params.set('keyword', kw.value);
 
             filterForm.querySelectorAll('input[name="attributeValueIds"]:checked')
@@ -195,7 +202,8 @@
 
         var filterForm = document.getElementById('filterForm');
         if (filterForm) {
-            var kw = filterForm.querySelector('input[name="keyword"]');
+            var kw = document.getElementById('shopKeywordInput')
+                  || filterForm.querySelector('input[name="keyword"]');
             if (kw) kw.value = params.get('keyword') || '';
             var minInp = filterForm.querySelector('input[name="minPrice"]');
             if (minInp) minInp.value = params.get('minPrice') || '';

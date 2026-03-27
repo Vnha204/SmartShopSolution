@@ -78,28 +78,29 @@
             @foreach (var product in Model.Products)
             {
                 <div class="col-xl-4 col-lg-4 col-md-6 col-sm-6">
-                    <div class="glasses_box shop_item position-relative">
-                        @if (product.IsOnSale)
-                        {
-                            <span class="sale-badge">-@product.DiscountPercent%</span>
-                        }
-                        <a asp-area="Customers" asp-controller="Shop" asp-action="Detail" asp-route-slug="@product.Slug">
+                    <a class="shop-card-link"
+                       asp-area="Customers"
+                       asp-controller="Shop"
+                       asp-action="Detail"
+                       asp-route-slug="@product.Slug">
+                        <div class="glasses_box shop_item shop-card position-relative">
+                            @if (product.IsOnSale)
+                            {
+                                <span class="sale-badge">-@product.DiscountPercent%</span>
+                            }
                             <figure>
                                 <img src="@(product.ThumbnailUrl ?? "~/images/no-image.png")" alt="@product.Name" />
                             </figure>
-                        </a>
-                        <h3>
-                            <span class="blu">₫</span>@product.DisplayPrice.ToString("N0")
-                            @if (product.IsOnSale)
-                            {
-                                <small class="original-price ms-2">₫@product.BasePrice.ToString("N0")</small>
-                            }
-                        </h3>
-                        <p>@product.Name</p>
-                        <button class="send_btn add_cart" data-product-id="@product.Id">
-                            <i class="fa fa-shopping-cart me-1"></i> Thêm vào giỏ
-                        </button>
-                    </div>
+                            <h3>
+                                <span class="blu">₫</span>@product.DisplayPrice.ToString("N0")
+                                @if (product.IsOnSale)
+                                {
+                                    <small class="original-price ms-2">₫@product.BasePrice.ToString("N0")</small>
+                                }
+                            </h3>
+                            <p>@product.Name</p>
+                        </div>
+                    </a>
                 </div>
             }
         }
@@ -113,10 +114,10 @@
         }
     </div>
 
-    @* Pagination — data-page used by shop.js for AJAX navigation *@
+    @* Pagination *@
     @if (Model?.TotalPages > 1)
     {
-        <nav class="mt-4">
+        <nav class="mt-4 shop-pagination">
             <ul class="pagination justify-content-center">
                 <li class="page-item @(Model.CurrentPage == 1 ? "disabled" : "")">
                     <a class="page-link" data-page="@(Model.CurrentPage - 1)" href="#">Trước</a>

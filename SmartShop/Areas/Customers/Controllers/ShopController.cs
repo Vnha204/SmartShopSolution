@@ -158,6 +158,81 @@ namespace SmartShop.Areas.Customers.Controllers
             return View(vm);
         }
 
+        // GET: /Customers/Shop/Detail/{slug}
+        public async Task<IActionResult> Detail(string slug)
+        {
+            if (string.IsNullOrWhiteSpace(slug))
+                return NotFound();
+
+            var product = await _unitOfWork.Products.GetBySlugAsync(slug);
+            if (product == null)
+                return NotFound();
+
+            // Sold count — sum of quantities across all order items for this product
+            var soldCount = await _unitOfWork.OrderItems
+                .Query(oi => oi.ProductId == product.Id)
+                .SumAsync(oi => (int?)oi.Quantity) ?? 0;
+
+            // Attribute groups for display
+            var attributeGroups = product.ProductAttributeValues
+                .GroupBy(pav => pav.AttributeValue.Attribute,
+                         (attr, pavs) => new ProductAttributeGroupVM
+                         {
+                             AttributeName        = attr.Name,
+                             AttributeDisplayName = attr.DisplayName,
+                             Values = pavs
+                                 .OrderBy(pav => pav.AttributeValue.SortOrder)
+                                 .Select(pav => pav.AttributeValue.DisplayName)
+                                 .ToList()
+                         })
+                .OrderBy(g => g.AttributeName)
+                .ToList();
+
+            // Related products — same primary category, exclude current, max 4
+            var categoryId = product.ProductCategories.FirstOrDefault()?.CategoryId;
+            var relatedProducts = new List<ProductItemVM>();
+            if (categoryId.HasValue)
+            {
+                relatedProducts = await _unitOfWork.Products
+                    .Query(p => p.IsActive
+                             && p.Id != product.Id
+                             && p.ProductCategories.Any(pc => pc.CategoryId == categoryId.Value))
+                    .OrderByDescending(p => p.IsFeatured)
+                    .ThenByDescending(p => p.CreatedAt)
+                    .Take(4)
+                    .Select(p => new ProductItemVM
+                    {
+                        Id           = p.Id,
+                        Name         = p.Name,
+                        Slug         = p.Slug,
+                        ThumbnailUrl = p.ThumbnailUrl,
+                        BasePrice    = p.BasePrice,
+                        SalePrice    = p.SalePrice,
+                        Stock        = p.Stock,
+                        IsFeatured   = p.IsFeatured
+                    })
+                    .ToListAsync();
+            }
+
+            var vm = new ProductDetailVM
+            {
+                Id              = product.Id,
+                Name            = product.Name,
+                Slug            = product.Slug,
+                ThumbnailUrl    = product.ThumbnailUrl,
+                BasePrice       = product.BasePrice,
+                SalePrice       = product.SalePrice,
+                Description     = product.Description,
+                Stock           = product.Stock,
+                IsFeatured      = product.IsFeatured,
+                SoldCount       = soldCount,
+                AttributeGroups = attributeGroups,
+                RelatedProducts = relatedProducts
+            };
+
+            return View(vm);
+        }
+
         // =====================================================================
         // Private helpers
         // =====================================================================

@@ -1,0 +1,195 @@
+@model SmartShop.Models.ViewModels.ProductDetailVM
+@{
+    ViewData["Title"] = Model.Name;
+    ViewData["ActivePage"] = "Shop";
+    ViewData["BodyClass"] = "position_head";
+}
+
+<div class="product-detail-page inner_page">
+    <div class="container">
+
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb" class="product-detail-breadcrumb">
+            <ol class="breadcrumb small mb-0">
+                <li class="breadcrumb-item">
+                    <a asp-area="Customers" asp-controller="Home" asp-action="Index">Trang chủ</a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a asp-area="Customers" asp-controller="Shop" asp-action="Index">Cửa hàng</a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">@Model.Name</li>
+            </ol>
+        </nav>
+
+        <!-- ═══════════════════════════════════════════════════════════════
+             MAIN — Image (left) + Info (right)
+        ════════════════════════════════════════════════════════════════ -->
+        <div class="row product-detail-main g-4">
+
+            <!-- Left column: product image -->
+            <div class="col-lg-5 col-md-6">
+                <div class="product-detail-image-panel">
+                    <img src="@(Model.ThumbnailUrl ?? "/images/no-image.png")"
+                         alt="@Model.Name"
+                         class="product-detail-img" />
+                    @if (Model.IsOnSale)
+                    {
+                        <span class="product-detail-sale-badge">-@Model.DiscountPercent%</span>
+                    }
+                </div>
+            </div>
+
+            <!-- Right column: product information -->
+            <div class="col-lg-7 col-md-6">
+                <div class="product-detail-info">
+
+                    <!-- 1. Product name -->
+                    <h1 class="product-detail-name">@Model.Name</h1>
+
+                    <!-- 2. Sold count -->
+                    <p class="product-detail-sold">
+                        <i class="fa fa-shopping-bag me-1"></i>
+                        Đã bán: <strong>@Model.SoldCount</strong>
+                    </p>
+
+                    <!-- 3. Price -->
+                    <div class="product-detail-price">
+                        <span class="price-current">₫@Model.DisplayPrice.ToString("N0")</span>
+                        @if (Model.IsOnSale)
+                        {
+                            <span class="price-original">₫@Model.BasePrice.ToString("N0")</span>
+                        }
+                    </div>
+
+                    <hr class="product-detail-divider" />
+
+                    <!-- 4. Description -->
+                    @if (!string.IsNullOrWhiteSpace(Model.Description))
+                    {
+                        <p class="product-detail-description">@Model.Description</p>
+                    }
+
+                    <!-- 5. Stock remaining -->
+                    <p class="product-detail-stock @(Model.Stock is > 0 and <= 5 ? "low-stock" : "")">
+                        @if (Model.Stock > 0)
+                        {
+                            <i class="fa fa-cube me-1"></i>
+                            <span>Còn lại: <strong>@Model.Stock</strong> sản phẩm</span>
+                        }
+                        else
+                        {
+                            <i class="fa fa-times-circle me-1"></i>
+                            <span class="text-danger fw-semibold">Hết hàng</span>
+                        }
+                    </p>
+
+                    <!-- Attributes (if any) -->
+                    @if (Model.AttributeGroups.Any())
+                    {
+                        <div class="product-detail-attributes">
+                            @foreach (var group in Model.AttributeGroups)
+                            {
+                                <div class="attr-row">
+                                    <span class="attr-label">@group.AttributeDisplayName:</span>
+                                    <span class="attr-value">@string.Join(", ", group.Values)</span>
+                                </div>
+                            }
+                        </div>
+                    }
+
+                    <!-- Purchase controls -->
+                    @if (Model.Stock > 0)
+                    {
+                        <div class="product-detail-actions">
+                            <!-- Row 1: Quantity selector (left half) + Add to cart (right half) -->
+                            <div class="detail-actions-row">
+                                <div class="detail-actions-qty">
+                                    <div class="qty-stepper">
+                                        <button type="button" class="qty-btn qty-minus" aria-label="Giảm số lượng">−</button>
+                                        <input type="number"
+                                               class="qty-input"
+                                               id="detailQty"
+                                               value="1"
+                                               min="1"
+                                               max="@Model.Stock" />
+                                        <button type="button" class="qty-btn qty-plus" aria-label="Tăng số lượng">+</button>
+                                    </div>
+                                </div>
+                                <div class="detail-actions-cart">
+                                    <button type="button"
+                                            class="btn-detail-cart"
+                                            data-product-id="@Model.Id">
+                                        <i class="fa fa-shopping-cart me-2"></i>Thêm vào giỏ
+                                    </button>
+                                </div>
+                            </div>
+                            <!-- Row 2: Buy now — full width -->
+                            <button type="button"
+                                    class="btn-detail-buynow"
+                                    data-product-id="@Model.Id">
+                                <i class="fa fa-bolt me-2"></i>Mua ngay
+                            </button>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="product-detail-actions">
+                            <button type="button" class="btn-detail-out-of-stock" disabled>
+                                <i class="fa fa-times me-2"></i>Hết hàng
+                            </button>
+                        </div>
+                    }
+
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════════════════
+             RELATED PRODUCTS
+        ════════════════════════════════════════════════════════════════ -->
+        @if (Model.RelatedProducts.Any())
+        {
+            <div class="related-products-section">
+                <h4 class="related-products-title">
+                    <i class="fa fa-th-large me-2"></i>Sản phẩm liên quan
+                </h4>
+                <div class="row g-3">
+                    @foreach (var p in Model.RelatedProducts)
+                    {
+                        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6">
+                            <a class="shop-card-link"
+                               asp-area="Customers"
+                               asp-controller="Shop"
+                               asp-action="Detail"
+                               asp-route-slug="@p.Slug">
+                                <div class="glasses_box shop_item shop-card position-relative">
+                                    @if (p.IsOnSale)
+                                    {
+                                        <span class="sale-badge">-@p.DiscountPercent%</span>
+                                    }
+                                    <figure>
+                                        <img src="@(p.ThumbnailUrl ?? "/images/no-image.png")"
+                                             alt="@p.Name" />
+                                    </figure>
+                                    <h3>
+                                        <span class="blu">₫</span>@p.DisplayPrice.ToString("N0")
+                                        @if (p.IsOnSale)
+                                        {
+                                            <small class="original-price ms-2">₫@p.BasePrice.ToString("N0")</small>
+                                        }
+                                    </h3>
+                                    <p>@p.Name</p>
+                                </div>
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/customers/product-detail.js"></script>
+}

@@ -155,10 +155,6 @@
                     </h6>
                 </div>
                 <div class="card-body">
-                    {{--
-                        Hidden input holds the final selected leaf category ID.
-                        asp-for binds validation; JS sets its value.
-                    --}}
                     <input type="hidden" asp-for="CategoryId" id="CategoryId" />
                     <span asp-validation-for="CategoryId" class="text-danger small d-block mb-2"></span>
 
