@@ -47,6 +47,11 @@
     background: var(--bg-light);
 }
 
+/* ===== Account Page Extra Top Spacing ===== */
+.inner_page.position_head.account-page-section {
+    padding-top: calc(var(--navbar-height) + 2.5rem);
+}
+
 /* ===== Dropdown Menu Fix ===== */
 .dropdown-menu {
     border-radius: var(--border-radius);

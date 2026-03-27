@@ -1,0 +1,155 @@
+@model SmartShop.Models.Order
+@{
+    ViewData["Title"] = "Đơn hàng #" + Model.OrderCode;
+    Layout = "_AccountLayout";
+
+    string StatusBadgeClass(string s) => s switch {
+        "pending"    => "order-badge-pending",
+        "confirmed"  => "order-badge-confirmed",
+        "processing" => "order-badge-processing",
+        "shipping"   => "order-badge-shipping",
+        "delivered"  => "order-badge-delivered",
+        "cancelled"  => "order-badge-cancelled",
+        _            => "order-badge-pending"
+    };
+    string StatusLabel(string s) => SmartShop.Models.OrderStatus.DisplayNames.GetValueOrDefault(s, s);
+
+    string PayBadgeClass(string p) => p switch {
+        "paid"    => "order-badge-paid",
+        "pending" => "order-badge-pending-pay",
+        _         => "order-badge-unpaid"
+    };
+    string PayLabel(string p) => p switch {
+        "paid"    => "Đã thanh toán",
+        "pending" => "Chờ thanh toán",
+        _         => "Chưa thanh toán"
+    };
+}
+
+<a asp-controller="Account" asp-action="Orders" class="btn-back-orders">
+    <i class="fa fa-arrow-left"></i> Quay lại danh sách đơn hàng
+</a>
+
+<div class="d-flex align-items-center gap-3 mb-4">
+    <h5 class="fw-bold mb-0">Đơn hàng #@Model.OrderCode</h5>
+    <span class="order-badge @StatusBadgeClass(Model.Status)">@StatusLabel(Model.Status)</span>
+</div>
+
+<div class="row g-4">
+
+    <!-- Left: items + note -->
+    <div class="col-lg-8">
+
+        <!-- Items -->
+        <div class="order-detail-card">
+            <div class="order-detail-card-title">
+                <i class="fa fa-list"></i> Sản phẩm đặt hàng
+            </div>
+            <table class="table order-items-table mb-0">
+                <thead>
+                    <tr>
+                        <th colspan="2">Sản phẩm</th>
+                        <th class="text-center">SL</th>
+                        <th class="text-end">Đơn giá</th>
+                        <th class="text-end">Thành tiền</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.OrderItems)
+                    {
+                        <tr>
+                            <td style="width:64px">
+                                @if (item.Product?.ThumbnailUrl != null)
+                                {
+                                    <img src="@item.Product.ThumbnailUrl" class="order-item-thumb" alt="@item.ProductName" />
+                                }
+                                else
+                                {
+                                    <div class="order-item-thumb-placeholder">
+                                        <i class="fa fa-image"></i>
+                                    </div>
+                                }
+                            </td>
+                            <td>
+                                <span class="fw-semibold">@item.ProductName</span>
+                            </td>
+                            <td class="text-center">@item.Quantity</td>
+                            <td class="text-end">@item.UnitPrice.ToString("N0")₫</td>
+                            <td class="text-end fw-semibold">@((item.UnitPrice * item.Quantity).ToString("N0"))₫</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+            <div class="order-total-row px-3 pb-1">
+                <span>Tổng cộng</span>
+                <span class="order-total-amount">@Model.TotalPrice.ToString("N0")₫</span>
+            </div>
+        </div>
+
+        <!-- Note -->
+        @if (!string.IsNullOrEmpty(Model.Note))
+        {
+            <div class="order-detail-card">
+                <div class="order-detail-card-title">
+                    <i class="fa fa-sticky-note-o"></i> Ghi chú
+                </div>
+                <p class="mb-0 text-muted">@Model.Note</p>
+            </div>
+        }
+
+    </div>
+
+    <!-- Right: order info + address -->
+    <div class="col-lg-4">
+
+        <!-- Order info -->
+        <div class="order-detail-card">
+            <div class="order-detail-card-title">
+                <i class="fa fa-info-circle"></i> Thông tin đơn hàng
+            </div>
+            <dl class="order-info-dl">
+                <dt>Mã đơn:</dt>
+                <dd>#@Model.OrderCode</dd>
+                <dt>Ngày đặt:</dt>
+                <dd>@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</dd>
+                <dt>Phương thức:</dt>
+                <dd>@Model.PaymentMethod.ToUpper()</dd>
+                <dt>Thanh toán:</dt>
+                <dd><span class="order-badge @PayBadgeClass(Model.PaymentStatus)">@PayLabel(Model.PaymentStatus)</span></dd>
+                <dt>Trạng thái:</dt>
+                <dd><span class="order-badge @StatusBadgeClass(Model.Status)">@StatusLabel(Model.Status)</span></dd>
+            </dl>
+
+            @if (string.Equals(Model.PaymentMethod, "vietqr", StringComparison.OrdinalIgnoreCase)
+                 && !string.Equals(Model.PaymentStatus, "paid", StringComparison.OrdinalIgnoreCase))
+            {
+                <div class="mt-3">
+                    <a asp-area="Customers" asp-controller="Payments" asp-action="VietQR"
+                       asp-route-orderId="@Model.Id"
+                       class="btn btn-primary btn-sm w-100">
+                        <i class="fa fa-qrcode me-1"></i> Xem hướng dẫn thanh toán VietQR
+                    </a>
+                </div>
+            }
+        </div>
+
+        <!-- Shipping address -->
+        @if (Model.Address != null)
+        {
+            <div class="order-detail-card">
+                <div class="order-detail-card-title">
+                    <i class="fa fa-map-marker"></i> Địa chỉ giao hàng
+                </div>
+                <p class="mb-1 fw-semibold">@Model.Address.FullName</p>
+                <p class="mb-1 text-muted small"><i class="fa fa-phone me-1"></i>@Model.Address.PhoneNumber</p>
+                <p class="mb-0 text-muted small">
+                    <i class="fa fa-map-marker me-1"></i>
+                    @Model.Address.StreetLine, @Model.Address.Ward,
+                    @Model.Address.District, @Model.Address.Province
+                </p>
+            </div>
+        }
+
+    </div>
+
+</div>

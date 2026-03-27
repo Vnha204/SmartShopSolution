@@ -210,7 +210,7 @@ namespace SmartShop.Areas.Customers.Controllers
             if (vm.PaymentMethod == "vietqr")
                 return RedirectToAction("VietQR", "Payments", new { area = "Customers", orderId = order.Id });
 
-            return RedirectToAction("Details", "Orders", new { area = "Customers", orderId = order.Id });
+            return RedirectToAction("OrderDetail", "Account", new { area = "", orderId = order.Id });
         }
     }
 }

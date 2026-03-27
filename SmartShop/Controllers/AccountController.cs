@@ -75,6 +75,18 @@ namespace SmartShop.Controllers
             return PartialView("_OrdersPartial", orders);
         }
 
+        public async Task<IActionResult> OrderDetail(int orderId)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return RedirectToAction("Login", "Auth");
+
+            var order = await _unitOfWork.Orders.GetWithDetailsAsync(orderId);
+            if (order == null) return NotFound();
+            if (order.UserId != user.Id) return Forbid();
+
+            return View(order);
+        }
+
         // ===== ADDRESSES =====
         public async Task<IActionResult> Addresses()
         {

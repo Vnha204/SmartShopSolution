@@ -8,7 +8,7 @@
     var currentAction = ViewContext.RouteData.Values["action"]?.ToString() ?? "Profile";
 }
 
-<section class="inner_page position_head">
+<section class="inner_page position_head account-page-section">
     <div class="container my-5">
         <div class="row">
             <!-- Sidebar -->
@@ -43,7 +43,7 @@
                                 <span>Tài khoản</span>
                             </a>
                             <a href="javascript:void(0)"
-                               class="list-group-item list-group-item-action border-0 d-flex align-items-center gap-3 account-tab @(currentAction == "Orders" ? "active" : "")"
+                               class="list-group-item list-group-item-action border-0 d-flex align-items-center gap-3 account-tab @(currentAction == "Orders" || currentAction == "OrderDetail" ? "active" : "")"
                                data-tab="orders"
                                data-url="@Url.Action("OrdersPartial", "Account")">
                                 <i class="fa fa-shopping-cart" style="width: 18px; text-align: center;"></i>

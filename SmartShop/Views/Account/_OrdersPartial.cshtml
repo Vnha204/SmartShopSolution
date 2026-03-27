@@ -3,14 +3,14 @@
 <div class="card card-custom">
     <div class="card-header bg-white border-bottom py-3">
         <h5 class="mb-0 fw-bold">
-            <i class="fa fa-shopping-bag me-2 text-primary-custom"></i> Đơn hàng của tôi
+            <i class="fa fa-shopping-cart me-2 text-primary-custom"></i> Đơn hàng của tôi
         </h5>
     </div>
     <div class="card-body p-4">
         @if (!Model.Any())
         {
             <div class="text-center py-5 text-muted">
-                <i class="fa fa-shopping-bag fa-3x mb-3 d-block" style="opacity:0.3;"></i>
+                <i class="fa fa-shopping-cart fa-3x mb-3 d-block" style="opacity:0.3;"></i>
                 <p>Bạn chưa có đơn hàng nào.</p>
                 <a asp-area="Customers" asp-controller="Shop" asp-action="Index"
                    class="btn btn-primary-custom px-4">
@@ -44,6 +44,13 @@
                             <span class="fw-bold text-success">
                                 @order.TotalPrice.ToString("N0") ₫
                             </span>
+                        </div>
+                        <div class="mt-2 text-end">
+                            <a asp-controller="Account" asp-action="OrderDetail"
+                               asp-route-orderId="@order.Id"
+                               class="btn btn-sm btn-outline-primary">
+                                <i class="fa fa-eye me-1"></i> Chi tiết
+                            </a>
                         </div>
                     </div>
                 }
