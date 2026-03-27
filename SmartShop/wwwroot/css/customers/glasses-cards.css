@@ -1,0 +1,13 @@
+/* ================================================================
+   glasses-cards.css — Scoped padding fix for glasses product cards
+   Overrides the global .glasses .glasses_box { padding: 120px … }
+   from style.css without touching that file.
+   ================================================================ */
+
+.glasses-cards-container .glasses_box {
+    padding: 0 0 15px 0;
+}
+
+.glasses-cards-container .glasses_box h3 {
+    padding: 10px 0 5px 0;
+}

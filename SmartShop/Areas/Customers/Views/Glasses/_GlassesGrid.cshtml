@@ -1,0 +1,45 @@
+@model SmartShop.Models.ViewModels.GlassesViewModel
+
+<div class="row" id="glasses-product-grid">
+    @if (Model.Products.Any())
+    {
+        @foreach (var product in Model.Products)
+        {
+            <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6">
+                <a class="shop-card-link"
+                   asp-area="Customers"
+                   asp-controller="Shop"
+                   asp-action="Index">
+                    <div class="glasses_box shop_item shop-card position-relative">
+                        @if (product.IsOnSale)
+                        {
+                            <span class="sale-badge">-@product.DiscountPercent%</span>
+                        }
+                        <figure>
+                            <img src="@(product.ThumbnailUrl ?? "/images/no-image.png")"
+                                 alt="@product.Name" />
+                        </figure>
+                        <h3>
+                            <span class="blu">₫</span>@product.DisplayPrice.ToString("N0")
+                            @if (product.IsOnSale)
+                            {
+                                <small class="original-price ms-2">₫@product.BasePrice.ToString("N0")</small>
+                            }
+                        </h3>
+                        <p>@product.Name</p>
+                    </div>
+                </a>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="col-12 text-center py-5">
+            <i class="fa fa-search fa-3x text-muted mb-3"></i>
+            <p class="text-muted">Không có sản phẩm nào trong danh mục này.</p>
+            <a href="?filter=all" class="btn btn-outline-primary mt-2">
+                Xem tất cả sản phẩm
+            </a>
+        </div>
+    }
+</div>

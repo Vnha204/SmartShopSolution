@@ -1,0 +1,35 @@
+/* ================================================================
+   glasses.css — Trang bộ sưu tập kính
+   ================================================================ */
+
+/* ─── Filter bar ──────────────────────────────────────────────── */
+.glasses-filter-bar {
+    margin-bottom: 30px;
+}
+
+.filter-btns {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+}
+
+/* ─── Filter tab links ────────────────────────────────────────── */
+.btn-filter {
+    display: inline-block;
+    padding: 8px 22px;
+    border: 2px solid var(--primary-color);
+    border-radius: 25px;
+    background: transparent;
+    color: var(--primary-color);
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none !important;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.btn-filter:hover,
+.btn-filter.active {
+    background: var(--primary-color);
+    color: #fff;
+}

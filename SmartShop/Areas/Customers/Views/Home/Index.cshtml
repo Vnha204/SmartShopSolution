@@ -85,6 +85,10 @@
 </div>
 <!-- end about section -->
 <!-- Our Glasses section -->
+@{
+    var featuredProducts = ViewBag.FeaturedProducts as List<SmartShop.Models.ViewModels.ProductItemVM>
+                           ?? new List<SmartShop.Models.ViewModels.ProductItemVM>();
+}
 <div class="glasses">
     <div class="container">
         <div class="row">
@@ -99,64 +103,36 @@
             </div>
         </div>
     </div>
-    <div class="container-fluid">
+    <div class="container-fluid glasses-cards-container">
         <div class="row">
-            <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6">
-                <div class="glasses_box">
-                    <figure><img src="~/images/glass1.png" alt="#" /></figure>
-                    <h3><span class="blu">$</span>50</h3>
-                    <p>Kính mát</p>
+            @foreach (var product in featuredProducts)
+            {
+                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6">
+                    <a class="shop-card-link"
+                       asp-area="Customers"
+                       asp-controller="Shop"
+                       asp-action="Index">
+                        <div class="glasses_box shop_item shop-card position-relative">
+                            @if (product.IsOnSale)
+                            {
+                                <span class="sale-badge">-@product.DiscountPercent%</span>
+                            }
+                            <figure>
+                                <img src="@(product.ThumbnailUrl ?? "/images/no-image.png")"
+                                     alt="@product.Name" />
+                            </figure>
+                            <h3>
+                                <span class="blu">₫</span>@product.DisplayPrice.ToString("N0")
+                                @if (product.IsOnSale)
+                                {
+                                    <small class="original-price ms-2">₫@product.BasePrice.ToString("N0")</small>
+                                }
+                            </h3>
+                            <p>@product.Name</p>
+                        </div>
+                    </a>
                 </div>
-            </div>
-            <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6">
-                <div class="glasses_box">
-                    <figure><img src="~/images/glass2.png" alt="#" /></figure>
-                    <h3><span class="blu">$</span>65</h3>
-                    <p>Kính mát</p>
-                </div>
-            </div>
-            <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6">
-                <div class="glasses_box">
-                    <figure><img src="~/images/glass3.png" alt="#" /></figure>
-                    <h3><span class="blu">$</span>80</h3>
-                    <p>Kính thuốc</p>
-                </div>
-            </div>
-            <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6">
-                <div class="glasses_box">
-                    <figure><img src="~/images/glass4.png" alt="#" /></figure>
-                    <h3><span class="blu">$</span>55</h3>
-                    <p>Kính thuốc</p>
-                </div>
-            </div>
-            <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6">
-                <div class="glasses_box">
-                    <figure><img src="~/images/glass5.png" alt="#" /></figure>
-                    <h3><span class="blu">$</span>70</h3>
-                    <p>Kính mát</p>
-                </div>
-            </div>
-            <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6">
-                <div class="glasses_box">
-                    <figure><img src="~/images/glass6.png" alt="#" /></figure>
-                    <h3><span class="blu">$</span>90</h3>
-                    <p>Kính mát</p>
-                </div>
-            </div>
-            <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6">
-                <div class="glasses_box">
-                    <figure><img src="~/images/glass7.png" alt="#" /></figure>
-                    <h3><span class="blu">$</span>45</h3>
-                    <p>Kính thuốc</p>
-                </div>
-            </div>
-            <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6">
-                <div class="glasses_box">
-                    <figure><img src="~/images/glass8.png" alt="#" /></figure>
-                    <h3><span class="blu">$</span>60</h3>
-                    <p>Kính mát</p>
-                </div>
-            </div>
+            }
             <div class="col-md-12">
                 <a class="read_more" asp-area="Customers" asp-controller="Glasses" asp-action="Index">Xem tất cả</a>
             </div>

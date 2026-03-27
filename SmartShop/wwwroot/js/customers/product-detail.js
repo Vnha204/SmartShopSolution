@@ -70,8 +70,14 @@
                         + '&quantity=' + encodeURIComponent(qty)
                 })
                 .then(function (r) {
-                    if (r.redirected && r.url.indexOf('/auth/login') !== -1) {
+                    var lowerUrl = r.url.toLowerCase();
+                    if (r.redirected && (lowerUrl.indexOf('/auth/login') !== -1 || lowerUrl.indexOf('/account/login') !== -1)) {
                         window.location.href = r.url;
+                        return null;
+                    }
+                    var ct = r.headers.get('content-type') || '';
+                    if (ct.indexOf('text/html') !== -1) {
+                        window.location.href = '/Auth/Login';
                         return null;
                     }
                     return r.ok ? r.json() : null;
@@ -117,8 +123,14 @@
                         + '&quantity=' + encodeURIComponent(qty)
                 })
                 .then(function (r) {
-                    if (r.redirected && r.url.indexOf('/auth/login') !== -1) {
+                    var lowerUrl = r.url.toLowerCase();
+                    if (r.redirected && (lowerUrl.indexOf('/auth/login') !== -1 || lowerUrl.indexOf('/account/login') !== -1)) {
                         window.location.href = r.url;
+                        return null;
+                    }
+                    var ct = r.headers.get('content-type') || '';
+                    if (ct.indexOf('text/html') !== -1) {
+                        window.location.href = '/Auth/Login';
                         return null;
                     }
                     return r.ok ? r.json() : null;
