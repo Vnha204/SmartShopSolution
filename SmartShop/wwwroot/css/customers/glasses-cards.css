@@ -1,13 +1,98 @@
 /* ================================================================
-   glasses-cards.css — Scoped padding fix for glasses product cards
-   Overrides the global .glasses .glasses_box { padding: 120px … }
-   from style.css without touching that file.
+   glasses-cards.css
+   Scoped to .glasses-cards-container — affects ONLY the Glasses
+   page and the Home "Glasses" section. No other pages are touched.
    ================================================================ */
 
+/* ── 1. Padding override (neutralises style.css padding:120px) ── */
 .glasses-cards-container .glasses_box {
-    padding: 0 0 15px 0;
+    padding: 0;
 }
 
 .glasses-cards-container .glasses_box h3 {
-    padding: 10px 0 5px 0;
+    padding: 10px 12px 5px;
+}
+
+/* ── 2. Equal-height cards via flexbox ──────────────────────── */
+
+/* Make each Bootstrap column a flex container so the card inside
+   can stretch to fill the full row height. Bootstrap 5 rows are
+   already display:flex / align-items:stretch, so columns are
+   equal height — we just need to propagate that height downward. */
+.glasses-cards-container .col-xl-3,
+.glasses-cards-container .col-lg-3,
+.glasses-cards-container .col-md-6,
+.glasses-cards-container .col-sm-6 {
+    display: flex;
+}
+
+/* The <a> wrapper fills the column */
+.glasses-cards-container .shop-card-link {
+    display: flex;
+    width: 100%;
+}
+
+/* The card itself: flex column so image + text stack, and all
+   cards in the same row share the same total height. */
+.glasses-cards-container .glasses_box {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    /* ── 3. Border colour ── */
+    border: 1px solid #03cafc;
+    border-radius: 6px;
+    overflow: hidden;
+    background: #fff;
+    transition: box-shadow 0.2s ease;
+}
+
+.glasses-cards-container .glasses_box:hover {
+    box-shadow: 0 4px 16px rgba(3, 202, 252, 0.25);
+}
+
+/* ── 4. Fixed image area ──────────────────────────────────────
+   aspect-ratio 4:3 gives a consistent rectangle regardless of
+   the source image dimensions. object-fit:contain keeps the
+   full product visible without cropping.                        */
+.glasses-cards-container .glasses_box figure {
+    flex-shrink: 0;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    margin: 0;
+    background: #f8f8f8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.glasses-cards-container .glasses_box figure img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+}
+
+/* ── 5. Price row ─────────────────────────────────────────── */
+.glasses-cards-container .glasses_box h3 {
+    flex-shrink: 0;
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.4;
+}
+
+/* ── 6. Product name — 2-line clamp ──────────────────────────
+   Prevents long Vietnamese titles from pushing cards taller.   */
+.glasses-cards-container .glasses_box p {
+    flex-grow: 1;       /* fills remaining space so all cards
+                           bottom-align the name consistently   */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    padding: 4px 12px 14px;
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.5;
+    color: #444;
 }
