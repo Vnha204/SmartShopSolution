@@ -37,11 +37,9 @@ builder.Services.ConfigureApplicationCookie(options =>
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
-builder.Services.AddSingleton<IQrCodeService, QrCodeService>();
-builder.Services.Configure<VietQRSettings>(builder.Configuration.GetSection("VietQR"));
-builder.Services.AddHttpClient("VietQR");
-builder.Services.AddMemoryCache();
-builder.Services.AddScoped<IVietQrApiClient, VietQrApiClient>();
+builder.Services.Configure<PayOSSettings>(builder.Configuration.GetSection("PayOS"));
+builder.Services.AddHttpClient("PayOS");
+builder.Services.AddScoped<IPayOSService, PayOSService>();
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
@@ -98,6 +96,8 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 // ===== Route config =====
+app.MapControllers(); // enables attribute-routed controllers (e.g. PayOSWebhookController)
+
 app.MapAreaControllerRoute(
     name: "Admin",
     areaName: "Admin",

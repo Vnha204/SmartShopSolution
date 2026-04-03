@@ -67,8 +67,8 @@
             </ul>
         </div>
 
-        @* VietQR: prominent "Mark as Paid" button when payment is still pending *@
-        @if (string.Equals(Model.PaymentMethod, "vietqr", StringComparison.OrdinalIgnoreCase)
+        @* PayOS: manual override button — only shown while webhook has not yet fired *@
+        @if (string.Equals(Model.PaymentMethod, "payos", StringComparison.OrdinalIgnoreCase)
              && string.Equals(Model.PaymentStatus, "pending", StringComparison.OrdinalIgnoreCase))
         {
             <form asp-area="Admin" asp-controller="Order"
@@ -77,7 +77,7 @@
                 <input type="hidden" name="id" value="@Model.Id" />
                 <input type="hidden" name="paymentStatus" value="paid" />
                 <button type="submit" class="btn btn-sm btn-success"
-                        onclick="return confirm('Xác nhận đã nhận được thanh toán VietQR cho đơn này?')">
+                        onclick="return confirm('Xác nhận thủ công thanh toán PayOS cho đơn này?')">
                     <i class="fa fa-check me-1"></i> Xác nhận đã nhận tiền
                 </button>
             </form>

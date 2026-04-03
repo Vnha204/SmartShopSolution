@@ -112,11 +112,11 @@
                                     <div class="payment-option-sub">Thanh toán khi nhận hàng</div>
                                 </div>
                             </label>
-                            <label class="payment-option @(Model.PaymentMethod == "vietqr" ? "selected" : "")">
-                                <input type="radio" asp-for="PaymentMethod" value="vietqr" />
+                            <label class="payment-option @(Model.PaymentMethod == "payos" ? "selected" : "")">
+                                <input type="radio" asp-for="PaymentMethod" value="payos" />
                                 <div>
-                                    <div class="payment-option-label"><i class="fa fa-qrcode"></i> VietQR</div>
-                                    <div class="payment-option-sub">Chuyển khoản qua QR code</div>
+                                    <div class="payment-option-label"><i class="fa fa-credit-card-alt"></i> PayOS</div>
+                                    <div class="payment-option-sub">Thanh toán trực tuyến qua PayOS</div>
                                 </div>
                             </label>
                         </div>
@@ -164,7 +164,7 @@
 
                         <button type="submit" class="btn-place-order">
                             <i class="fa fa-check-circle"></i>
-                            @(Model.PaymentMethod == "vietqr" ? "Tiến hành thanh toán QR" : "Đặt hàng")
+                            @(Model.PaymentMethod == "payos" ? "Tiến hành thanh toán" : "Đặt hàng")
                         </button>
 
                         <a asp-area="Customers" asp-controller="Cart" asp-action="Index"

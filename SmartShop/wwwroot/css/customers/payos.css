@@ -1,0 +1,175 @@
+/* =========================================================
+   PayOS payment result / waiting page
+   ========================================================= */
+
+.payos-section {
+    padding: 60px 0 80px;
+    min-height: 70vh;
+    background: #f8f9fa;
+}
+
+.payos-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #1f1f1f;
+    margin-bottom: 4px;
+}
+
+.payos-subtitle {
+    color: #666;
+    margin-bottom: 28px;
+    font-size: 1rem;
+}
+
+/* ── Status banner ─────────────────────────────────────── */
+.payos-status-banner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 20px;
+    border-radius: 8px;
+    font-size: 0.97rem;
+    font-weight: 500;
+    margin-bottom: 28px;
+}
+
+.payos-status-banner i {
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+
+.payos-status-pending {
+    background: #fff8e1;
+    border: 1px solid #ffe082;
+    color: #7a5800;
+}
+
+.payos-status-paid {
+    background: #e8f5e9;
+    border: 1px solid #a5d6a7;
+    color: #1b5e20;
+}
+
+.payos-status-cancelled {
+    background: #fce4ec;
+    border: 1px solid #f48fb1;
+    color: #880e4f;
+}
+
+/* ── Card ──────────────────────────────────────────────── */
+.payos-card {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 12px rgba(0,0,0,.07);
+    padding: 28px 30px;
+    margin-bottom: 20px;
+}
+
+.payos-card-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1f1f1f;
+    margin-bottom: 18px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #eee;
+}
+
+/* ── Order summary table ───────────────────────────────── */
+.payos-order-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.payos-order-table td {
+    padding: 9px 4px;
+    font-size: 0.93rem;
+    color: #555;
+    border-bottom: 1px solid #f0f0f0;
+    vertical-align: middle;
+}
+
+.payos-order-table td:first-child {
+    color: #888;
+    width: 40%;
+}
+
+.payos-order-table tr:last-child td {
+    border-bottom: none;
+}
+
+/* ── Badge ─────────────────────────────────────────────── */
+.payos-badge {
+    display: inline-block;
+    padding: 3px 12px;
+    border-radius: 20px;
+    font-size: 0.82rem;
+    font-weight: 600;
+}
+
+.payos-badge-pending {
+    background: #fff8e1;
+    color: #7a5800;
+    border: 1px solid #ffe082;
+}
+
+.payos-badge-paid {
+    background: #e8f5e9;
+    color: #1b5e20;
+    border: 1px solid #a5d6a7;
+}
+
+/* ── Retry / Pay again block ───────────────────────────── */
+.payos-retry-block {
+    margin-top: 22px;
+    padding-top: 18px;
+    border-top: 1px solid #f0f0f0;
+}
+
+/* ── Buttons ───────────────────────────────────────────── */
+.btn-payos-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 10px 26px;
+    background: var(--primary-color, #03cafc);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.93rem;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: opacity .2s;
+}
+
+.btn-payos-primary:hover {
+    opacity: .85;
+    color: #fff;
+}
+
+.payos-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+}
+
+.btn-payos-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 20px;
+    background: #fff;
+    color: #444;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: border-color .2s, color .2s;
+}
+
+.btn-payos-secondary:hover {
+    border-color: var(--primary-color, #03cafc);
+    color: var(--primary-color, #03cafc);
+}

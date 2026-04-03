@@ -138,7 +138,7 @@
                 .then(function (data) {
                     if (!data) return;
                     if (data.success) {
-                        window.location.href = '/Customers/Checkout';
+                        window.location.href = '/Customers/Checkout?payment=payos';
                     } else {
                         showToast(false, data.message || 'Có lỗi xảy ra.');
                         buyNowBtn.disabled = false;

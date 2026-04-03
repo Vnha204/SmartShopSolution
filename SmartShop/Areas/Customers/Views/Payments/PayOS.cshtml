@@ -1,0 +1,102 @@
+@model Order
+@{
+    ViewData["Title"]     = "Thanh toán — Đơn #" + Model.OrderCode;
+    ViewData["BodyClass"] = "position_head";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    bool isPaid      = string.Equals(Model.PaymentStatus, "paid",    StringComparison.OrdinalIgnoreCase);
+    bool isCancelled = ViewData["Cancelled"] as bool? ?? false;
+}
+
+<section class="payos-section" data-order-id="@Model.Id">
+    <div class="container">
+
+        <h1 class="payos-title">Thanh toán trực tuyến</h1>
+        <p class="payos-subtitle">Đơn hàng <strong>#@Model.OrderCode</strong></p>
+
+        <div id="payos-status-banner"
+             class="payos-status-banner @(isPaid ? "payos-status-paid" : (isCancelled ? "payos-status-cancelled" : "payos-status-pending"))">
+            @if (isPaid)
+            {
+                <i class="fa fa-check-circle"></i>
+                <span>Đơn hàng đã được xác nhận thanh toán. Cảm ơn bạn!</span>
+            }
+            else if (isCancelled)
+            {
+                <i class="fa fa-times-circle"></i>
+                <span>Giao dịch đã bị hủy. Bạn có thể thử lại bên dưới.</span>
+            }
+            else
+            {
+                <i class="fa fa-clock-o"></i>
+                <span id="payos-status-text">Đang chờ xác nhận thanh toán…</span>
+            }
+        </div>
+
+        <div class="row g-4 justify-content-center">
+            <div class="col-lg-7">
+
+                <div class="payos-card">
+                    <div class="payos-card-title">
+                        <i class="fa fa-file-text-o"></i> Chi tiết đơn hàng
+                    </div>
+                    <table class="payos-order-table">
+                        <tr>
+                            <td>Mã đơn hàng</td>
+                            <td><strong>#@Model.OrderCode</strong></td>
+                        </tr>
+                        <tr>
+                            <td>Tổng tiền</td>
+                            <td class="text-primary fw-bold">@Model.TotalPrice.ToString("N0")₫</td>
+                        </tr>
+                        <tr>
+                            <td>Phương thức</td>
+                            <td>Thanh toán trực tuyến (PayOS)</td>
+                        </tr>
+                        <tr>
+                            <td>Trạng thái</td>
+                            <td>
+                                <span id="payos-status-badge"
+                                      class="payos-badge @(isPaid ? "payos-badge-paid" : "payos-badge-pending")">
+                                    @(isPaid ? "Đã thanh toán" : "Chờ thanh toán")
+                                </span>
+                            </td>
+                        </tr>
+                    </table>
+
+                    @if (!isPaid)
+                    {
+                        <div class="payos-retry-block">
+                            <a asp-area="Customers" asp-controller="Payments" asp-action="PayOS"
+                               asp-route-orderId="@Model.Id"
+                               class="btn-payos-primary">
+                                <i class="fa fa-refresh"></i> @(isCancelled ? "Thử lại thanh toán" : "Thanh toán lại")
+                            </a>
+                        </div>
+                    }
+                </div>
+
+                <div class="payos-actions">
+                    <a asp-area="" asp-controller="Account" asp-action="OrderDetail"
+                       asp-route-orderId="@Model.Id"
+                       class="btn-payos-secondary">
+                        <i class="fa fa-eye"></i> Xem đơn hàng
+                    </a>
+                    <a asp-area="" asp-controller="Account" asp-action="Orders"
+                       class="btn-payos-secondary">
+                        <i class="fa fa-list"></i> Tất cả đơn hàng
+                    </a>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</section>
+
+@section Scripts {
+    @if (!isPaid && !isCancelled)
+    {
+        <script src="~/js/customers/payment-status.js" asp-append-version="true"></script>
+    }
+}

@@ -34,6 +34,10 @@ namespace SmartShop.Areas.Customers.Controllers
 
             var addresses = (await _unitOfWork.Addresses.GetByUserIdAsync(userId)).ToList();
 
+            // Pre-select payment method when arriving via a direct link (e.g. "Mua ngay")
+            var paymentHint = Request.Query["payment"].ToString();
+            var preselected  = paymentHint is "payos" or "cod" ? paymentHint : "cod";
+
             var vm = new CheckoutViewModel
             {
                 Items = cart.Items.Select(ci => new CartItemViewModel
@@ -48,7 +52,8 @@ namespace SmartShop.Areas.Customers.Controllers
                 }).ToList(),
                 Addresses         = addresses,
                 SelectedAddressId = addresses.FirstOrDefault(a => a.IsDefault)?.Id
-                                 ?? addresses.FirstOrDefault()?.Id
+                                 ?? addresses.FirstOrDefault()?.Id,
+                PaymentMethod     = preselected
             };
 
             return View(vm);
@@ -94,7 +99,7 @@ namespace SmartShop.Areas.Customers.Controllers
             }
 
             // ── Sanitise payment method ───────────────────────────────────────
-            if (vm.PaymentMethod != "cod" && vm.PaymentMethod != "vietqr")
+            if (vm.PaymentMethod != "cod" && vm.PaymentMethod != "payos")
                 vm.PaymentMethod = "cod";
 
             if (!ModelState.IsValid)
@@ -167,7 +172,7 @@ namespace SmartShop.Areas.Customers.Controllers
                 OrderCode     = orderCode,
                 Status        = OrderStatus.Pending,
                 PaymentMethod = vm.PaymentMethod,
-                PaymentStatus = vm.PaymentMethod == "vietqr" ? "pending" : "unpaid",
+                PaymentStatus = vm.PaymentMethod == "payos" ? "pending" : "unpaid",
                 TotalPrice    = cart.Items.Sum(ci => ci.UnitPriceSnapshot * ci.Quantity),
                 Note          = string.IsNullOrWhiteSpace(vm.Note) ? null : vm.Note.Trim(),
                 CreatedAt     = DateTime.UtcNow,
@@ -207,8 +212,8 @@ namespace SmartShop.Areas.Customers.Controllers
             // ── Redirect ──────────────────────────────────────────────────────
             TempData["Success"] = $"Đặt hàng thành công! Mã đơn: {order.OrderCode}";
 
-            if (vm.PaymentMethod == "vietqr")
-                return RedirectToAction("VietQR", "Payments", new { area = "Customers", orderId = order.Id });
+            if (vm.PaymentMethod == "payos")
+                return RedirectToAction("PayOS", "Payments", new { area = "Customers", orderId = order.Id });
 
             return RedirectToAction("OrderDetail", "Account", new { area = "", orderId = order.Id });
         }

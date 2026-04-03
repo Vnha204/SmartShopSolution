@@ -120,14 +120,14 @@
                 <dd><span class="order-badge @StatusBadgeClass(Model.Status)">@StatusLabel(Model.Status)</span></dd>
             </dl>
 
-            @if (string.Equals(Model.PaymentMethod, "vietqr", StringComparison.OrdinalIgnoreCase)
+            @if (string.Equals(Model.PaymentMethod, "payos", StringComparison.OrdinalIgnoreCase)
                  && !string.Equals(Model.PaymentStatus, "paid", StringComparison.OrdinalIgnoreCase))
             {
                 <div class="mt-3">
-                    <a asp-area="Customers" asp-controller="Payments" asp-action="VietQR"
+                    <a asp-area="Customers" asp-controller="Payments" asp-action="PayOS"
                        asp-route-orderId="@Model.Id"
                        class="btn btn-primary btn-sm w-100">
-                        <i class="fa fa-qrcode me-1"></i> Xem hướng dẫn thanh toán VietQR
+                        <i class="fa fa-credit-card me-1"></i> Tiếp tục thanh toán
                     </a>
                 </div>
             }

@@ -40,6 +40,15 @@ namespace SmartShop.Models
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
+        // PayOS tracking — populated when a payment link is created
+        [MaxLength(100)]
+        public string? PayOSPaymentLinkId { get; set; }
+
+        public long? PayOSOrderCode { get; set; }
+
+        [MaxLength(500)]
+        public string? PayOSCheckoutUrl { get; set; }
+
         // Navigation
         public ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
     }
