@@ -37,6 +37,7 @@ builder.Services.ConfigureApplicationCookie(options =>
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
+builder.Services.AddScoped<EmailService>();
 builder.Services.Configure<PayOSSettings>(builder.Configuration.GetSection("PayOS"));
 builder.Services.AddHttpClient("PayOS");
 builder.Services.AddScoped<IPayOSService, PayOSService>();
@@ -117,6 +118,11 @@ app.MapControllerRoute(
     name: "account",
     pattern: "account/{action=Index}",
     defaults: new { controller = "Account", area = "" });
+
+app.MapControllerRoute(
+    name: "contact",
+    pattern: "Contact/{action=Index}/{id?}",
+    defaults: new { controller = "Contact", area = "" });
 
 app.MapControllerRoute(
     name: "default",

@@ -17,6 +17,7 @@
 
 	<ItemGroup>
     <PackageReference Include="CloudinaryDotNet" Version="1.28.0" />
+    <PackageReference Include="MailKit" Version="4.15.1" />
     <PackageReference Include="payOS" Version="2.1.0" />
     <PackageReference Include="QRCoder" Version="1.4.3" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.23" />

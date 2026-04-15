@@ -19,6 +19,7 @@ namespace SmartShop.Data.Repository
         public IProductAttributeValueRepository ProductAttributeValues { get; private set; }
         public ICartRepository Carts { get; private set; }
         public ICartItemRepository CartItems { get; private set; }
+        public IContactMessageRepository ContactMessages { get; private set; }
 
         public UnitOfWork(AppDbContext context)
         {
@@ -35,6 +36,7 @@ namespace SmartShop.Data.Repository
             ProductAttributeValues = new ProductAttributeValueRepository(_context);
             Carts = new CartRepository(_context);
             CartItems = new CartItemRepository(_context);
+            ContactMessages = new ContactMessageRepository(_context);
         }
 
         public async Task<int> SaveAsync()

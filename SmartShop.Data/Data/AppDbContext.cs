@@ -30,6 +30,9 @@ namespace SmartShop.Data.Data
         public DbSet<Cart> Carts => Set<Cart>();
         public DbSet<CartItem> CartItems => Set<CartItem>();
 
+        // ===== Contact =====
+        public DbSet<ContactMessage> ContactMessages => Set<ContactMessage>();
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder); // BẮT BUỘC — để Identity tạo bảng của nó
