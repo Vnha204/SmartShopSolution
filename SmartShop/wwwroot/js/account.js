@@ -23,12 +23,10 @@
         init: function () {
             var self = this;
 
-            // Check if we're on account page
             if ($(this.selectors.nav).length === 0) {
                 return;
             }
 
-            console.log('AccountModule: Initializing...');
             this.bindEvents();
             this.handlePopState();
         },
@@ -45,11 +43,7 @@
                 var url = $tab.data('url');
                 var tabName = $tab.data('tab');
 
-                console.log('AccountModule: Tab clicked -', tabName, url);
-
-                // Skip if already active
                 if ($tab.hasClass('active')) {
-                    console.log('AccountModule: Tab already active, skipping');
                     return;
                 }
 
@@ -66,9 +60,6 @@
             var self = this;
             var $content = $(this.selectors.contentInner);
 
-            console.log('AccountModule: Loading content from', url);
-
-            // Show loading state
             $content.css('opacity', '0.5');
 
             $.ajax({
@@ -76,23 +67,12 @@
                 type: 'GET',
                 cache: false,
                 success: function (data) {
-                    console.log('AccountModule: Content loaded successfully');
-                    
-                    // Update content
                     $content.html(data).css('opacity', '1');
-
-                    // Update browser URL without reload
                     self.updateUrl(tabName);
-
-                    // Update page title
                     self.updateTitle(tabName);
-
-                    // Re-initialize Bootstrap components
                     self.initBootstrapComponents();
                 },
                 error: function (xhr, status, error) {
-                    console.error('AccountModule: Error loading content', error);
-                    
                     $content.html(
                         '<div class="alert alert-danger m-3">' +
                         '<i class="fa fa-exclamation-circle me-2"></i>' +
@@ -157,12 +137,8 @@
         }
     };
 
-    // Initialize on document ready
     $(document).ready(function () {
         AccountModule.init();
     });
-
-    // Expose module globally for debugging
-    window.AccountModule = AccountModule;
 
 })(jQuery);

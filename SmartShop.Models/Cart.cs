@@ -18,7 +18,6 @@ namespace SmartShop.Models
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
-        // Navigation
         public ICollection<CartItem> Items { get; set; } = new List<CartItem>();
     }
 }

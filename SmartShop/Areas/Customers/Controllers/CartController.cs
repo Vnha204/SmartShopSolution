@@ -71,7 +71,6 @@ namespace SmartShop.Areas.Customers.Controllers
 
             var userId = _userManager.GetUserId(User)!;
 
-            // Get or create cart
             var cart = await _unitOfWork.Carts.GetByUserIdAsync(userId);
             if (cart == null)
             {

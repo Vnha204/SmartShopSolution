@@ -100,7 +100,6 @@ namespace SmartShop.Areas.Customers.Controllers
                     filter.AttributeValueIds);
             }
 
-            // 5. Sort
             filteredQ = sortBy switch
             {
                 "price-asc"  => filteredQ.OrderBy(p => (p.SalePrice ?? p.BasePrice)),
@@ -109,7 +108,6 @@ namespace SmartShop.Areas.Customers.Controllers
                 _            => filteredQ.OrderByDescending(p => p.CreatedAt)
             };
 
-            // 6. Count + paginate
             var total = await filteredQ.CountAsync();
             vm.TotalProducts = total;
             vm.TotalPages    = (int)Math.Ceiling(total / (double)pageSize);
@@ -132,7 +130,6 @@ namespace SmartShop.Areas.Customers.Controllers
                 IsFeatured   = p.IsFeatured
             }).ToList();
 
-            // 7. Price range presets
             var allActiveQ = _unitOfWork.Products.Query(p => p.IsActive);
             vm.PriceRanges = new List<PriceRangeVM>
             {
@@ -173,7 +170,6 @@ namespace SmartShop.Areas.Customers.Controllers
                 .Query(oi => oi.ProductId == product.Id)
                 .SumAsync(oi => (int?)oi.Quantity) ?? 0;
 
-            // Attribute groups for display
             var attributeGroups = product.ProductAttributeValues
                 .GroupBy(pav => pav.AttributeValue.Attribute,
                          (attr, pavs) => new ProductAttributeGroupVM

@@ -35,7 +35,6 @@ namespace SmartShop.Controllers
             if (string.IsNullOrEmpty(signature))
                 return BadRequest(new { error = "Missing signature" });
 
-            // Build data dictionary for signature verification
             var dataDict = new Dictionary<string, object?>();
             foreach (var prop in dataEl.EnumerateObject())
             {
@@ -64,7 +63,6 @@ namespace SmartShop.Controllers
                 return Ok(new { message = "acknowledged" });
             }
 
-            // Extract identifiers from webhook data
             var paymentLinkId = dataEl.TryGetProperty("paymentLinkId", out var plEl) ? plEl.GetString() : null;
             long? payosOrderCode = dataEl.TryGetProperty("orderCode", out var ocEl) && ocEl.TryGetInt64(out var oc)
                 ? oc : null;

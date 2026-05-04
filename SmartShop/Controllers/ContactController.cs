@@ -36,7 +36,7 @@ namespace SmartShop.Controllers
 
             try
             {
-                var sentAt = DateTime.Now;
+                var sentAt = DateTime.UtcNow;
 
                 var contact = new ContactMessage
                 {

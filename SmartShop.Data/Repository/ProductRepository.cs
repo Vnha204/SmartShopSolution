@@ -2,11 +2,6 @@
 using SmartShop.Data.Data;
 using SmartShop.Data.Repository.IRepository;
 using SmartShop.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SmartShop.Data.Repository
 {

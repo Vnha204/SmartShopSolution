@@ -209,7 +209,6 @@ namespace SmartShop.Areas.Customers.Controllers
 
             await _unitOfWork.SaveAsync();
 
-            // ── Redirect ──────────────────────────────────────────────────────
             TempData["Success"] = $"Đặt hàng thành công! Mã đơn: {order.OrderCode}";
 
             if (vm.PaymentMethod == "payos")

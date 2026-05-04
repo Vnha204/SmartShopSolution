@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace SmartShop.Utility
+﻿namespace SmartShop.Utility
 {
     public static class StatusBadgeHelper
     {
@@ -25,13 +19,6 @@ namespace SmartShop.Utility
             "unpaid" => "bg-warning text-dark",
             "refunded" => "bg-secondary",
             _ => "bg-secondary"
-        };
-
-        public static string GetStockBadge(int stock) => stock switch
-        {
-            0 => "bg-danger",
-            < 10 => "bg-warning text-dark",
-            _ => "bg-success"
         };
     }
 }
