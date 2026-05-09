@@ -111,7 +111,7 @@
                 <dt>Mã đơn:</dt>
                 <dd>#@Model.OrderCode</dd>
                 <dt>Ngày đặt:</dt>
-                <dd>@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</dd>
+                <dd>@Model.CreatedAt.ToString("HH:mm, dd/MM/yyyy")</dd>
                 <dt>Phương thức:</dt>
                 <dd>@Model.PaymentMethod.ToUpper()</dd>
                 <dt>Thanh toán:</dt>
@@ -133,22 +133,18 @@
             }
         </div>
 
-        <!-- Shipping address -->
-        @if (Model.Address != null)
-        {
-            <div class="order-detail-card">
-                <div class="order-detail-card-title">
-                    <i class="fa fa-map-marker"></i> Địa chỉ giao hàng
-                </div>
-                <p class="mb-1 fw-semibold">@Model.Address.FullName</p>
-                <p class="mb-1 text-muted small"><i class="fa fa-phone me-1"></i>@Model.Address.PhoneNumber</p>
-                <p class="mb-0 text-muted small">
-                    <i class="fa fa-map-marker me-1"></i>
-                    @Model.Address.StreetLine, @Model.Address.Ward,
-                    @Model.Address.District, @Model.Address.Province
-                </p>
+        <div class="order-detail-card">
+            <div class="order-detail-card-title">
+                <i class="fa fa-map-marker"></i> Địa chỉ giao hàng
             </div>
-        }
+            <p class="mb-1 fw-semibold">@Model.Address.FullName</p>
+            <p class="mb-1 text-muted small"><i class="fa fa-phone me-1"></i>@Model.Address.PhoneNumber</p>
+            <p class="mb-0 text-muted small">
+                <i class="fa fa-map-marker me-1"></i>
+                @Model.Address.StreetLine, @Model.Address.Ward,
+                @Model.Address.District, @Model.Address.Province
+            </p>
+        </div>
 
     </div>
 

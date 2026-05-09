@@ -1,4 +1,4 @@
-﻿@model LoginVM
+@model LoginVM
 @{
     ViewData["Title"] = "Đăng nhập";
     Layout = "_Layout";
@@ -6,13 +6,12 @@
 
 <section class="inner_page position_head">
     <div class="container">
-        <div class="row justify-content-center" style="min-height: 80vh; align-items: center; padding: 60px 0;">
+        <div class="row justify-content-center auth-page-row">
             <div class="col-md-5 col-sm-10">
 
                 <div class="card shadow-sm border-0 rounded-3">
                     <div class="card-body p-4 p-md-5">
 
-                        <!-- Logo/Title -->
                         <div class="text-center mb-4">
                             <h3 class="fw-bold text-theme-link">
                                 <i class="fa fa-user-circle me-2"></i> Đăng nhập
@@ -20,7 +19,11 @@
                             <p class="text-muted small">Chào mừng bạn trở lại SmartShop</p>
                         </div>
 
-                        <!-- Validation summary -->
+                        @if (TempData["Success"] != null)
+                        {
+                            <div class="alert alert-success py-2 small">@TempData["Success"]</div>
+                        }
+
                         @if (!ViewData.ModelState.IsValid)
                         {
                             <div class="alert alert-danger py-2 small">
@@ -37,7 +40,6 @@
                             @Html.AntiForgeryToken()
                             <input type="hidden" name="returnUrl" value="@ViewData["ReturnUrl"]" />
 
-                            <!-- Email -->
                             <div class="mb-3">
                                 <label asp-for="Email" class="form-label fw-semibold small"></label>
                                 <div class="input-group">
@@ -52,11 +54,11 @@
                                 <span asp-validation-for="Email" class="text-danger small"></span>
                             </div>
 
-                            <!-- Password -->
                             <div class="mb-3">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <label asp-for="Password" class="form-label fw-semibold small mb-0"></label>
-                                    <a href="#" class="small text-muted text-decoration-none">Quên mật khẩu?</a>
+                                    <a asp-controller="Auth" asp-action="ForgotPassword"
+                                       class="small text-muted text-decoration-none">Quên mật khẩu?</a>
                                 </div>
                                 <div class="input-group">
                                     <span class="input-group-text bg-light border-end-0">
@@ -68,26 +70,23 @@
                                            autocomplete="current-password"
                                            id="loginPasswordInput" />
                                     <button type="button" class="input-group-text bg-light border-start-0"
-                                            onclick="togglePassword('loginPasswordInput', this)">
+                                            data-pw-toggle="loginPasswordInput">
                                         <i class="fa fa-eye text-muted"></i>
                                     </button>
                                 </div>
                                 <span asp-validation-for="Password" class="text-danger small"></span>
                             </div>
 
-                            <!-- Remember Me -->
                             <div class="mb-4 form-check">
                                 <input asp-for="RememberMe" type="checkbox" class="form-check-input" id="rememberMe" />
                                 <label class="form-check-label small" for="rememberMe">Ghi nhớ đăng nhập</label>
                             </div>
 
-                            <!-- Submit -->
                             <button type="submit" class="btn btn-theme-primary w-100 fw-semibold py-2">
                                 <i class="fa fa-sign-in me-2"></i> Đăng nhập
                             </button>
                         </form>
 
-                        <!-- Register link -->
                         <div class="text-center mt-4 pt-2 border-top">
                             <p class="small text-muted mb-0">
                                 Chưa có tài khoản?
@@ -105,19 +104,3 @@
         </div>
     </div>
 </section>
-
-@section Scripts {
-    <script>
-        function togglePassword(inputId, btn) {
-            var input = document.getElementById(inputId);
-            var icon = btn.querySelector('i');
-            if (input.type === 'password') {
-                input.type = 'text';
-                icon.classList.replace('fa-eye', 'fa-eye-slash');
-            } else {
-                input.type = 'password';
-                icon.classList.replace('fa-eye-slash', 'fa-eye');
-            }
-        }
-    </script>
-}

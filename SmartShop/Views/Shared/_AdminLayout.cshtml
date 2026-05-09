@@ -14,27 +14,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>@ViewData["Title"] — SmartShop Admin</title>
 
-    <!-- Bootstrap 5 -->
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <!-- Font Awesome 6 -->
+        <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
-    <!-- Admin Layout -->
     <link rel="stylesheet" href="~/css/admin-layout.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/admin/orders.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/admin/product-attributes.css" asp-append-version="true" />
 </head>
 <body>
     <div class="admin-wrapper">
 
-        <!-- ===== SIDEBAR ===== -->
         <aside class="admin-sidebar" id="adminSidebar">
 
-            <!-- Brand -->
             <div class="sidebar-brand">
                 <img src="~/images/logo.png" alt="SmartShop" onerror="this.style.display='none'" />
                 <span>SmartShop</span>
             </div>
 
-            <!-- User info -->
             <div class="sidebar-user">
                 <div class="avatar">
                     @if (!string.IsNullOrEmpty(currentUser?.AvatarUrl))
@@ -52,7 +47,6 @@
                 </div>
             </div>
 
-            <!-- Nav -->
             <nav class="sidebar-nav">
                 <div class="nav-section-title">Tổng quan</div>
                 <ul class="nav flex-column">
@@ -64,7 +58,6 @@
                     </li>
                 </ul>
 
-                @* (file head/body unchanged above) *@
 
                 <div class="nav-section-title">Quản lý</div>
                 <ul class="nav flex-column">
@@ -106,7 +99,6 @@
                     </li>
                 </ul>
 
-                @* remainder of file unchanged *@
 
                 <div class="nav-section-title">Khác</div>
                 <ul class="nav flex-column">
@@ -118,7 +110,6 @@
                 </ul>
             </nav>
 
-            <!-- Footer logout -->
             <div class="sidebar-footer">
                 <form asp-controller="Auth" asp-action="Logout" method="post">
                     @Html.AntiForgeryToken()
@@ -128,25 +119,16 @@
                 </form>
             </div>
         </aside>
-        <!-- ===== END SIDEBAR ===== -->
-        <!-- ===== MAIN ===== -->
+
         <div class="admin-main">
 
-            <!-- Topbar -->
             <div class="admin-topbar">
-                <div>
-                    <h5 class="page-title">@(ViewData["Title"] ?? "Admin")</h5>
-                </div>
+             
                 <div class="topbar-actions">
-                    <a asp-area="Customers" asp-controller="Home" asp-action="Index"
-                       class="btn-home" target="_blank">
-                        <i class="fa fa-home"></i> Trang chủ
-                    </a>
                     <span class="text-muted small">@(currentUser?.Email ?? "")</span>
                 </div>
             </div>
 
-            <!-- Toast alerts (TempData) -->
             @if (TempData["Success"] != null)
             {
                 <div class="admin-toast-area">
@@ -166,12 +148,10 @@
                 </div>
             }
 
-            <!-- Page content -->
             <main class="admin-content">
                 @RenderBody()
             </main>
         </div>
-        <!-- ===== END MAIN ===== -->
 
     </div>
 

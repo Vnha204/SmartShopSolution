@@ -171,10 +171,10 @@
                     <dd class="col-6 fw-semibold">#@Model.OrderCode</dd>
 
                     <dt class="col-6 text-muted">Ngày đặt:</dt>
-                    <dd class="col-6">@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</dd>
+                    <dd class="col-6">@Model.CreatedAt.ToString("HH:mm, dd/MM/yyyy")</dd>
 
                     <dt class="col-6 text-muted">Cập nhật:</dt>
-                    <dd class="col-6">@Model.UpdatedAt.ToString("dd/MM/yyyy HH:mm")</dd>
+                    <dd class="col-6">@Model.UpdatedAt.ToString("HH:mm, dd/MM/yyyy")</dd>
 
                     <dt class="col-6 text-muted">Trạng thái:</dt>
                     <dd class="col-6">
@@ -206,23 +206,20 @@
             </div>
         </div>
 
-        @if (Model.Address != null)
-        {
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white border-bottom py-3">
-                    <h6 class="mb-0 fw-bold"><i class="fa fa-map-marker me-2 text-primary"></i> Địa chỉ giao hàng</h6>
-                </div>
-                <div class="card-body small">
-                    <p class="mb-1 fw-semibold">@Model.Address.FullName</p>
-                    <p class="mb-1 text-muted"><i class="fa fa-phone me-1"></i> @Model.Address.PhoneNumber</p>
-                    <p class="mb-0 text-muted">
-                        <i class="fa fa-map-marker me-1"></i>
-                        @Model.Address.StreetLine, @Model.Address.Ward,
-                        @Model.Address.District, @Model.Address.Province
-                    </p>
-                </div>
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-bottom py-3">
+                <h6 class="mb-0 fw-bold"><i class="fa fa-map-marker me-2 text-primary"></i> Địa chỉ giao hàng</h6>
             </div>
-        }
+            <div class="card-body small">
+                <p class="mb-1 fw-semibold">@Model.Address.FullName</p>
+                <p class="mb-1 text-muted"><i class="fa fa-phone me-1"></i> @Model.Address.PhoneNumber</p>
+                <p class="mb-0 text-muted">
+                    <i class="fa fa-map-marker me-1"></i>
+                    @Model.Address.StreetLine, @Model.Address.Ward,
+                    @Model.Address.District, @Model.Address.Province
+                </p>
+            </div>
+        </div>
 
     </div>
 

@@ -90,7 +90,7 @@ namespace SmartShop.Areas.Admin.Controllers
                     if (product != null)
                     {
                         product.Stock    += item.Quantity;
-                        product.UpdatedAt = DateTime.UtcNow;
+                        product.UpdatedAt = TimeHelper.VietnamNow();
                         _unitOfWork.Products.Update(product);
                     }
                 }
@@ -98,7 +98,7 @@ namespace SmartShop.Areas.Admin.Controllers
             }
 
             order.Status    = status;
-            order.UpdatedAt = DateTime.UtcNow;
+            order.UpdatedAt = TimeHelper.VietnamNow();
             _unitOfWork.Orders.Update(order);
             await _unitOfWork.SaveAsync();
 

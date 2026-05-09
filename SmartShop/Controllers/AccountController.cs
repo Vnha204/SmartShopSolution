@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using SmartShop.Data.Repository.IRepository;
 using SmartShop.Models;
+using SmartShop.Models.ViewModels;
 
 namespace SmartShop.Controllers
 {
@@ -21,10 +22,8 @@ namespace SmartShop.Controllers
             _logger = logger;
         }
 
-        // ===== INDEX - Redirect to Profile =====
         public IActionResult Index() => RedirectToAction(nameof(Profile));
 
-        // ===== PROFILE =====
         public async Task<IActionResult> Profile()
         {
             var user = await _userManager.GetUserAsync(User);
@@ -56,7 +55,6 @@ namespace SmartShop.Controllers
             return Json(new { success = false, message = "Có lỗi xảy ra. Vui lòng thử lại!" });
         }
 
-        // ===== ORDERS =====
         public async Task<IActionResult> Orders()
         {
             var user = await _userManager.GetUserAsync(User);
@@ -87,7 +85,6 @@ namespace SmartShop.Controllers
             return View(order);
         }
 
-        // ===== ADDRESSES =====
         public async Task<IActionResult> Addresses()
         {
             var user = await _userManager.GetUserAsync(User);
@@ -107,15 +104,13 @@ namespace SmartShop.Controllers
         }
 
         [HttpPost, ValidateAntiForgeryToken]
-        public async Task<IActionResult> AddAddressAjax(Address model)
+        public async Task<IActionResult> AddAddressAjax(AddAddressViewModel model)
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return Json(new { success = false, message = "Chưa đăng nhập!" });
 
             if (!ModelState.IsValid)
                 return Json(new { success = false, message = "Vui lòng điền đầy đủ thông tin!" });
-
-            model.UserId = user.Id;
 
             if (model.IsDefault)
             {
@@ -124,45 +119,86 @@ namespace SmartShop.Controllers
                     addr.IsDefault = false;
             }
 
-            await _unitOfWork.Addresses.AddAsync(model);
+            var address = new Address
+            {
+                UserId = user.Id,
+                FullName = model.FullName,
+                PhoneNumber = model.PhoneNumber,
+                Province = model.Province,
+                District = model.District,
+                Ward = model.Ward,
+                StreetLine = model.StreetLine,
+                IsDefault = model.IsDefault
+            };
+
+            await _unitOfWork.Addresses.AddAsync(address);
             await _unitOfWork.SaveAsync();
 
-            return Json(new { success = true, message = "Đã thêm địa chỉ thành công!" });
+            return Json(new { success = true, message = "Thêm địa chỉ thành công!", addressId = address.Id, isDefault = address.IsDefault });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> AddressCard(int id)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return Unauthorized();
+
+            var address = await _unitOfWork.Addresses.FirstOrDefaultAsync(a => a.Id == id && a.UserId == user.Id);
+            if (address == null) return NotFound();
+
+            return PartialView("_AddressCard", address);
         }
 
         [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteAddressAjax(int id)
         {
-            var user = await _userManager.GetUserAsync(User);
-            if (user == null) return Json(new { success = false, message = "Chưa đăng nhập!" });
+            try
+            {
+                var user = await _userManager.GetUserAsync(User);
+                if (user == null)
+                    return Json(new { success = false, message = "Chưa đăng nhập!" });
 
-            var address = await _unitOfWork.Addresses.FirstOrDefaultAsync(a => a.Id == id && a.UserId == user.Id);
-            if (address == null)
-                return Json(new { success = false, message = "Địa chỉ không tồn tại!" });
+                var address = await _unitOfWork.Addresses.FirstOrDefaultAsync(a => a.Id == id);
+                if (address == null)
+                    return Json(new { success = false, message = "Không tìm thấy địa chỉ" });
+                if (address.UserId != user.Id)
+                    return Json(new { success = false, message = "Bạn không có quyền xóa địa chỉ này" });
 
-            if (await _unitOfWork.Addresses.IsUsedInOrderAsync(id))
-                return Json(new { success = false, message = "Không thể xóa địa chỉ đang được sử dụng trong đơn hàng!" });
+                if (address.IsDefault)
+                {
+                    var remaining = (await _unitOfWork.Addresses.FindAsync(
+                        a => a.UserId == user.Id && a.Id != id)).ToList();
+                    if (remaining.Count > 0)
+                        remaining[0].IsDefault = true;
+                }
 
-            _unitOfWork.Addresses.Remove(address);
-            await _unitOfWork.SaveAsync();
+                address.IsDeleted = true;
+                await _unitOfWork.SaveAsync();
 
-            return Json(new { success = true, message = "Đã xóa địa chỉ thành công!" });
+                return Json(new { success = true, message = "Xóa địa chỉ thành công" });
+            }
+            catch
+            {
+                return Json(new { success = false, message = "Có lỗi xảy ra, vui lòng thử lại." });
+            }
         }
 
         [HttpPost, ValidateAntiForgeryToken]
-        public async Task<IActionResult> SetDefaultAddressAjax(int id)
+        public async Task<IActionResult> SetDefaultAddress(int id)
         {
             var user = await _userManager.GetUserAsync(User);
-            if (user == null) return Json(new { success = false, message = "Chưa đăng nhập!" });
+            if (user == null) return Json(new { success = false, message = "Có lỗi xảy ra, vui lòng thử lại." });
 
             var addresses = (await _unitOfWork.Addresses.FindAsync(a => a.UserId == user.Id)).ToList();
+            if (!addresses.Any(a => a.Id == id))
+                return Json(new { success = false, message = "Có lỗi xảy ra, vui lòng thử lại." });
+
             foreach (var addr in addresses)
                 addr.IsDefault = (addr.Id == id);
 
             await _unitOfWork.SaveAsync();
 
-            return Json(new { success = true, message = "Đã cập nhật địa chỉ mặc định!" });
+            return Json(new { success = true, message = "Đã đặt làm địa chỉ mặc định" });
         }
-
     }
 }

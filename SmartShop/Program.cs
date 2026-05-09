@@ -37,6 +37,7 @@ builder.Services.ConfigureApplicationCookie(options =>
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
 builder.Services.AddScoped<EmailService>();
+builder.Services.AddScoped<IRazorViewRenderer, RazorViewRenderer>();
 builder.Services.Configure<PayOSSettings>(builder.Configuration.GetSection("PayOS"));
 builder.Services.AddHttpClient("PayOS");
 builder.Services.AddScoped<IPayOSService, PayOSService>();
@@ -127,5 +128,9 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}",
     defaults: new { area = "Customers" });
+
+var cultureInfo = new System.Globalization.CultureInfo("vi-VN");
+System.Globalization.CultureInfo.DefaultThreadCurrentCulture = cultureInfo;
+System.Globalization.CultureInfo.DefaultThreadCurrentUICulture = cultureInfo;
 
 app.Run();

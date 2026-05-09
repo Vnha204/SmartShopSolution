@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using SmartShop.Data.Repository.IRepository;
 using SmartShop.Models;
 using SmartShop.Services;
+using SmartShop.Utility;
 
 namespace SmartShop.Areas.Customers.Controllers
 {
@@ -90,7 +91,7 @@ namespace SmartShop.Areas.Customers.Controllers
             order.PayOSPaymentLinkId = result.PaymentLinkId;
             order.PayOSOrderCode     = result.OrderCode;
             order.PayOSCheckoutUrl   = result.CheckoutUrl;
-            order.UpdatedAt          = DateTime.UtcNow;
+            order.UpdatedAt          = TimeHelper.VietnamNow();
             _unitOfWork.Orders.Update(order);
             await _unitOfWork.SaveAsync();
 

@@ -24,7 +24,7 @@ namespace SmartShop.Models
         public string? ImageUrl { get; set; }
         public int SortOrder { get; set; } = 0;
         public bool IsActive { get; set; } = true;
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime CreatedAt { get; set; } = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time"));
 
         // Navigation
         public ICollection<Category> Children { get; set; } = new List<Category>();

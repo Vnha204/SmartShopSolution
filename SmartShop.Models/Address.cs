@@ -34,5 +34,7 @@ namespace SmartShop.Models
         public string StreetLine { get; set; } = string.Empty;
 
         public bool IsDefault { get; set; } = false;
+
+        public bool IsDeleted { get; set; } = false;
     }
 }

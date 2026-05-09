@@ -168,8 +168,8 @@ namespace SmartShop.Areas.Admin.Controllers
                 Stock             = vm.Stock,
                 IsActive          = vm.IsActive,
                 IsFeatured        = vm.IsFeatured,
-                CreatedAt         = DateTime.UtcNow,
-                UpdatedAt         = DateTime.UtcNow
+                CreatedAt         = TimeHelper.VietnamNow(),
+                UpdatedAt         = TimeHelper.VietnamNow()
             };
 
             await _unitOfWork.Products.AddAsync(product);
@@ -300,7 +300,7 @@ namespace SmartShop.Areas.Admin.Controllers
             product.Stock       = vm.Stock;
             product.IsActive    = vm.IsActive;
             product.IsFeatured  = vm.IsFeatured;
-            product.UpdatedAt   = DateTime.UtcNow;
+            product.UpdatedAt   = TimeHelper.VietnamNow();
 
             _unitOfWork.ProductCategories.RemoveRange(product.ProductCategories);
             if (vm.CategoryId.HasValue)
@@ -468,16 +468,29 @@ namespace SmartShop.Areas.Admin.Controllers
                 .Distinct()
                 .ToListAsync();
 
-            var validValueIds = (await _unitOfWork.AttributeValues.Query()
+            var applicableValues = await _unitOfWork.AttributeValues.Query()
                 .Where(v => applicableAttrIds.Contains(v.AttributeId))
-                .Select(v => v.Id)
-                .ToListAsync()).ToHashSet();
+                .Select(v => new { v.Id, v.AttributeId })
+                .ToListAsync();
 
-            var submitted = vm.SelectedAttributeValueIds.Where(id => id > 0).ToList();
+            var validValueIds = applicableValues.Select(v => v.Id).ToHashSet();
+            var submitted     = vm.SelectedAttributeValueIds.Where(id => id > 0).ToList();
+
             if (submitted.Any(id => !validValueIds.Contains(id)))
             {
                 ModelState.AddModelError("SelectedAttributeValueIds",
                     "Một số giá trị thuộc tính không thuộc danh mục đã chọn.");
+            }
+
+            var hasDuplicate = applicableValues
+                .Where(v => submitted.Contains(v.Id))
+                .GroupBy(v => v.AttributeId)
+                .Any(g => g.Count() > 1);
+
+            if (hasDuplicate)
+            {
+                ModelState.AddModelError("SelectedAttributeValueIds",
+                    "Mỗi thuộc tính chỉ được chọn một giá trị.");
             }
         }
     }

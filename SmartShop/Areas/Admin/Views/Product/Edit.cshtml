@@ -127,7 +127,7 @@
                         @* Server-side render (Edit mode: category already known) *@
                         @foreach (var attr in Model.AvailableAttributes)
                         {
-                            <div class="mb-3">
+                            <div class="mb-3" data-attribute-id="@attr.AttributeId">
                                 <p class="fw-semibold mb-1">@attr.DisplayName</p>
                                 <div class="d-flex flex-wrap gap-2">
                                     @foreach (var opt in attr.Options)
@@ -137,6 +137,8 @@
                                             <input class="form-check-input" type="checkbox"
                                                    name="SelectedAttributeValueIds" value="@opt.Id"
                                                    id="av_@opt.Id"
+                                                   data-attribute-id="@attr.AttributeId"
+                                                   data-value-id="@opt.Id"
                                                    checked="@(isChecked ? "checked" : null)" />
                                             <label class="form-check-label" for="av_@opt.Id">
                                                 @opt.DisplayName
@@ -219,6 +221,7 @@
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
     <script src="~/js/admin-product-thumbnail.js"></script>
+    <script src="~/js/admin/product-attributes.js" asp-append-version="true"></script>
     <script>
     // ── Constants ─────────────────────────────────────────────────────────────
     const CAT_API          = '/Admin/api/categories';
@@ -377,7 +380,7 @@
         }
         let html = '';
         attrs.forEach(attr => {
-            html += `<div class="mb-3">
+            html += `<div class="mb-3" data-attribute-id="${attr.attributeId}">
                 <p class="fw-semibold mb-1">${escHtml(attr.displayName)}</p>
                 <div class="d-flex flex-wrap gap-2">`;
             attr.values.forEach(v => {
@@ -385,7 +388,8 @@
                 html += `<div class="form-check form-check-inline">
                     <input class="form-check-input" type="checkbox"
                            name="SelectedAttributeValueIds" value="${v.id}"
-                           id="av_${v.id}"${chk} />
+                           id="av_${v.id}" data-attribute-id="${attr.attributeId}"
+                           data-value-id="${v.id}"${chk} />
                     <label class="form-check-label" for="av_${v.id}">
                         ${escHtml(v.displayName)}
                     </label>

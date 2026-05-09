@@ -1,0 +1,10 @@
+.attribute-value-disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.attribute-value-disabled label {
+    cursor: not-allowed;
+    color: var(--text-muted);
+}

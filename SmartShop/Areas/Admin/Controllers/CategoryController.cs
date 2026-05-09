@@ -56,7 +56,7 @@ namespace SmartShop.Areas.Admin.Controllers
             }
 
             model.Slug = model.Slug.Trim().ToLower();
-            model.CreatedAt = DateTime.UtcNow;
+            model.CreatedAt = TimeHelper.VietnamNow();
 
             await _unitOfWork.Categories.AddAsync(model);
             await _unitOfWork.SaveAsync();

@@ -17,8 +17,8 @@ namespace SmartShop.Models
         public string UserId { get; set; } = string.Empty;  // FK → AppUser (IdentityUser dùng string Id)
         public AppUser? User { get; set; }
 
-        public int? AddressId { get; set; }
-        public Address? Address { get; set; }
+        public int AddressId { get; set; }
+        public Address Address { get; set; } = null!;
 
         [Required, MaxLength(50)]
         public string OrderCode { get; set; } = string.Empty;
@@ -37,8 +37,8 @@ namespace SmartShop.Models
         public string PaymentStatus { get; set; } = "unpaid";
 
         public string? Note { get; set; }
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime CreatedAt { get; set; } = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time"));
+        public DateTime UpdatedAt { get; set; } = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time"));
 
         // PayOS tracking — populated when a payment link is created
         [MaxLength(100)]

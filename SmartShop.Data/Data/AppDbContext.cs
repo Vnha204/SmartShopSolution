@@ -33,6 +33,9 @@ namespace SmartShop.Data.Data
         // ===== Contact =====
         public DbSet<ContactMessage> ContactMessages => Set<ContactMessage>();
 
+        // ===== Password Reset =====
+        public DbSet<PasswordResetOtp> PasswordResetOtps => Set<PasswordResetOtp>();
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder); // BẮT BUỘC — để Identity tạo bảng của nó
@@ -59,6 +62,17 @@ namespace SmartShop.Data.Data
             modelBuilder.Entity<Order>()
                 .HasIndex(o => o.OrderCode)
                 .IsUnique();
+
+            // Address soft delete filter
+            modelBuilder.Entity<Address>()
+                .HasQueryFilter(a => !a.IsDeleted);
+
+            // Order → Address: no cascade (SQL Server rejects multiple cascade paths)
+            modelBuilder.Entity<Order>()
+                .HasOne(o => o.Address)
+                .WithMany()
+                .HasForeignKey(o => o.AddressId)
+                .OnDelete(DeleteBehavior.NoAction);
 
             // One cart per user
             modelBuilder.Entity<Cart>()

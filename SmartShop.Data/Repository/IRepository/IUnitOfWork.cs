@@ -15,6 +15,7 @@ namespace SmartShop.Data.Repository.IRepository
         ICartRepository Carts { get; }
         ICartItemRepository CartItems { get; }
         IContactMessageRepository ContactMessages { get; }
+        IPasswordResetOtpRepository PasswordResetOtps { get; }
 
         Task<int> SaveAsync();
     }

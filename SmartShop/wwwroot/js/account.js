@@ -1,12 +1,6 @@
-/**
- * account.js - Account section AJAX navigation
- * SmartShop - E-commerce Platform
- */
-
 (function ($) {
     'use strict';
 
-    // Account Tab Navigation Module
     var AccountModule = {
         selectors: {
             nav: '#accountNav',
@@ -21,8 +15,6 @@
         },
 
         init: function () {
-            var self = this;
-
             if ($(this.selectors.nav).length === 0) {
                 return;
             }
@@ -34,7 +26,6 @@
         bindEvents: function () {
             var self = this;
 
-            // Tab click event using event delegation
             $(document).on('click', this.selectors.tab, function (e) {
                 e.preventDefault();
                 e.stopPropagation();
@@ -47,16 +38,14 @@
                     return;
                 }
 
-                // Update active state immediately
                 $(self.selectors.tab).removeClass('active');
                 $tab.addClass('active');
 
-                // Load content via AJAX
                 self.loadContent(url, tabName);
             });
         },
 
-        loadContent: function (url, tabName) {
+        loadContent: function (url, tabName, callback) {
             var self = this;
             var $content = $(this.selectors.contentInner);
 
@@ -71,8 +60,9 @@
                     self.updateUrl(tabName);
                     self.updateTitle(tabName);
                     self.initBootstrapComponents();
+                    if (typeof callback === 'function') callback();
                 },
-                error: function (xhr, status, error) {
+                error: function () {
                     $content.html(
                         '<div class="alert alert-danger m-3">' +
                         '<i class="fa fa-exclamation-circle me-2"></i>' +
@@ -85,7 +75,7 @@
 
         updateUrl: function (tabName) {
             var newUrl = '/Account';
-            
+
             switch (tabName) {
                 case 'orders':
                     newUrl = '/Account/Orders';
@@ -119,7 +109,6 @@
         },
 
         initBootstrapComponents: function () {
-            // Re-initialize tooltips
             var tooltips = document.querySelectorAll('[data-bs-toggle="tooltip"]');
             tooltips.forEach(function (el) {
                 var existingTooltip = bootstrap.Tooltip.getInstance(el);
@@ -127,7 +116,6 @@
                 new bootstrap.Tooltip(el);
             });
 
-            // Re-initialize popovers
             var popovers = document.querySelectorAll('[data-bs-toggle="popover"]');
             popovers.forEach(function (el) {
                 var existingPopover = bootstrap.Popover.getInstance(el);
@@ -140,5 +128,7 @@
     $(document).ready(function () {
         AccountModule.init();
     });
+
+    window.AccountModule = AccountModule;
 
 })(jQuery);

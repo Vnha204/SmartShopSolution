@@ -37,6 +37,8 @@
     <link rel="stylesheet" href="~/css/customers/product-detail.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/customers/glasses.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/customers/glasses-cards.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/auth.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/customers/account.css" asp-append-version="true" />
     @if (ViewData["ShowMap"] != null && (bool)ViewData["ShowMap"])
     {
         <link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" />
@@ -140,6 +142,8 @@
     <!-- App Scripts -->
     <script src="~/js/custom.js"></script>
     <script src="~/js/account.js"></script>
+    <script src="~/js/address.js"></script>
+    <script src="~/js/forgot-password.js"></script>
 
     <!-- Mapbox (conditional) -->
     @if (ViewData["ShowMap"] != null && (bool)ViewData["ShowMap"])

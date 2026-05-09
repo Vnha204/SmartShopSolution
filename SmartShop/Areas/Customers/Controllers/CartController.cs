@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using SmartShop.Data.Repository.IRepository;
 using SmartShop.Models;
 using SmartShop.Models.ViewModels;
+using SmartShop.Utility;
 
 namespace SmartShop.Areas.Customers.Controllers
 {
@@ -93,11 +94,11 @@ namespace SmartShop.Areas.Customers.Controllers
                     ProductId         = productId,
                     Quantity          = Math.Min(quantity, product.Stock),
                     UnitPriceSnapshot = product.SalePrice ?? product.BasePrice,
-                    AddedAt           = DateTime.UtcNow
+                    AddedAt           = TimeHelper.VietnamNow()
                 });
             }
 
-            cart.UpdatedAt = DateTime.UtcNow;
+            cart.UpdatedAt = TimeHelper.VietnamNow();
             _unitOfWork.Carts.Update(cart);
             await _unitOfWork.SaveAsync();
 
@@ -143,7 +144,7 @@ namespace SmartShop.Areas.Customers.Controllers
                 _unitOfWork.CartItems.Update(item);
             }
 
-            cart.UpdatedAt = DateTime.UtcNow;
+            cart.UpdatedAt = TimeHelper.VietnamNow();
             _unitOfWork.Carts.Update(cart);
             await _unitOfWork.SaveAsync();
 
@@ -177,7 +178,7 @@ namespace SmartShop.Areas.Customers.Controllers
             }
 
             _unitOfWork.CartItems.Remove(item);
-            cart.UpdatedAt = DateTime.UtcNow;
+            cart.UpdatedAt = TimeHelper.VietnamNow();
             _unitOfWork.Carts.Update(cart);
             await _unitOfWork.SaveAsync();
 
@@ -198,7 +199,7 @@ namespace SmartShop.Areas.Customers.Controllers
             if (cart != null && cart.Items.Any())
             {
                 _unitOfWork.CartItems.RemoveRange(cart.Items);
-                cart.UpdatedAt = DateTime.UtcNow;
+                cart.UpdatedAt = TimeHelper.VietnamNow();
                 _unitOfWork.Carts.Update(cart);
                 await _unitOfWork.SaveAsync();
             }

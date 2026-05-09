@@ -31,8 +31,8 @@ namespace SmartShop.Models
         public int Stock { get; set; } = 0;
         public bool IsActive { get; set; } = true;
         public bool IsFeatured { get; set; } = false;
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime CreatedAt { get; set; } = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time"));
+        public DateTime UpdatedAt { get; set; } = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time"));
 
         // Navigation
         public ICollection<ProductCategory> ProductCategories { get; set; } = new List<ProductCategory>();

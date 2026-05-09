@@ -1,0 +1,30 @@
+.address-empty-icon {
+    opacity: 0.3;
+}
+
+.address-card-default {
+    background: rgba(52, 152, 219, 0.05);
+}
+
+.badge-xs {
+    font-size: 10px;
+}
+
+.btn-set-default {
+    color: #adb5bd;
+    border-color: #dee2e6;
+    background-color: transparent;
+    transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.btn-set-default:hover {
+    color: #0d6efd;
+    border-color: #0d6efd;
+    background-color: transparent;
+}
+
+.btn-set-default.is-default {
+    color: #0d6efd;
+    border-color: #0d6efd;
+    background-color: rgba(13, 110, 253, 0.08);
+}

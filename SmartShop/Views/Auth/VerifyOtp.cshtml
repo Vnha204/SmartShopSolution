@@ -1,0 +1,76 @@
+@model VerifyOtpViewModel
+@{
+    ViewData["Title"] = "Xác minh OTP";
+    Layout = "_Layout";
+}
+
+<section class="inner_page position_head">
+    <div class="container">
+        <div class="row justify-content-center auth-page-row">
+            <div class="col-md-5 col-sm-10">
+                <div class="card auth-card">
+                    <div class="card-body">
+
+                        <div class="text-center mb-4">
+                            <div class="auth-step-icon">
+                                <i class="fa fa-shield"></i>
+                            </div>
+                            <h4 class="fw-bold">Nhập mã OTP</h4>
+                            <p class="text-muted small">
+                                Mã OTP đã được gửi đến <strong>@Model.Email</strong>.<br />
+                                Mã có hiệu lực trong 10 phút.
+                            </p>
+                        </div>
+
+                        @if (!ViewData.ModelState.IsValid)
+                        {
+                            <div class="alert alert-danger py-2 small">
+                                <ul class="mb-0 ps-3">
+                                    @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                                    {
+                                        <li>@error.ErrorMessage</li>
+                                    }
+                                </ul>
+                            </div>
+                        }
+
+                        @if (TempData["Error"] != null)
+                        {
+                            <div class="alert alert-danger py-2 small">@TempData["Error"]</div>
+                        }
+
+                        <form asp-controller="Auth" asp-action="VerifyOtp" method="post" class="forgot-password-form">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" asp-for="Email" />
+                            <input type="hidden" asp-for="OtpCode" id="otpCode" />
+
+                            <div class="mb-4">
+                                <div class="otp-container">
+                                    <input class="otp-digit" type="text" inputmode="numeric" maxlength="1" autocomplete="off" />
+                                    <input class="otp-digit" type="text" inputmode="numeric" maxlength="1" autocomplete="off" />
+                                    <input class="otp-digit" type="text" inputmode="numeric" maxlength="1" autocomplete="off" />
+                                    <input class="otp-digit" type="text" inputmode="numeric" maxlength="1" autocomplete="off" />
+                                    <input class="otp-digit" type="text" inputmode="numeric" maxlength="1" autocomplete="off" />
+                                    <input class="otp-digit" type="text" inputmode="numeric" maxlength="1" autocomplete="off" />
+                                </div>
+                                <span asp-validation-for="OtpCode" class="text-danger small d-block text-center mt-2"></span>
+                            </div>
+
+                            <button type="submit" class="btn btn-theme-primary w-100 fw-semibold py-2">
+                                <i class="fa fa-check me-2"></i> Xác nhận
+                            </button>
+                        </form>
+
+                        <div class="text-center mt-3">
+                            <a asp-controller="Auth" asp-action="ForgotPassword"
+                               class="small text-muted text-decoration-none">
+                                <i class="fa fa-refresh me-1"></i> Gửi lại mã OTP
+                            </a>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

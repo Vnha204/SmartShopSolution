@@ -1,0 +1,64 @@
+@model SmartShop.Models.ViewModels.OtpEmailViewModel
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Mã OTP của bạn</title>
+</head>
+<body style="margin:0;padding:0;background:#f4f6f8;font-family:Arial,sans-serif;">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f4f6f8;padding:40px 0;">
+        <tr>
+            <td align="center">
+                <table width="540" cellpadding="0" cellspacing="0" border="0"
+                       style="background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.08);">
+                    <tr>
+                        <td style="background:#0d6efd;padding:28px 40px;text-align:center;">
+                            <h1 style="margin:0;color:#ffffff;font-size:22px;font-weight:700;letter-spacing:.5px;">
+                                SmartShop
+                            </h1>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding:40px;">
+                            <p style="margin:0 0 16px;font-size:16px;color:#212529;">
+                                Xin chào <strong>@Model.FullName</strong>,
+                            </p>
+                            <p style="margin:0 0 24px;font-size:15px;color:#495057;line-height:1.6;">
+                                Chúng tôi nhận được yêu cầu đặt lại mật khẩu tài khoản SmartShop của bạn.
+                                Dưới đây là mã OTP xác minh của bạn:
+                            </p>
+                            <div style="text-align:center;margin:0 0 28px;">
+                                <div style="display:inline-block;background:#f0f4ff;border:2px dashed #0d6efd;
+                                            border-radius:10px;padding:18px 40px;">
+                                    <span style="font-size:36px;font-weight:700;letter-spacing:10px;color:#0d6efd;">
+                                        @Model.OtpCode
+                                    </span>
+                                </div>
+                            </div>
+                            <p style="margin:0 0 16px;font-size:14px;color:#6c757d;text-align:center;">
+                                Mã có hiệu lực trong <strong>10 phút</strong>.
+                            </p>
+                            <p style="margin:0;font-size:14px;color:#6c757d;line-height:1.6;">
+                                Nếu bạn không thực hiện yêu cầu này, hãy bỏ qua email này.
+                                Mật khẩu của bạn sẽ không thay đổi.
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="background:#f8f9fa;padding:20px 40px;text-align:center;
+                                   border-top:1px solid #dee2e6;">
+                            <p style="margin:0;font-size:12px;color:#adb5bd;">
+                                © 2025 SmartShop. Tất cả quyền được bảo lưu.
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

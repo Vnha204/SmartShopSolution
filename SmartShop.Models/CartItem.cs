@@ -18,6 +18,6 @@ namespace SmartShop.Models
         [Column(TypeName = "decimal(18,2)")]
         public decimal UnitPriceSnapshot { get; set; }
 
-        public DateTime AddedAt { get; set; } = DateTime.UtcNow;
+        public DateTime AddedAt { get; set; } = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time"));
     }
 }

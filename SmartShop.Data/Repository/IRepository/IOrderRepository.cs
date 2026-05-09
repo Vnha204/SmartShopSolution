@@ -7,5 +7,6 @@ namespace SmartShop.Data.Repository.IRepository
         Task<IEnumerable<Order>> GetByUserIdAsync(string userId);
         Task<Order?> GetWithDetailsAsync(int id);
         Task<IEnumerable<Order>> GetAllWithDetailsAsync();
+        Task<IEnumerable<Order>> GetOrdersByAddressIdAsync(int addressId);
     }
 }

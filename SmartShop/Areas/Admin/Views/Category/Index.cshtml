@@ -130,7 +130,7 @@
                                         @(cat.IsActive ? "Hiển thị" : "Ẩn")
                                     </span>
                                 </td>
-                                <td class="small text-muted">@cat.CreatedAt.ToString("dd/MM/yyyy")</td>
+                                <td class="small text-muted">@cat.CreatedAt.ToString("HH:mm, dd/MM/yyyy")</td>
                                 <td>
                                     <div class="d-flex gap-1">
                                         <a asp-area="Admin" asp-controller="Category" asp-action="Edit"

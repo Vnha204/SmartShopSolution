@@ -20,6 +20,7 @@ namespace SmartShop.Data.Repository
         public ICartRepository Carts { get; private set; }
         public ICartItemRepository CartItems { get; private set; }
         public IContactMessageRepository ContactMessages { get; private set; }
+        public IPasswordResetOtpRepository PasswordResetOtps { get; private set; }
 
         public UnitOfWork(AppDbContext context)
         {
@@ -37,6 +38,7 @@ namespace SmartShop.Data.Repository
             Carts = new CartRepository(_context);
             CartItems = new CartItemRepository(_context);
             ContactMessages = new ContactMessageRepository(_context);
+            PasswordResetOtps = new PasswordResetOtpRepository(_context);
         }
 
         public async Task<int> SaveAsync()

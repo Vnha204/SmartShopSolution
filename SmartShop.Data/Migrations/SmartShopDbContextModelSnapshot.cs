@@ -176,6 +176,9 @@ namespace SmartShop.Data.Migrations
                     b.Property<bool>("IsDefault")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
                     b.Property<string>("PhoneNumber")
                         .IsRequired()
                         .HasMaxLength(20)
@@ -505,7 +508,7 @@ namespace SmartShop.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("AddressId")
+                    b.Property<int>("AddressId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedAt")
@@ -599,6 +602,39 @@ namespace SmartShop.Data.Migrations
                     b.HasIndex("ProductId");
 
                     b.ToTable("OrderItems");
+                });
+
+            modelBuilder.Entity("SmartShop.Models.PasswordResetOtp", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsUsed")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("OtpCode")
+                        .IsRequired()
+                        .HasMaxLength(6)
+                        .HasColumnType("nvarchar(6)");
+
+                    b.Property<DateTime>("OtpExpiry")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("PasswordResetOtps");
                 });
 
             modelBuilder.Entity("SmartShop.Models.Product", b =>
@@ -827,7 +863,9 @@ namespace SmartShop.Data.Migrations
                 {
                     b.HasOne("SmartShop.Models.Address", "Address")
                         .WithMany()
-                        .HasForeignKey("AddressId");
+                        .HasForeignKey("AddressId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("SmartShop.Models.AppUser", "User")
                         .WithMany("Orders")
@@ -857,6 +895,17 @@ namespace SmartShop.Data.Migrations
                     b.Navigation("Order");
 
                     b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("SmartShop.Models.PasswordResetOtp", b =>
+                {
+                    b.HasOne("SmartShop.Models.AppUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("SmartShop.Models.ProductAttributeValue", b =>
