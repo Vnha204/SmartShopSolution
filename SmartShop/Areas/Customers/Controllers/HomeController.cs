@@ -19,7 +19,7 @@ namespace SmartShop.Areas.Customers.Controllers
 
         public async Task<IActionResult> Index()
         {
-            // Prefer IsFeatured products; fall back to newest active products
+            // sp nổi bật
             var featured = (await _unitOfWork.Products.GetFeaturedAsync(8)).ToList();
 
             if (!featured.Any())

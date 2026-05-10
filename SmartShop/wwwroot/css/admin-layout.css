@@ -1,4 +1,4 @@
-/* ===== ADMIN LAYOUT ===== */
+/* admin layout */
 html, body {
     height: 100%;
     margin: 0;
@@ -11,7 +11,7 @@ html, body {
     min-height: 100vh;
 }
 
-/* SIDEBAR */
+/* sidebar */
 .admin-sidebar {
     width: 250px;
     min-height: 100vh;
@@ -48,7 +48,7 @@ html, body {
             letter-spacing: 0.5px;
         }
 
-    /* USER INFO trong sidebar */
+    /* thông tin người dùng sidebar */
     .admin-sidebar .sidebar-user {
         padding: 14px 20px;
         border-bottom: 1px solid rgba(255,255,255,0.1);
@@ -84,7 +84,7 @@ html, body {
             display: inline-block;
         }
 
-    /* NAV ITEMS */
+    /* nav items */
     .admin-sidebar .sidebar-nav {
         flex: 1;
         padding: 10px 0;
@@ -131,7 +131,7 @@ html, body {
             font-size: 15px;
         }
 
-    /* SIDEBAR FOOTER */
+    /* sidebar footer */
     .admin-sidebar .sidebar-footer {
         padding: 14px 20px;
         border-top: 1px solid rgba(255,255,255,0.1);
@@ -157,7 +157,7 @@ html, body {
                 color: #fff;
             }
 
-/* MAIN CONTENT */
+/* nội dung chính */
 .admin-main {
     margin-left: 250px;
     flex: 1;
@@ -166,7 +166,7 @@ html, body {
     min-height: 100vh;
 }
 
-/* TOP BAR */
+/* thanh trên */
 .admin-topbar {
     background: #fff;
     border-bottom: 1px solid #e8ecef;
@@ -218,13 +218,13 @@ html, body {
                 color: #333;
             }
 
-/* PAGE CONTENT */
+/* nội dung trang */
 .admin-content {
     padding: 24px;
     flex: 1;
 }
 
-/* TOAST / ALERT */
+/* toast alert */
 .admin-toast-area {
     position: fixed;
     top: 70px;
@@ -233,7 +233,7 @@ html, body {
     min-width: 300px;
 }
 
-/* RESPONSIVE */
+/* responsive */
 @media (max-width: 768px) {
     .admin-sidebar {
         transform: translateX(-250px);
@@ -248,7 +248,7 @@ html, body {
     }
 }
 
-/* STATS CARD */
+/* thẻ thống kê */
 .stat-card {
     border-radius: 12px;
     border: none;
@@ -264,12 +264,11 @@ html, body {
         opacity: 0.3;
     }
 
-/* Brand-color stat card (replaces inline background on the orders stat card) */
 .stat-card-brand {
     background: #03cafc !important;
 }
 
-/* TABLE */
+/* bảng */
 .admin-table thead th {
     background: #f8f9fa;
     font-size: 12px;
@@ -281,7 +280,7 @@ html, body {
     background: #f8f9ff;
 }
 
-/* BADGE STATUS */
+/* badge trạng thái */
 .badge-status {
     font-size: 11px;
     padding: 4px 10px;

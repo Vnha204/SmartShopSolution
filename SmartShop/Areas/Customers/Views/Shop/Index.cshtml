@@ -5,7 +5,7 @@
     ViewData["BodyClass"] = "position_head";
 }
 
-<!-- shop section -->
+<!-- trang shop -->
 <div class="shop_page inner_page">
     <div class="container">
         <div class="row">
@@ -21,9 +21,6 @@
     <div class="container" style="margin-top: 30px;">
         <div class="row">
 
-            <!-- ═══════════════════════════════════════════════════════════════
-                 SIDEBAR FILTER
-            ════════════════════════════════════════════════════════════════ -->
             <div class="col-lg-3 col-md-4">
                 <div class="shop_sidebar">
                     <div class="d-flex justify-content-between align-items-center mb-3">
@@ -37,20 +34,18 @@
 
                     <form id="filterForm" method="get" asp-action="Index">
 
-                        <!-- ── Category drill-down ── -->
+                        <!-- bộ lọc danh mục -->
                         <div class="filter_group">
                             <h5><i class="fa fa-tag me-2"></i> Danh mục</h5>
 
-                            <!-- Hidden field carries the selected category ID on submit -->
                             <input type="hidden"
                                    name="selectedCategoryId"
                                    id="selectedCategoryId"
                                    value="@(Model?.Filter?.SelectedCategoryId?.ToString() ?? "")" />
 
-                            <!-- JS renders dropdown chain here -->
+                            <!-- dropdown danh mục -->
                             <div id="categoryChainContainer"></div>
 
-                            <!-- Server-rendered breadcrumb (shown after page reload) -->
                             @if (Model?.SelectedCategoryBreadcrumb?.Any() == true)
                             {
                                 <div class="mt-2 small text-success fw-semibold" id="serverBreadcrumb">
@@ -68,7 +63,6 @@
                             </p>
                         </div>
 
-                        <!-- ── Dynamic attribute filters (server-rendered, replaced by AJAX) ── -->
                         <div id="sidebarAttrFilters">
                         @if (Model?.Filter?.SelectedCategoryId != null
                              && Model.Attributes != null && Model.Attributes.Any())
@@ -99,7 +93,7 @@
                         }
                         </div>
 
-                        <!-- ── Price Range Filter ── -->
+                        <!-- bộ lọc khoảng giá -->
                         <div class="filter_group">
                             <h5><i class="fa fa-money me-2"></i> Khoảng giá</h5>
                             <div class="price-inputs d-flex gap-2 mb-3">
@@ -140,12 +134,8 @@
                 </div>
             </div>
 
-            <!-- ═══════════════════════════════════════════════════════════════
-                 PRODUCT GRID
-            ════════════════════════════════════════════════════════════════ -->
             <div class="col-lg-9 col-md-8">
 
-                <!-- Search bar — persists across AJAX updates (outside #shopResults) -->
                 <div class="shop-search-bar" id="shopSearchBar">
                     <div class="input-group">
                         <input type="text"
@@ -162,7 +152,7 @@
 
             <div id="shopResults">
 
-                <!-- Category breadcrumb (above sort bar) -->
+                <!-- breadcrumb danh mục -->
                 @if (Model?.SelectedCategoryBreadcrumb?.Any() == true)
                 {
                     <nav aria-label="breadcrumb" class="mb-2">
@@ -178,7 +168,7 @@
                     </nav>
                 }
 
-                <!-- Sort bar -->
+                <!-- thanh sắp xếp -->
                 <div class="d-flex justify-content-between align-items-center mb-4 p-3 bg-white rounded shadow-sm">
                     <span class="text-muted">
                         Tìm thấy <strong>@(Model?.TotalProducts ?? 0)</strong> sản phẩm
@@ -193,7 +183,7 @@
                     </div>
                 </div>
 
-                <!-- Product cards -->
+                <!-- thẻ sản phẩm -->
                 <div class="row" id="productGrid">
                     @if (Model?.Products != null && Model.Products.Any())
                     {
@@ -236,7 +226,7 @@
                     }
                 </div>
 
-                <!-- Pagination -->
+                <!-- phân trang -->
                 @if (Model?.TotalPages > 1)
                 {
                     <nav class="mt-4 shop-pagination">
@@ -257,12 +247,12 @@
                     </nav>
                 }
 
-            </div><!-- /#shopResults -->
+            </div>
             </div>
         </div>
     </div>
 </div>
-<!-- end shop section -->
+
 
 @section Scripts {
     <script src="~/js/shop.js"></script>

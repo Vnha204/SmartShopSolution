@@ -23,12 +23,9 @@
 
     <div class="row g-4">
 
-        <!-- ═══════════════════════════════════════════════════════════════
-             LEFT COLUMN
-        ════════════════════════════════════════════════════════════════ -->
         <div class="col-lg-8">
 
-            <!-- Basic info -->
+            <!-- thông tin cơ bản -->
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-header bg-white border-bottom py-3">
                     <h6 class="mb-0 fw-bold">
@@ -56,7 +53,7 @@
                 </div>
             </div>
 
-            <!-- Price & Stock -->
+            <!-- giá & kho -->
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-header bg-white border-bottom py-3">
                     <h6 class="mb-0 fw-bold">
@@ -91,7 +88,7 @@
                 </div>
             </div>
 
-            <!-- Thumbnail -->
+            <!-- hình ảnh -->
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-header bg-white border-bottom py-3">
                     <h6 class="mb-0 fw-bold">
@@ -99,7 +96,7 @@
                     </h6>
                 </div>
                 <div class="card-body">
-                    @* Show existing Cloudinary image *@
+                    @* ảnh hiện tại *@
                     <div id="imgPreview" class="mb-3" style="@(string.IsNullOrEmpty(Model.ThumbnailUrl) ? "display:none;" : "")">
                         <p class="form-text text-muted mb-1">Ảnh hiện tại:</p>
                         <img id="previewImg" src="@(Model.ThumbnailUrl ?? "")" alt="Preview"
@@ -114,7 +111,6 @@
                 </div>
             </div>
 
-            <!-- Attributes card (server-side render on first load; JS replaces on category change) -->
             <div id="attributeCard" class="card border-0 shadow-sm mb-4"
                  style="@(hasAttributes ? "" : "display:none;")">
                 <div class="card-header bg-white border-bottom py-3">
@@ -124,7 +120,7 @@
                 </div>
                 <div class="card-body">
                     <div id="attributeSection">
-                        @* Server-side render (Edit mode: category already known) *@
+                        @* server-side render *@
                         @foreach (var attr in Model.AvailableAttributes)
                         {
                             <div class="mb-3" data-attribute-id="@attr.AttributeId">
@@ -154,12 +150,9 @@
 
         </div>
 
-        <!-- ═══════════════════════════════════════════════════════════════
-             RIGHT COLUMN — Status + Category drill-down
-        ════════════════════════════════════════════════════════════════ -->
         <div class="col-lg-4">
 
-            <!-- Status -->
+            <!-- trạng thái -->
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-header bg-white border-bottom py-3">
                     <h6 class="mb-0 fw-bold">
@@ -178,7 +171,7 @@
                 </div>
             </div>
 
-            <!-- Category drill-down -->
+            <!-- chọn danh mục -->
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-header bg-white border-bottom py-3">
                     <h6 class="mb-0 fw-bold">
@@ -205,7 +198,7 @@
                 </div>
             </div>
 
-            <!-- Save -->
+            <!-- lưu -->
             <div class="d-grid gap-2">
                 <button type="submit" class="btn btn-primary">
                     <i class="fa fa-save me-2"></i> Lưu thay đổi
@@ -223,15 +216,10 @@
     <script src="~/js/admin-product-thumbnail.js"></script>
     <script src="~/js/admin/product-attributes.js" asp-append-version="true"></script>
     <script>
-    // ── Constants ─────────────────────────────────────────────────────────────
     const CAT_API          = '/Admin/api/categories';
-    const _existingCatId   = @Html.Raw(existingCatId);          // int | null
-    const _existingSelIds  = @Html.Raw(selectedIdsJson);        // int[]
+    const _existingCatId   = @Html.Raw(existingCatId);          // int hoặc null
+    const _existingSelIds  = @Html.Raw(selectedIdsJson);        // mảng int
     let   _maxDepth        = 0;
-
-    // ═════════════════════════════════════════════════════════════════════════
-    // Category drill-down (same logic as Create)
-    // ═════════════════════════════════════════════════════════════════════════
 
     function removeDepthsFrom(fromDepth) {
         for (let d = fromDepth; d <= _maxDepth + 1; d++) {
@@ -283,7 +271,6 @@
         });
 
         wrapper.appendChild(sel);
-        // Guard: remove any element already at this depth (race-condition safety)
         const stale = document.getElementById(wrapper.id);
         if (stale) stale.remove();
         container.appendChild(wrapper);
@@ -305,7 +292,6 @@
         if (hasChildren) {
             await renderLevel(parseInt(categoryId), depth + 1, null);
         } else {
-            // Leaf selected — reload attributes via JS (don't use _existingSelIds when category changed)
             const newCat = parseInt(categoryId);
             const text   = await fetchBreadcrumbText(newCat);
             setLeaf(newCat, text, []);  // empty selection when category changes
@@ -322,8 +308,6 @@
     function clearLeaf() {
         document.getElementById('CategoryId').value = '';
         document.getElementById('leafDisplay').style.display = 'none';
-        // Don't hide attribute card yet — keep server-rendered checkboxes visible
-        // until user actually picks a different category
     }
 
     async function fetchBreadcrumbText(categoryId) {
@@ -332,13 +316,12 @@
         return bc.map(b => b.name).join(' › ');
     }
 
-    // Expand chain from root to leaf for the existing product category
     async function preloadCategoryChain(leafCategoryId) {
         const resp      = await fetch(`${CAT_API}/breadcrumb?categoryId=${leafCategoryId}`);
         const breadcrumb = await resp.json();
         if (!breadcrumb.length) return;
 
-        // Render root level pre-selecting first breadcrumb item
+        // render cấp gốc, chọn trước mục đầu tiên
         await renderLevel(null, 0, breadcrumb[0].id);
 
         for (let i = 0; i < breadcrumb.length - 1; i++) {
@@ -352,12 +335,7 @@
         document.getElementById('leafBreadcrumb').textContent =
             breadcrumb.map(b => b.name).join(' › ');
         document.getElementById('leafDisplay').style.display = 'block';
-        // Note: attributes are already server-rendered; no need for loadAttributes here.
     }
-
-    // ═════════════════════════════════════════════════════════════════════════
-    // Attribute loading — called only when user changes category via JS
-    // ═════════════════════════════════════════════════════════════════════════
 
     async function loadAttributes(categoryId, selectedIds) {
         const card    = document.getElementById('attributeCard');
@@ -406,10 +384,9 @@
         return d.innerHTML;
     }
 
-    // ── Init ──────────────────────────────────────────────────────────────────
     document.addEventListener('DOMContentLoaded', async function () {
         if (_existingCatId) {
-            // Expand the chain to show the product's current category
+            // mở rộng chuỗi danh mục hiện có
             await preloadCategoryChain(_existingCatId);
         } else {
             await renderLevel(null, 0, null);

@@ -12,22 +12,7 @@
     </div>
 </div>
 
-@if (TempData["Success"] != null)
-{
-    <div class="alert alert-success alert-dismissible fade show">
-        <i class="fa fa-check-circle me-2"></i> @TempData["Success"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-}
-@if (TempData["Error"] != null)
-{
-    <div class="alert alert-danger alert-dismissible fade show">
-        <i class="fa fa-exclamation-circle me-2"></i> @TempData["Error"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-}
-
-<!-- Filter form -->
+<!-- form lọc -->
 <div class="card card-custom mb-4">
     <div class="card-body py-3">
         <form asp-area="Admin" asp-controller="Order" asp-action="Index" method="get"
@@ -92,7 +77,7 @@
     </div>
 </div>
 
-<!-- Status tabs (client-side filter) -->
+<!-- tab trạng thái (lọc phía client) -->
 <div class="card card-custom mb-4">
     <div class="card-body p-0">
         <ul class="nav nav-tabs border-0 px-3 pt-3" id="orderTabs">
@@ -131,7 +116,7 @@
     </div>
 </div>
 
-<!-- Table -->
+<!-- bảng -->
 <div class="card card-custom">
     <div class="card-body p-0">
         <div class="table-responsive">

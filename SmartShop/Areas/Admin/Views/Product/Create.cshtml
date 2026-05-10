@@ -18,12 +18,9 @@
 
     <div class="row g-4">
 
-        <!-- ═══════════════════════════════════════════════════════════════
-             LEFT COLUMN — Main info + Attributes
-        ════════════════════════════════════════════════════════════════ -->
         <div class="col-lg-8">
 
-            <!-- Basic info -->
+            <!-- thông tin cơ bản -->
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-header bg-white border-bottom py-3">
                     <h6 class="mb-0 fw-bold">
@@ -54,7 +51,7 @@
                 </div>
             </div>
 
-            <!-- Price & Stock -->
+            <!-- giá & kho -->
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-header bg-white border-bottom py-3">
                     <h6 class="mb-0 fw-bold">
@@ -89,7 +86,7 @@
                 </div>
             </div>
 
-            <!-- Thumbnail -->
+            <!-- hình ảnh -->
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-header bg-white border-bottom py-3">
                     <h6 class="mb-0 fw-bold">
@@ -109,7 +106,6 @@
                 </div>
             </div>
 
-            <!-- Dynamic attributes (shown after leaf category chosen) -->
             <div id="attributeCard" class="card border-0 shadow-sm mb-4" style="display:none;">
                 <div class="card-header bg-white border-bottom py-3">
                     <h6 class="mb-0 fw-bold">
@@ -123,12 +119,9 @@
 
         </div>
 
-        <!-- ═══════════════════════════════════════════════════════════════
-             RIGHT COLUMN — Status + Category drill-down
-        ════════════════════════════════════════════════════════════════ -->
         <div class="col-lg-4">
 
-            <!-- Status -->
+            <!-- trạng thái -->
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-header bg-white border-bottom py-3">
                     <h6 class="mb-0 fw-bold">
@@ -147,7 +140,7 @@
                 </div>
             </div>
 
-            <!-- Category drill-down -->
+            <!-- chọn danh mục -->
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-header bg-white border-bottom py-3">
                     <h6 class="mb-0 fw-bold">
@@ -158,10 +151,10 @@
                     <input type="hidden" asp-for="CategoryId" id="CategoryId" />
                     <span asp-validation-for="CategoryId" class="text-danger small d-block mb-2"></span>
 
-                    <!-- Drill-down dropdowns render here (JS) -->
+                    <!-- dropdown danh mục -->
                     <div id="categoryChainContainer"></div>
 
-                    <!-- Breadcrumb display when leaf selected -->
+                    <!-- breadcrumb khi chọn lá -->
                     <div id="leafDisplay" class="mt-2" style="display:none;">
                         <small class="text-success fw-semibold">
                             <i class="fa fa-check-circle me-1"></i>
@@ -176,7 +169,7 @@
                 </div>
             </div>
 
-            <!-- Save -->
+            <!-- lưu -->
             <div class="d-grid gap-2">
                 <button type="submit" class="btn btn-primary">
                     <i class="fa fa-save me-2"></i> Lưu sản phẩm
@@ -194,11 +187,9 @@
     <script src="~/js/admin-product-thumbnail.js"></script>
     <script src="~/js/admin/product-attributes.js" asp-append-version="true"></script>
     <script>
-    // ── Constants ─────────────────────────────────────────────────────────────
     const CAT_API   = '/Admin/api/categories';
-    let   _maxDepth = 0;   // tracks deepest dropdown level rendered
+    let   _maxDepth = 0;   // cấp dropdown sâu nhất đã render
 
-    // ── Slug generator ────────────────────────────────────────────────────────
     function generateSlug(name) {
         const s = name.toLowerCase()
             .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
@@ -207,11 +198,7 @@
         document.getElementById('Slug').value = s;
     }
 
-    // ═════════════════════════════════════════════════════════════════════════
-    // Category drill-down
-    // ═════════════════════════════════════════════════════════════════════════
-
-    // Remove all dropdown wrappers at depth >= fromDepth
+    // xóa dropdown từ depth trở đi
     function removeDepthsFrom(fromDepth) {
         for (let d = fromDepth; d <= _maxDepth + 1; d++) {
             const el = document.getElementById('cat-level-' + d);
@@ -220,7 +207,7 @@
         _maxDepth = Math.max(fromDepth - 1, 0);
     }
 
-    // Render a dropdown for a given depth level
+    // render dropdown tại độ sâu nhất định
     async function renderLevel(parentId, depth) {
         removeDepthsFrom(depth);
         clearLeaf();
@@ -263,19 +250,18 @@
         });
 
         wrapper.appendChild(sel);
-        // Guard: remove any element already at this depth (race-condition safety)
         const stale = document.getElementById(wrapper.id);
         if (stale) stale.remove();
         container.appendChild(wrapper);
         _maxDepth = Math.max(_maxDepth, depth);
     }
 
-    // Called when user picks an item in level <depth>
+    // xử lý khi chọn mục tại một cấp
     async function onLevelChange(sel) {
         const depth      = parseInt(sel.dataset.depth);
         const categoryId = sel.value;
 
-        // Remove everything deeper
+        // xóa cấp sâu hơn
         removeDepthsFrom(depth + 1);
         clearLeaf();
 
@@ -311,13 +297,12 @@
         return bc.map(b => b.name).join(' › ');
     }
 
-    // Pre-load for Edit mode: given a known categoryId, expand the chain
     async function preloadCategoryChain(leafCategoryId) {
         const resp      = await fetch(`${CAT_API}/breadcrumb?categoryId=${leafCategoryId}`);
         const breadcrumb = await resp.json();
         if (!breadcrumb.length) return;
 
-        // Render root level
+        // render cấp gốc
         await renderLevel(null, 0);
 
         for (let i = 0; i < breadcrumb.length; i++) {
@@ -326,18 +311,14 @@
             if (sel) sel.value = item.id;
 
             if (i < breadcrumb.length - 1) {
-                // Load next level (children of current item)
+                // load cấp con
                 await renderLevel(item.id, i + 1);
             } else {
-                // Leaf
+                // lá
                 setLeaf(item.id, breadcrumb.map(b => b.name).join(' › '));
             }
         }
     }
-
-    // ═════════════════════════════════════════════════════════════════════════
-    // Attribute loading (checkboxes)
-    // ═════════════════════════════════════════════════════════════════════════
 
     async function loadAttributes(categoryId, selectedIds) {
         const card    = document.getElementById('attributeCard');
@@ -386,9 +367,8 @@
         return d.innerHTML;
     }
 
-    // ── Init ──────────────────────────────────────────────────────────────────
     document.addEventListener('DOMContentLoaded', function () {
-        renderLevel(null, 0);  // Load root categories on page load
+        renderLevel(null, 0);  // load danh mục gốc khi tải trang
     });
     </script>
 }

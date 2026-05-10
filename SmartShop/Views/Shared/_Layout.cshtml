@@ -11,19 +11,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
     <title>@ViewData["Title"] - SmartShop</title>
 
-    <!-- Bootstrap CSS (libman) -->
+    <!-- bootstrap css -->
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <!-- Template CSS -->
+    <!-- css template -->
     <link rel="stylesheet" href="~/css/style.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/responsive.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/jquery.mCustomScrollbar.min.css" />
-    <!-- Favicon -->
+    <!-- favicon -->
     <link rel="icon" href="~/images/fevicon.png" type="image/gif" />
-    <!-- CSRF token for AJAX requests -->
+    <!-- csrf token cho ajax -->
     <meta name="csrf-token" content="@_af.GetAndStoreTokens(Context).RequestToken" />
-    <!-- Font Awesome -->
+    <!-- font awesome -->
     <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" />
-    <!-- Fancybox -->
+    <!-- fancybox -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/2.1.5/jquery.fancybox.min.css" media="screen" />
     <style>
         html, body { overflow-x: hidden; max-width: 100%; }
@@ -47,12 +47,11 @@
 </head>
 <body class="main-layout @bodyClass">
 
-    <!-- Loader -->
+    <!-- loader -->
     <div class="loader_bg">
         <div class="loader"><img src="~/images/loading.gif" alt="#" /></div>
     </div>
-    <!-- end loader -->
-    <!-- Header -->
+    <!-- header -->
     <header>
         <div class="header">
             <div class="container-fluid">
@@ -104,19 +103,18 @@
             </div>
         </div>
     </header>
-    <!-- end header -->
     @RenderBody()
 
-    <!-- Footer -->
+    <!-- footer -->
     <footer>
         <div class="footer">
             <div class="container">
                 <div class="row">
                     <div class="col-md-8 offset-md-2">
                         <ul class="location_icon">
-                            <li><a href="#"><i class="fa fa-map-marker" aria-hidden="true"></i></a><br /> Địa chỉ</li>
-                            <li><a href="#"><i class="fa fa-phone" aria-hidden="true"></i></a><br /> +01 1234567890</li>
-                            <li><a href="#"><i class="fa fa-envelope" aria-hidden="true"></i></a><br /> demo@gmail.com</li>
+                            <li><a href="#"><i class="fa fa-map-marker" aria-hidden="true"></i></a><br /> 123 Đường Kính Mắt, Quận Thời Trang</li>
+                            <li><a href="#"><i class="fa fa-phone" aria-hidden="true"></i></a><br /> 0987654321</li>
+                            <li><a href="#"><i class="fa fa-envelope" aria-hidden="true"></i></a><br /> anhdoviet0@gmail.com</li>
                         </ul>
                     </div>
                 </div>
@@ -132,20 +130,19 @@
             </div>
         </div>
     </footer>
-    <!-- end footer -->
-    
-    <!-- Core Scripts -->
+
+    <!-- script lõi -->
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/jquery.mCustomScrollbar.concat.min.js"></script>
     
-    <!-- App Scripts -->
+    <!-- script ứng dụng -->
     <script src="~/js/custom.js"></script>
     <script src="~/js/account.js"></script>
     <script src="~/js/address.js"></script>
     <script src="~/js/forgot-password.js"></script>
 
-    <!-- Mapbox (conditional) -->
+    <!-- mapbox (có điều kiện) -->
     @if (ViewData["ShowMap"] != null && (bool)ViewData["ShowMap"])
     {
         <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
@@ -154,7 +151,7 @@
     
     @await RenderSectionAsync("Scripts", required: false)
 
-    <!-- Cart toast notification -->
+    <!-- toast giỏ hàng -->
     <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index:1200">
         <div id="cartToast" class="toast align-items-center border-0" role="alert" aria-live="assertive" aria-atomic="true">
             <div class="d-flex">

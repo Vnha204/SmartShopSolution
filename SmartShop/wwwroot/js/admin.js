@@ -1,19 +1,14 @@
-/**
- * admin.js - Admin panel scripts
- * SmartShop - E-commerce Platform
- */
-
 (function () {
     'use strict';
 
-    // Admin Module
+    // admin module
     window.AdminModule = {
         init: function () {
             this.initToastAutoDismiss();
             this.initSidebar();
         },
 
-        // Auto-dismiss toast notifications after 4 seconds
+        // tự ẩn toast sau 4 giây
         initToastAutoDismiss: function () {
             setTimeout(function () {
                 var toasts = document.querySelectorAll('.admin-toast-area .alert');
@@ -26,7 +21,7 @@
             }, 4000);
         },
 
-        // Sidebar toggle
+        // toggle sidebar
         initSidebar: function () {
             var sidebarToggle = document.getElementById('sidebarToggle');
             var sidebar = document.querySelector('.admin-sidebar');
@@ -38,7 +33,7 @@
             }
         },
 
-        // Filter products table
+        // lọc bảng sản phẩm
         filterProducts: function () {
             var keyword = document.getElementById('searchInput');
             var statusFilter = document.getElementById('statusFilter');
@@ -53,9 +48,8 @@
             );
         },
 
-        // Filter orders table
+        // lọc bảng đơn hàng
         filterOrders: function (status, tabEl) {
-            // Update tab active state
             var tabs = document.querySelectorAll('#orderTabs .nav-link');
             tabs.forEach(function (el) {
                 el.classList.remove('active');
@@ -64,7 +58,6 @@
                 tabEl.classList.add('active');
             }
 
-            // Filter rows
             var rows = document.querySelectorAll('#ordersTable tbody tr');
             rows.forEach(function (row) {
                 if (status === 'all' || row.dataset.status === status) {
@@ -75,7 +68,7 @@
             });
         },
 
-        // Generic table filter
+        // lọc bảng chung
         filterTable: function (tableBodyId, keyword, status, counterId) {
             var rows = document.querySelectorAll('#' + tableBodyId + ' tr[data-name]');
             var count = 0;
@@ -99,7 +92,7 @@
         }
     };
 
-    // Global functions for onclick handlers
+    // hàm toàn cục cho onclick
     window.searchProducts = function () {
         AdminModule.filterProducts();
     };
@@ -112,7 +105,7 @@
         AdminModule.filterOrders(status, tabEl);
     };
 
-    // Initialize on DOM ready
+    // khởi tạo khi dom sẵn sàng
     document.addEventListener('DOMContentLoaded', function () {
         AdminModule.init();
     });

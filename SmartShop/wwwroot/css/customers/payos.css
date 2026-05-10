@@ -1,7 +1,3 @@
-/* =========================================================
-   PayOS payment result / waiting page
-   ========================================================= */
-
 .payos-section {
     padding: 60px 0 80px;
     min-height: 70vh;
@@ -21,7 +17,7 @@
     font-size: 1rem;
 }
 
-/* ── Status banner ─────────────────────────────────────── */
+/* trạng thái thanh toán */
 .payos-status-banner {
     display: flex;
     align-items: center;
@@ -56,7 +52,7 @@
     color: #880e4f;
 }
 
-/* ── Card ──────────────────────────────────────────────── */
+/* thẻ nội dung */
 .payos-card {
     background: #fff;
     border-radius: 10px;
@@ -74,7 +70,7 @@
     border-bottom: 1px solid #eee;
 }
 
-/* ── Order summary table ───────────────────────────────── */
+/* bảng tóm tắt đơn */
 .payos-order-table {
     width: 100%;
     border-collapse: collapse;
@@ -97,7 +93,7 @@
     border-bottom: none;
 }
 
-/* ── Badge ─────────────────────────────────────────────── */
+/* badge */
 .payos-badge {
     display: inline-block;
     padding: 3px 12px;
@@ -118,14 +114,14 @@
     border: 1px solid #a5d6a7;
 }
 
-/* ── Retry / Pay again block ───────────────────────────── */
+/* khối thanh toán lại */
 .payos-retry-block {
     margin-top: 22px;
     padding-top: 18px;
     border-top: 1px solid #f0f0f0;
 }
 
-/* ── Buttons ───────────────────────────────────────────── */
+/* nút */
 .btn-payos-primary {
     display: inline-flex;
     align-items: center;

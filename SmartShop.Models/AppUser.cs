@@ -14,7 +14,6 @@ namespace SmartShop.Models
         public string? AvatarUrl { get; set; }
         public DateTime CreatedAt { get; set; } = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time"));
 
-        // Navigation
         public ICollection<Order> Orders { get; set; } = new List<Order>();
         public ICollection<Address> Addresses { get; set; } = new List<Address>();
     }

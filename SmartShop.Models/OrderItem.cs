@@ -17,7 +17,7 @@ namespace SmartShop.Models
         public Product? Product { get; set; }
 
         [Required, MaxLength(300)]
-        public string ProductName { get; set; } = string.Empty; // snapshot
+        public string ProductName { get; set; } = string.Empty;
 
         public int Quantity { get; set; }
 

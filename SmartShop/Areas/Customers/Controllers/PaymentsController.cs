@@ -33,7 +33,7 @@ namespace SmartShop.Areas.Customers.Controllers
         }
 
         // GET /Customers/Payments/PayOS?orderId={id}
-        // Creates a PayOS payment link and redirects the customer to it.
+        // tạo PayOS payment link, chuyển route
         public async Task<IActionResult> PayOS(int orderId)
         {
             var order = await _unitOfWork.Orders.GetByIdAsync(orderId);
@@ -45,11 +45,11 @@ namespace SmartShop.Areas.Customers.Controllers
             if (!string.Equals(order.PaymentMethod, "payos", StringComparison.OrdinalIgnoreCase))
                 return RedirectToAction("OrderDetail", "Account", new { area = "", orderId });
 
-            // Already paid — send straight to result page
+            
             if (string.Equals(order.PaymentStatus, "paid", StringComparison.OrdinalIgnoreCase))
                 return RedirectToAction(nameof(PayOSReturn), new { orderId });
 
-            // Reuse existing payment link if one was already created (prevents PayOS error 231)
+            // Tái sử dụng link thanh toán cũ để tránh lỗi PayOS 231
             if (!string.IsNullOrWhiteSpace(order.PayOSPaymentLinkId) &&
                 !string.IsNullOrWhiteSpace(order.PayOSCheckoutUrl) &&
                 (string.Equals(order.PaymentStatus, "pending", StringComparison.OrdinalIgnoreCase) ||
@@ -58,8 +58,6 @@ namespace SmartShop.Areas.Customers.Controllers
                 return Redirect(order.PayOSCheckoutUrl);
             }
 
-            // ?? won't help here because appsettings stores "" (not null).
-            // Use IsNullOrWhiteSpace so user-secrets "App:PublicBaseUrl" takes priority.
             var baseUrl =
                 !string.IsNullOrWhiteSpace(_config["App:PublicBaseUrl"]) ? _config["App:PublicBaseUrl"]!
                 : $"{Request.Scheme}://{Request.Host}";
@@ -67,7 +65,6 @@ namespace SmartShop.Areas.Customers.Controllers
             var returnUrl = $"{baseUrl}/Customers/Payments/PayOSReturn?orderId={orderId}";
             var cancelUrl = $"{baseUrl}/Customers/Payments/PayOSReturn?orderId={orderId}&cancelled=true";
 
-            // PayOS description max 25 characters
             var description = order.OrderCode.Length > 25
                 ? order.OrderCode[..25]
                 : order.OrderCode;
@@ -87,7 +84,7 @@ namespace SmartShop.Areas.Customers.Controllers
                 return RedirectToAction("OrderDetail", "Account", new { area = "", orderId });
             }
 
-            // Persist the payment link identifiers so webhook can find this order reliably
+            // Lưu ID link thanh toán để webhook xác định đúng đơn hàng
             order.PayOSPaymentLinkId = result.PaymentLinkId;
             order.PayOSOrderCode     = result.OrderCode;
             order.PayOSCheckoutUrl   = result.CheckoutUrl;
@@ -97,9 +94,7 @@ namespace SmartShop.Areas.Customers.Controllers
 
             return Redirect(result.CheckoutUrl);
         }
-
-        // GET /Customers/Payments/PayOSReturn?orderId={id}&cancelled={true?}
-        // Landing page after PayOS redirects the customer back (returnUrl / cancelUrl).
+        // Trang xử lý khi khách hàng quay lại từ PayOS sau thanh toán/hủy thanh toán
         public async Task<IActionResult> PayOSReturn(int orderId, bool cancelled = false)
         {
             var order = await _unitOfWork.Orders.GetWithDetailsAsync(orderId);
@@ -113,7 +108,6 @@ namespace SmartShop.Areas.Customers.Controllers
         }
 
         // GET /Customers/Payments/PaymentStatus?orderId={id}
-        // AJAX endpoint polled by payment-status.js
         [HttpGet]
         public async Task<IActionResult> PaymentStatus(int orderId)
         {

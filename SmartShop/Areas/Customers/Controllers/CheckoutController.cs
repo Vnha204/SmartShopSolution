@@ -21,7 +21,7 @@ namespace SmartShop.Areas.Customers.Controllers
             _userManager = userManager;
         }
 
-        // GET /Customers/Checkout
+        // GET thanh toán
         public async Task<IActionResult> Index()
         {
             var userId = _userManager.GetUserId(User)!;
@@ -35,7 +35,6 @@ namespace SmartShop.Areas.Customers.Controllers
 
             var addresses = (await _unitOfWork.Addresses.GetByUserIdAsync(userId)).ToList();
 
-            // Pre-select payment method when arriving via a direct link (e.g. "Mua ngay")
             var paymentHint = Request.Query["payment"].ToString();
             var preselected  = paymentHint is "payos" or "cod" ? paymentHint : "cod";
 

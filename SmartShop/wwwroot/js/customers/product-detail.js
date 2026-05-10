@@ -1,14 +1,3 @@
-/**
- * product-detail.js — Product detail page interactions
- *
- * Responsibilities:
- *   1. Quantity stepper (+/− buttons with stock bounds)
- *   2. Add-to-cart AJAX (same pattern as shop.js)
- *      - Reads CSRF token from <meta name="csrf-token">
- *      - Redirects to login if unauthenticated
- *      - Shows Bootstrap toast feedback
- *      - Increments cart badge in navbar
- */
 (function () {
     'use strict';
 
@@ -16,7 +5,6 @@
         var qtyInput = document.getElementById('detailQty');
         var maxStock = qtyInput ? (parseInt(qtyInput.max, 10) || 99) : 99;
 
-        // ── Quantity stepper ─────────────────────────────────────────────────
         var minusBtn = document.querySelector('.qty-minus');
         var plusBtn  = document.querySelector('.qty-plus');
 
@@ -45,7 +33,6 @@
             });
         }
 
-        // ── Add to cart ──────────────────────────────────────────────────────
         var addCartBtn = document.querySelector('.btn-detail-cart');
         if (addCartBtn) {
             addCartBtn.addEventListener('click', function () {
@@ -98,7 +85,6 @@
             });
         }
 
-        // ── Buy now ──────────────────────────────────────────────────────────
         var buyNowBtn = document.querySelector('.btn-detail-buynow');
         if (buyNowBtn) {
             buyNowBtn.addEventListener('click', function () {
@@ -154,9 +140,7 @@
         }
     });
 
-    // =========================================================================
-    // Helpers (shared pattern with shop.js)
-    // =========================================================================
+    // helpers
 
     function showToast(success, message) {
         var toastEl = document.getElementById('cartToast');

@@ -33,8 +33,6 @@ namespace SmartShop.Areas.Customers.Controllers
             return PartialView("_GlassesGrid", vm);
         }
 
-        // ─── Private helpers ──────────────────────────────────────────────────
-
         private async Task<GlassesViewModel> BuildViewModelAsync(string filter)
         {
             filter = (filter ?? "all").ToLowerInvariant().Trim();

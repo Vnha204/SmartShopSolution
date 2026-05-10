@@ -1,34 +1,9 @@
-/*--------------------------------------------------------------------- File Name: style.css ---------------------------------------------------------------------*/
-
-
-/*--------------------------------------------------------------------- import Fonts ---------------------------------------------------------------------*/
-
 @import url('https://fonts.googleapis.com/css?family=Rajdhani:300,400,500,600,700');
 @import url('https://fonts.googleapis.com/css?family=Poppins:100,100i,200,200i,300,300i,400,400i,500,500i,600,600i,700,700i,800,800i,900,900i');
 @import url('https://fonts.googleapis.com/css?family=Raleway:100,400,600,700,900&display=swap');
 @import url('https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,700i,900&display=swap');
 @import url('https://fonts.googleapis.com/css?family=Open+Sans:400,600,700,800,800i&display=swap');
 
-/*****---------------------------------------- 1) font-family: 'Rajdhani', sans-serif;
- 2) font-family: 'Poppins', sans-serif;
- ----------------------------------------*****/
-
-
-/*--------------------------------------------------------------------- import Files ---------------------------------------------------------------------*/
-
-/*@import url(animate.min.css);
-@import url(normalize.css);
-@import url(icomoon.css);
-@import url(font-awesome.min.css);
-@import url(meanmenu.css);
-@import url(owl.carousel.min.css);
-@import url(swiper.min.css);
-@import url(slick.css);
-@import url(jquery.fancybox.min.css);
-@import url(jquery-ui.css);
-@import url(nice-select.css);*/
-
-/*--------------------------------------------------------------------- skeleton ---------------------------------------------------------------------*/
 
 * {
     box-sizing: border-box !important;
@@ -215,10 +190,10 @@ button {
 }
 
 
-/**-- heading section --**/
+/* phần tiêu đề */
 
 
-/*---------------------------- preloader area ----------------------------*/
+/* preloader */
 
 .loader_bg {
     position: fixed;
@@ -244,16 +219,10 @@ button {
     }
 
 
-/*-- header area --*/
+/* khu vực header */
 
 
-/*--------------------------------------------------------------------- top banner area ---------------------------------------------------------------------*/
-
-
-/*--------------------------------------------------------------------- layout new css ---------------------------------------------------------------------*/
-
-
-/*-- navigation--*/
+/* điều hướng */
 
 .navigation.navbar {
     float: right;
@@ -318,7 +287,7 @@ button {
 }
 
 
-/** banner section **/
+/* phần banner */
 
 .banner_main {
     background: #f5f6f6;
@@ -391,7 +360,6 @@ button {
 }
 
 
-/** end banner section **/
 
 .titlepage h2 {
     font-size: 35px;
@@ -430,7 +398,7 @@ button {
     }
 
 
-/** about section **/
+/* phần giới thiệu */
 
 .about {
     border-bottom: #000 solid 1px;
@@ -481,10 +449,9 @@ button {
     }
 
 
-/** end about section **/
 
 
-/** Our  Glasses section **/
+/* phần kính mắt */
 
 .glasses {
     background: #fff;
@@ -508,7 +475,7 @@ button {
     text-transform: initial;
 }
 
-/* Contact page info icons */
+/* icon thông tin liên hệ */
 .contact-icon {
     color: #03cafc;
     margin-right: 10px;
@@ -549,10 +516,9 @@ button {
 }
 
 
-/** end Our  Glasses section **/
 
 
-/** Our shop section **/
+/* phần shop */
 
 .shop {
     margin-top: 90px;
@@ -612,10 +578,9 @@ button {
     }
 
 
-/** end Our shop section **/
 
 
-/** clients section **/
+/* phần khách hàng */
 
 .clients {
     padding: 90px 0 70px 0;
@@ -688,10 +653,9 @@ button {
 }
 
 
-/** end clients section **/
 
 
-/** contact section **/
+/* phần liên hệ */
 
 .contact {
     margin-top: 90px;
@@ -784,10 +748,9 @@ button {
 }
 
 
-/** end contact section **/
 
 
-/** footer **/
+/* footer */
 
 .footer {
     background: #252525;
@@ -840,10 +803,9 @@ ul.location_icon {
         }
 
 
-/** end footer **/
 
 
-/** inner page css **/
+/* css trang nội */
 
 .position_head .header {
     position: inherit;
@@ -855,7 +817,7 @@ ul.location_icon {
     margin-bottom: 90px;
 }
 
-/** filter buttons (Glasses page) **/
+/* nút lọc trang kính */
 
 .filter-btns {
     display: flex;
@@ -880,7 +842,7 @@ ul.location_icon {
     color: #fff;
 }
 
-/** add to cart button in shop grid **/
+/* nút thêm vào giỏ trong lưới shop */
 
 .shop_item .send_btn {
     width: auto;

@@ -26,7 +26,6 @@ namespace SmartShop.Models
         public bool IsActive { get; set; } = true;
         public DateTime CreatedAt { get; set; } = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time"));
 
-        // Navigation
         public ICollection<Category> Children { get; set; } = new List<Category>();
         public ICollection<ProductCategory> ProductCategories { get; set; } = new List<ProductCategory>();
         public ICollection<CategoryAttribute> CategoryAttributes { get; set; } = new List<CategoryAttribute>();

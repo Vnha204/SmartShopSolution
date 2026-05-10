@@ -23,7 +23,7 @@
         else
         {
             <div id="cart-body" class="row g-4">
-                <!-- Cart items -->
+                <!-- giỏ hàng -->
                 <div class="col-lg-8">
                     <div class="cart-table">
                         <table class="table mb-0">
@@ -40,7 +40,7 @@
                                 @foreach (var item in Model.Items)
                                 {
                                     <tr data-item-id="@item.CartItemId">
-                                        <!-- Thumbnail -->
+                                        <!-- hình thu nhỏ -->
                                         <td style="width:90px">
                                             @if (!string.IsNullOrEmpty(item.ThumbnailUrl))
                                             {
@@ -54,17 +54,17 @@
                                             }
                                         </td>
 
-                                        <!-- Name -->
+                                        <!-- tên -->
                                         <td>
                                             <span class="cart-product-name">@item.ProductName</span>
                                         </td>
 
-                                        <!-- Unit price -->
+                                        <!-- đơn giá -->
                                         <td>
                                             <span class="cart-price">@item.UnitPriceSnapshot.ToString("N0")₫</span>
                                         </td>
 
-                                        <!-- Quantity stepper -->
+                                        <!-- bộ chỉnh số lượng -->
                                         <td>
                                             <div class="qty-stepper">
                                                 <button type="button" class="qty-minus"
@@ -84,12 +84,12 @@
                                             </div>
                                         </td>
 
-                                        <!-- Subtotal -->
+                                        <!-- thành tiền -->
                                         <td class="text-end">
                                             <span class="cart-subtotal">@item.Subtotal.ToString("N0")₫</span>
                                         </td>
 
-                                        <!-- Remove -->
+                                        <!-- xóa -->
                                         <td>
                                             <button type="button" class="btn-remove-item"
                                                     data-item-id="@item.CartItemId"
@@ -111,7 +111,7 @@
                     </div>
                 </div>
 
-                <!-- Summary -->
+                <!-- tóm tắt -->
                 <div class="col-lg-4">
                     <div class="cart-summary">
                         <div class="cart-summary-title">Tóm tắt đơn hàng</div>

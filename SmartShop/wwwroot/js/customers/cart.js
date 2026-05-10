@@ -1,4 +1,4 @@
-// Cart page — AJAX cart actions (no full page reloads)
+// ajax giỏ hàng — không reload trang
 (function () {
     'use strict';
 
@@ -9,12 +9,10 @@
         return m ? m.content : '';
     }
 
-    // ── Vietnamese currency formatter ────────────────────────────────────────
     function vnd(amount) {
         return Number(amount).toLocaleString('vi-VN') + '₫';
     }
 
-    // ── Bootstrap 5 toast ───────────────────────────────────────────────────
     function showToast(success, message) {
         var toastEl = document.getElementById('cartToast');
         var body    = document.getElementById('cartToastBody');
@@ -25,7 +23,6 @@
         bootstrap.Toast.getOrCreateInstance(toastEl, { delay: 2500 }).show();
     }
 
-    // ── Navbar cart badge ───────────────────────────────────────────────────
     function setBadge(count) {
         var badge = document.querySelector('.cart-nav-link .cart-badge');
         if (count <= 0) {
@@ -45,7 +42,6 @@
         }
     }
 
-    // ── Apply cart data to DOM ───────────────────────────────────────────────
     function applyCart(cartData) {
         setBadge(cartData.badgeCount);
 
@@ -62,16 +58,16 @@
             return;
         }
 
-        // Update each existing row; remove rows no longer present
+        // cập nhật từng dòng, xóa dòng không còn tồn tại
         var tbody = body.querySelector('tbody');
         if (tbody) {
-            // Remove rows whose IDs are no longer in the response
+            // xóa dòng không còn trong phản hồi
             var itemIds = cartData.items.map(function (i) { return String(i.cartItemId); });
             tbody.querySelectorAll('tr[data-item-id]').forEach(function (row) {
                 if (itemIds.indexOf(row.dataset.itemId) === -1) row.remove();
             });
 
-            // Update quantities and subtotals for remaining rows
+            // cập nhật số lượng và tổng tiền các dòng còn lại
             cartData.items.forEach(function (item) {
                 var row = tbody.querySelector('tr[data-item-id="' + item.cartItemId + '"]');
                 if (!row) return;
@@ -82,14 +78,13 @@
             });
         }
 
-        // Update summary
+        // cập nhật tổng kết
         var totalQtyEl = body.querySelector('[data-field="total-qty"]');
         if (totalQtyEl) totalQtyEl.textContent = cartData.totalQuantity;
         var totalEl = body.querySelector('[data-field="total"]');
         if (totalEl) totalEl.textContent = vnd(cartData.total);
     }
 
-    // ── Generic cart POST helper ─────────────────────────────────────────────
     function cartPost(url, bodyStr, successMsg) {
         return fetch(url, {
             method: 'POST',
@@ -117,10 +112,9 @@
         });
     }
 
-    // ── Event delegation ─────────────────────────────────────────────────────
     document.addEventListener('click', function (e) {
 
-        // Decrease quantity
+        // giảm số lượng
         var minusBtn = e.target.closest('.qty-minus');
         if (minusBtn) {
             var itemId = minusBtn.dataset.itemId;
@@ -135,7 +129,7 @@
             return;
         }
 
-        // Increase quantity
+        // tăng số lượng
         var plusBtn = e.target.closest('.qty-plus');
         if (plusBtn) {
             var itemId = plusBtn.dataset.itemId;
@@ -151,7 +145,7 @@
             return;
         }
 
-        // Remove item
+        // xóa sản phẩm
         var removeBtn = e.target.closest('.btn-remove-item');
         if (removeBtn) {
             var itemId = removeBtn.dataset.itemId;
@@ -162,7 +156,7 @@
             return;
         }
 
-        // Clear all
+        // xóa toàn bộ giỏ
         var clearBtn = e.target.closest('#btn-clear-cart');
         if (clearBtn) {
             if (!confirm('Xóa toàn bộ giỏ hàng?')) return;

@@ -15,10 +15,10 @@
 
             <div class="row g-4">
 
-                <!-- ── Left column: address / payment / note ── -->
+                <!-- cột trái -->
                 <div class="col-lg-7">
 
-                    <!-- Address -->
+                    <!-- địa chỉ -->
                     <div class="checkout-card">
                         <div class="checkout-card-title">
                             <i class="fa fa-map-marker"></i> Địa chỉ giao hàng
@@ -50,17 +50,14 @@
                             </div>
                             <span asp-validation-for="SelectedAddressId" class="text-danger d-block mt-1"></span>
 
-                            <!-- Toggle for adding a new address even when existing ones exist -->
                             <button type="button" id="btnToggleNewAddress" class="btn-toggle-new-address">
                                 <i class="fa fa-plus"></i> Thêm địa chỉ mới
                             </button>
                         }
 
-                        <!-- New address form: always visible when no existing addresses -->
                         <div id="newAddressForm" @(Model.Addresses.Any() ? "style=\"display:none\"" : "")>
                             @if (Model.Addresses.Any())
                             {
-                                <!-- Hidden radio so SelectedAddressId is null when using new address -->
                                 <input type="radio" id="radioNewAddress" name="SelectedAddressId" value="" style="display:none" />
                             }
 
@@ -99,7 +96,7 @@
                         </div>
                     </div>
 
-                    <!-- Payment method -->
+                    <!-- phương thức thanh toán -->
                     <div class="checkout-card">
                         <div class="checkout-card-title">
                             <i class="fa fa-credit-card"></i> Phương thức thanh toán
@@ -122,7 +119,7 @@
                         </div>
                     </div>
 
-                    <!-- Note -->
+                    <!-- ghi chú -->
                     <div class="checkout-card">
                         <div class="checkout-card-title">
                             <i class="fa fa-sticky-note-o"></i> Ghi chú đơn hàng
@@ -133,7 +130,7 @@
 
                 </div>
 
-                <!-- ── Right column: order summary ── -->
+                <!-- cột phải: tóm tắt đơn -->
                 <div class="col-lg-5">
                     <div class="checkout-summary">
                         <div class="checkout-summary-title">Tóm tắt đơn hàng</div>

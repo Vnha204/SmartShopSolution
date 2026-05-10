@@ -36,7 +36,6 @@ namespace SmartShop.Areas.Customers.Controllers
                 Filter      = filter
             };
 
-            // 1. Resolve category + all descendants
             List<int> descendantCatIds = new();
             List<Category>? allActiveCats = null;
 
@@ -51,7 +50,6 @@ namespace SmartShop.Areas.Customers.Controllers
                     .ToList();
             }
 
-            // 2. Base query — category descendants + keyword + price
             var baseQ = _unitOfWork.Products.Query(p => p.IsActive);
 
             if (descendantCatIds.Any())
@@ -67,7 +65,6 @@ namespace SmartShop.Areas.Customers.Controllers
             if (filter.MaxPrice.HasValue)
                 baseQ = baseQ.Where(p => (p.SalePrice ?? p.BasePrice) <= filter.MaxPrice.Value);
 
-            // 4. Full filtered query — AND across attribute groups, OR within each group
             var filteredQ = baseQ;
             var activeAvIds = filter.AttributeValueIds.Where(id => id > 0).ToList();
             if (activeAvIds.Any())
@@ -83,13 +80,12 @@ namespace SmartShop.Areas.Customers.Controllers
 
                 foreach (var kvp in valueIdsByAttr)
                 {
-                    var groupValueIds = kvp.Value; // local capture for EF expression tree
+                    var groupValueIds = kvp.Value;
                     filteredQ = filteredQ.Where(p =>
                         p.ProductAttributeValues.Any(pav => groupValueIds.Contains(pav.AttributeValueId)));
                 }
             }
 
-            // 3. Load dynamic attributes with counts from filtered query context (faceted search)
             if (filter.SelectedCategoryId.HasValue)
             {
                 var contextIds = (await filteredQ.Select(p => p.Id).ToListAsync()).ToHashSet();
@@ -165,7 +161,6 @@ namespace SmartShop.Areas.Customers.Controllers
             if (product == null)
                 return NotFound();
 
-            // Sold count — sum of quantities across all order items for this product
             var soldCount = await _unitOfWork.OrderItems
                 .Query(oi => oi.ProductId == product.Id)
                 .SumAsync(oi => (int?)oi.Quantity) ?? 0;
@@ -184,7 +179,6 @@ namespace SmartShop.Areas.Customers.Controllers
                 .OrderBy(g => g.AttributeName)
                 .ToList();
 
-            // Related products — same primary category, exclude current, max 4
             var categoryId = product.ProductCategories.FirstOrDefault()?.CategoryId;
             var relatedProducts = new List<ProductItemVM>();
             if (categoryId.HasValue)
@@ -228,10 +222,6 @@ namespace SmartShop.Areas.Customers.Controllers
 
             return View(vm);
         }
-
-        // =====================================================================
-        // Private helpers
-        // =====================================================================
 
         private static List<int> GetDescendantIds(List<Category> allCats, int categoryId)
         {

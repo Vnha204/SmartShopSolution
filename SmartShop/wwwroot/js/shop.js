@@ -1,17 +1,3 @@
-/**
- * shop.js — client interaction for Shop filters
- *
- * A) Duplication fix: shop.js is now loaded ONLY via @section Scripts in Index.cshtml.
- *    The duplicate <script> in _Layout.cshtml has been removed.
- *    Additionally, renderCatLevel() has a stale-element guard before appending.
- *
- * B) AJAX filtering: all filter changes (category, attribute, price, keyword, sort,
- *    pagination) update products via fetch() without a full page reload.
- *    - ShopController returns PartialView("_ShopAjaxPartial") when partial=1.
- *    - JS replaces #sidebarAttrFilters and #shopResults from the parsed response.
- *    - URL is kept in sync via history.pushState / popstate.
- */
-
 (function () {
     'use strict';
 
@@ -20,16 +6,13 @@
 
     var _maxCatDepth = 0;
 
-    // ── DOMContentLoaded init ─────────────────────────────────────────────────
-
     document.addEventListener('DOMContentLoaded', function () {
         var filterForm = document.getElementById('filterForm');
-        if (!filterForm) return;   // not on shop page
+        if (!filterForm) return;   // không ở trang shop
 
-        // Stamp current URL into history so popstate can restore it
+        // lưu url hiện tại vào history
         history.replaceState({}, '', window.location.href);
 
-        // ── Category drill-down init ─────────────────────────────────────────
         var selectedInput = document.getElementById('selectedCategoryId');
         var existingCatId = selectedInput && selectedInput.value
             ? parseInt(selectedInput.value, 10)
@@ -41,7 +24,6 @@
             renderCatLevel(null, 0);
         }
 
-        // ── Attribute checkboxes & price-range radios (delegation on form) ───
         filterForm.addEventListener('change', function (e) {
             var el = e.target;
             if (el.type === 'checkbox' && el.name === 'attributeValueIds') {
@@ -53,7 +35,6 @@
             }
         });
 
-        // ── Price text inputs: submit on Enter / blur ────────────────────────
         var minInp = filterForm.querySelector('input[name="minPrice"]');
         var maxInp = filterForm.querySelector('input[name="maxPrice"]');
         [minInp, maxInp].forEach(function (el) {
@@ -64,7 +45,6 @@
             el.addEventListener('blur', function () { submitAjax(); });
         });
 
-        // ── Search bar above grid: submit on Enter or button click ───────────
         var shopKwInp = document.getElementById('shopKeywordInput');
         var shopKwBtn = document.getElementById('shopSearchBtn');
         if (shopKwInp) {
@@ -76,20 +56,17 @@
             shopKwBtn.addEventListener('click', function () { submitAjax(); });
         }
 
-        // ── "Áp dụng bộ lọc" submit button ──────────────────────────────────
         filterForm.addEventListener('submit', function (e) {
             e.preventDefault();
             submitAjax();
         });
 
-        // ── SortBy (inside #shopResults — may be replaced; use delegation) ───
         document.addEventListener('change', function (e) {
             if (e.target.id === 'sortBy') {
                 submitAjax();
             }
         });
 
-        // ── Pagination clicks (inside #shopResults — use delegation) ─────────
         document.addEventListener('click', function (e) {
             var link = e.target.closest('.page-link[data-page]');
             if (link) {
@@ -99,7 +76,6 @@
             }
         });
 
-        // ── Clear ALL filters ────────────────────────────────────────────────
         document.addEventListener('click', function (e) {
             var btn = e.target.closest('#clearFilters, #clearFiltersEmpty');
             if (!btn) return;
@@ -115,7 +91,6 @@
             submitAjax();
         });
 
-        // ── Clear category (server-rendered button; shown on initial full load) ──
         document.addEventListener('click', function (e) {
             var btn = e.target.closest('#clearCategory');
             if (!btn) return;
@@ -130,17 +105,14 @@
             submitAjax();
         });
 
-        // ── Popstate: browser back / forward ────────────────────────────────
         window.addEventListener('popstate', function () {
             loadFromUrl(window.location.search);
         });
     });
 
-    // =========================================================================
-    // AJAX helpers
-    // =========================================================================
+    // ajax helpers
 
-    /** Collect current form state into URLSearchParams. */
+    // thu thập trạng thái form
     function buildParams(overrides) {
         var params = new URLSearchParams();
 
@@ -162,7 +134,6 @@
                 .forEach(function (cb) { params.append('attributeValueIds', cb.value); });
         }
 
-        // sortBy lives inside #shopResults (replaced by AJAX) — query live DOM
         var sortEl = document.getElementById('sortBy');
         if (sortEl && sortEl.value) params.set('sortBy', sortEl.value);
 
@@ -175,7 +146,6 @@
         return params;
     }
 
-    /** Fetch the partial and swap #sidebarAttrFilters + #shopResults. */
     function submitAjax(overrides) {
         var params   = buildParams(overrides);
         var queryStr = params.toString();
@@ -186,17 +156,17 @@
         .then(function (r) { return r.text(); })
         .then(function (html) {
             applyPartialHtml(html);
-            // Push URL without partial=1
+            // cập nhật url không có partial=1
             history.pushState({}, '', window.location.pathname + (queryStr ? '?' + queryStr : ''));
         })
         .catch(function (err) { console.error('Shop AJAX error', err); });
     }
 
-    /** Restore state from URL (used by popstate). */
+    // khôi phục trạng thái từ url
     function loadFromUrl(search) {
         var params = new URLSearchParams(search);
 
-        // Restore sidebar inputs
+        // khôi phục sidebar
         var si = document.getElementById('selectedCategoryId');
         if (si) si.value = params.get('selectedCategoryId') || '';
 
@@ -211,7 +181,7 @@
             if (maxInp) maxInp.value = params.get('maxPrice') || '';
         }
 
-        // Rebuild category chain
+        // xây lại chuỗi danh mục
         var catId = params.get('selectedCategoryId');
         removeCatDepthsFrom(0);
         if (catId) {
@@ -220,7 +190,7 @@
             renderCatLevel(null, 0);
         }
 
-        // Fetch and apply partial
+        // tải và áp dụng partial
         params.set('partial', '1');
         fetch(SHOP_PATH + '?' + params.toString(), {
             headers: { 'X-Requested-With': 'XMLHttpRequest' }
@@ -230,7 +200,7 @@
         .catch(function (err) { console.error('Popstate fetch error', err); });
     }
 
-    /** Parse partial HTML and swap the two target zones. */
+    // phân tích partial html và thay nội dung
     function applyPartialHtml(html) {
         var doc = new DOMParser().parseFromString(html, 'text/html');
 
@@ -247,9 +217,7 @@
         }
     }
 
-    // =========================================================================
-    // Category drill-down
-    // =========================================================================
+    // danh mục drill-down
 
     function removeCatDepthsFrom(fromDepth) {
         for (var d = fromDepth; d <= _maxCatDepth + 1; d++) {
@@ -295,7 +263,7 @@
                 });
 
                 wrapper.appendChild(sel);
-                // Race-condition guard: remove any stale element at this depth
+                // kiểm tra phần tử cũ cùng depth
                 var stale = document.getElementById(wrapper.id);
                 if (stale) stale.remove();
                 container.appendChild(wrapper);
@@ -324,7 +292,7 @@
         if (hasChildren) {
             renderCatLevel(categoryId, depth + 1);
         } else {
-            // Leaf selected — AJAX update (no full page reload)
+            // lá danh mục — cập nhật ajax
             submitAjax();
         }
     }
@@ -359,17 +327,8 @@
         return Promise.resolve();
     }
 
-    // =========================================================================
-    // Add to cart
-    // =========================================================================
+    // thêm vào giỏ hàng
 
-    /**
-     * Event delegation: works on buttons in the initial grid AND in AJAX-replaced grids.
-     * Sends an AJAX POST to CartController.Add with the antiforgery token from the
-     * <meta name="csrf-token"> tag injected by _Layout.cshtml.
-     * If the user is not authenticated the server redirects to login; we detect this
-     * via response.redirected and forward the browser there.
-     */
     document.addEventListener('click', function (e) {
         var btn = e.target.closest('.add_cart');
         if (!btn) return;
@@ -378,7 +337,7 @@
         if (!productId) return;
 
         var meta = document.querySelector('meta[name="csrf-token"]');
-        if (!meta) return; // layout not loaded (should not happen)
+        if (!meta) return;
 
         var originalHtml = btn.innerHTML;
         btn.disabled = true;
@@ -394,7 +353,6 @@
             body: 'productId=' + encodeURIComponent(productId) + '&quantity=1'
         })
         .then(function (r) {
-            // If the server redirected to the login page (unauthenticated), forward the browser
             if (r.redirected && r.url.indexOf('/auth/login') !== -1) {
                 window.location.href = r.url;
                 return null;
@@ -415,7 +373,6 @@
         });
     });
 
-    /** Show a Bootstrap 5 toast with success (green) or error (red) styling. */
     function showCartToast(success, message) {
         var toastEl = document.getElementById('cartToast');
         var body    = document.getElementById('cartToastBody');
@@ -428,7 +385,6 @@
         bootstrap.Toast.getOrCreateInstance(toastEl, { delay: 2500 }).show();
     }
 
-    /** Increment the cart badge in the navbar, or create it if it doesn't exist yet. */
     function incrementCartBadge() {
         var badge = document.querySelector('.cart-nav-link .cart-badge');
         if (badge) {
@@ -444,9 +400,7 @@
         }
     }
 
-    // =========================================================================
-    // Price preset helper
-    // =========================================================================
+    // preset giá
 
     function applyPricePreset(value) {
         var filterForm = document.getElementById('filterForm');

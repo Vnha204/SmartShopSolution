@@ -13,14 +13,13 @@ namespace SmartShop.Models
         public int Id { get; set; }
 
         [Required, MaxLength(100)]
-        public string Name { get; set; } = string.Empty;        // 'material'
+        public string Name { get; set; } = string.Empty;
 
         [Required, MaxLength(150)]
-        public string DisplayName { get; set; } = string.Empty; // 'Chất liệu'
+        public string DisplayName { get; set; } = string.Empty;
 
         public int SortOrder { get; set; } = 0;
 
-        // Navigation
         public ICollection<AttributeValue> Values { get; set; } = new List<AttributeValue>();
         public ICollection<CategoryAttribute> CategoryAttributes { get; set; } = new List<CategoryAttribute>();
     }

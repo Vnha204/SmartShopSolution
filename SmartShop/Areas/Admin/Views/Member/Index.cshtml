@@ -11,22 +11,7 @@
     </div>
 </div>
 
-@if (TempData["Success"] != null)
-{
-    <div class="alert alert-success alert-dismissible fade show py-2 small">
-        <i class="fa fa-check-circle me-2"></i> @TempData["Success"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-}
-@if (TempData["Error"] != null)
-{
-    <div class="alert alert-danger alert-dismissible fade show py-2 small">
-        <i class="fa fa-exclamation-circle me-2"></i> @TempData["Error"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-}
-
-<!-- Search bar -->
+<!-- thanh tìm kiếm -->
 <div class="card border-0 shadow-sm mb-4">
     <div class="card-body py-3">
         <div class="row g-2 align-items-center">
@@ -103,17 +88,20 @@
                             </td>
                             <td class="small text-muted">@u.CreatedAt.ToString("HH:mm, dd/MM/yyyy")</td>
                             <td>
-                                <form asp-area="Admin" asp-controller="Member" asp-action="ToggleActive"
-                                      method="post" class="d-inline">
-                                    @Html.AntiForgeryToken()
-                                    <input type="hidden" name="id" value="@u.Id" />
-                                    <button type="submit"
-                                            class="btn btn-sm @(u.IsLockedOut ? "btn-outline-success" : "btn-outline-warning")"
-                                            title="@(u.IsLockedOut ? "Kích hoạt lại" : "Vô hiệu hoá")"
-                                            onclick="return confirm('@(u.IsLockedOut ? "Kích hoạt lại tài khoản này?" : "Vô hiệu hoá tài khoản này?")')">
-                                        <i class="fa @(u.IsLockedOut ? "fa-unlock" : "fa-lock")"></i>
-                                    </button>
-                                </form>
+                                @if (u.Role != "Admin")
+                                {
+                                    <form asp-area="Admin" asp-controller="Member" asp-action="ToggleActive"
+                                          method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@u.Id" />
+                                        <button type="submit"
+                                                class="btn btn-sm @(u.IsLockedOut ? "btn-outline-success" : "btn-outline-warning")"
+                                                title="@(u.IsLockedOut ? "Kích hoạt lại" : "Vô hiệu hoá")"
+                                                onclick="return confirm('@(u.IsLockedOut ? "Kích hoạt lại tài khoản này?" : "Vô hiệu hoá tài khoản này?")')">
+                                            <i class="fa @(u.IsLockedOut ? "fa-unlock" : "fa-lock")"></i>
+                                        </button>
+                                    </form>
+                                }
                             </td>
                         </tr>
                     }

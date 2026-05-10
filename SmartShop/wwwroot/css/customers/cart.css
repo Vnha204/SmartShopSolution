@@ -1,6 +1,4 @@
-/* =====================================================================
-   Cart Badge — shown in navbar on all pages
-   ===================================================================== */
+/* badge giỏ hàng navbar */
 .cart-nav-link {
     position: relative;
     display: flex;
@@ -25,9 +23,7 @@
     line-height: 1;
 }
 
-/* =====================================================================
-   Cart Page
-   ===================================================================== */
+/* trang giỏ hàng */
 .cart-section {
     padding: 40px 0 60px;
 }
@@ -39,7 +35,7 @@
     color: #222;
 }
 
-/* ---- Table ---- */
+/* bảng sản phẩm */
 .cart-table {
     background: #fff;
     border-radius: 6px;
@@ -68,7 +64,7 @@
     border-bottom: none;
 }
 
-/* ---- Product cell ---- */
+/* ô sản phẩm */
 .cart-product-thumb {
     width: 72px;
     height: 72px;
@@ -95,7 +91,7 @@
     font-size: .95rem;
 }
 
-/* ---- Quantity stepper ---- */
+/* điều chỉnh số lượng */
 .qty-stepper {
     display: flex;
     align-items: center;
@@ -140,7 +136,7 @@
     margin: 0;
 }
 
-/* ---- Price ---- */
+/* giá */
 .cart-price {
     font-weight: 600;
     color: #e74c3c;
@@ -153,7 +149,7 @@
     white-space: nowrap;
 }
 
-/* ---- Remove button ---- */
+/* nút xóa */
 .btn-remove-item {
     background: none;
     border: none;
@@ -170,7 +166,7 @@
     background: #ffeeed;
 }
 
-/* ---- Summary panel ---- */
+/* tổng kết đơn */
 .cart-summary {
     background: #fff;
     border-radius: 6px;
@@ -250,7 +246,7 @@
     color: #03cafc;
 }
 
-/* ---- Empty cart ---- */
+/* giỏ trống */
 .cart-empty {
     text-align: center;
     padding: 60px 20px;
@@ -268,7 +264,7 @@
     margin-bottom: 20px;
 }
 
-/* ---- Alert messages ---- */
+/* thông báo */
 .cart-alerts {
     margin-bottom: 20px;
 }

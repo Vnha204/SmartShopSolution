@@ -1,4 +1,4 @@
-/* ===== Checkout page ===== */
+/* trang thanh toán */
 
 .checkout-section {
     padding: 40px 0 60px;
@@ -11,7 +11,7 @@
     margin-bottom: 1.5rem;
 }
 
-/* ── Panel cards ── */
+/* thẻ panel */
 .checkout-card {
     background: var(--bg-white);
     border-radius: var(--border-radius);
@@ -32,7 +32,7 @@
     gap: 0.5rem;
 }
 
-/* ── Address radio list ── */
+/* danh sách địa chỉ */
 .address-radio-list {
     display: flex;
     flex-direction: column;
@@ -86,7 +86,7 @@
     margin-left: 4px;
 }
 
-/* ── New address form toggle ── */
+/* toggle form địa chỉ mới */
 .btn-toggle-new-address {
     background: none;
     border: 1.5px dashed var(--border-color);
@@ -121,7 +121,7 @@
     margin-bottom: 0.25rem;
 }
 
-/* ── Payment method ── */
+/* phương thức thanh toán */
 .payment-option-list {
     display: flex;
     gap: 1rem;
@@ -165,7 +165,7 @@
     color: var(--text-muted);
 }
 
-/* ── Order summary sidebar ── */
+/* tóm tắt đơn sidebar */
 .checkout-summary {
     background: var(--bg-white);
     border-radius: var(--border-radius);
@@ -244,7 +244,7 @@
     color: var(--primary-color);
 }
 
-/* ── Place order button ── */
+/* nút đặt hàng */
 .btn-place-order {
     display: block;
     width: 100%;
@@ -265,7 +265,7 @@
     background: var(--primary-hover);
 }
 
-/* ── Validation errors ── */
+/* lỗi validation */
 .text-danger {
     font-size: 0.8rem;
 }

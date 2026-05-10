@@ -1,25 +1,20 @@
-/**
- * custom.js - Main site JavaScript
- * SmartShop - E-commerce Platform
- */
-
 (function ($) {
     'use strict';
 
     $(function () {
 
-        // Preloader - fade out after content loads
+        // ẩn preloader sau khi tải xong
         setTimeout(function () {
             $('.loader_bg').fadeOut(300);
         }, 800);
 
-        // Initialize Bootstrap 5 tooltips
+        // khởi tạo tooltip bootstrap 5
         var tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
         tooltipTriggerList.forEach(function (el) {
             new bootstrap.Tooltip(el);
         });
 
-        // Megamenu overlay effect
+        // hiệu ứng overlay megamenu
         var $wrapper = $('#wrapper');
         $('.main-menu ul li.megamenu')
             .on('mouseenter', function () {
@@ -29,13 +24,13 @@
                 $wrapper.removeClass('overlay');
             });
 
-        // Sidebar toggle (admin)
+        // toggle sidebar admin
         $('#sidebarCollapse').on('click', function () {
             $('#sidebar').toggleClass('active');
             $(this).toggleClass('active');
         });
 
-        // Carousel initialization
+        // khởi tạo carousel
         var carousels = {
             '#blogCarousel': { interval: 5000 },
             '#banner1': { interval: 4000 },

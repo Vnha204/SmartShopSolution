@@ -37,7 +37,7 @@ namespace SmartShop.Services
             string returnUrl,
             string cancelUrl)
         {
-            // PayOS signature: keys sorted alphabetically (spec: amount, cancelUrl, description, orderCode, returnUrl)
+            // PayOS signature: (spec: amount, cancelUrl, description, orderCode, returnUrl)
             var sigData   = $"amount={amount}&cancelUrl={cancelUrl}&description={description}&orderCode={orderCode}&returnUrl={returnUrl}";
             var signature = ComputeHmacSha256(sigData, _settings.ChecksumKey);
 
@@ -123,10 +123,14 @@ namespace SmartShop.Services
 
         public bool VerifyWebhookSignature(Dictionary<string, object?> data, string signature)
         {
-            // PayOS JS SDK behaviour:
+            // Cách PayOS JS SDK tạo chuỗi dữ liệu:
             //   Object.keys(data).sort().map(k => `${k}=${data[k]}`).join('&')
-            // In JS: null → "null", true → "true" (lowercase), numbers → their decimal string.
-            // We must replicate that exactly — null values MUST be included as "null".
+            // Trong JavaScript:
+            // - null → "null"
+            // - true → "true" (chữ thường)
+            // - number → chuỗi số thập phân
+            // Cần xử lý giống hệt để tạo chữ ký/hash chính xác.
+            // Giá trị null vẫn phải được đưa vào chuỗi dưới dạng "null".
             var parts = data
                 .OrderBy(kv => kv.Key, StringComparer.Ordinal)
                 .Select(kv =>
@@ -134,7 +138,7 @@ namespace SmartShop.Services
                     var val = kv.Value switch
                     {
                         null         => "null",
-                        bool b       => b ? "true" : "false",   // JS lowercases booleans
+                        bool b       => b ? "true" : "false", 
                         _            => kv.Value.ToString()!
                     };
                     return $"{kv.Key}={val}";

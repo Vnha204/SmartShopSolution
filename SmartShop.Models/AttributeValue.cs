@@ -14,14 +14,13 @@ namespace SmartShop.Models
         public Attribute Attribute { get; set; } = null!;
 
         [Required, MaxLength(200)]
-        public string Value { get; set; } = string.Empty;       // 'titanium'
+        public string Value { get; set; } = string.Empty;       
 
         [Required, MaxLength(200)]
-        public string DisplayName { get; set; } = string.Empty; // 'Titanium'
+        public string DisplayName { get; set; } = string.Empty; 
 
         public int SortOrder { get; set; } = 0;
 
-        // Navigation
         public ICollection<ProductAttributeValue> ProductAttributeValues { get; set; } = new List<ProductAttributeValue>();
     }
 }

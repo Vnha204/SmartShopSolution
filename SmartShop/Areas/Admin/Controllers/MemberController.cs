@@ -51,6 +51,16 @@ namespace SmartShop.Areas.Admin.Controllers
 
             var isCurrentlyLocked = user.LockoutEnd.HasValue && user.LockoutEnd > DateTimeOffset.UtcNow;
 
+            if (!isCurrentlyLocked)
+            {
+                var roles = await _userManager.GetRolesAsync(user);
+                if (roles.Contains("Admin"))
+                {
+                    TempData["Error"] = "Không thể vô hiệu hoá tài khoản Admin.";
+                    return RedirectToAction(nameof(Index));
+                }
+            }
+
             if (isCurrentlyLocked)
             {
                 await _userManager.SetLockoutEndDateAsync(user, null);

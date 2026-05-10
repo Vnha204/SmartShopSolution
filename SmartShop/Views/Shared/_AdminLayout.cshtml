@@ -111,7 +111,7 @@
             </nav>
 
             <div class="sidebar-footer">
-                <form asp-controller="Auth" asp-action="Logout" method="post">
+                <form asp-area="" asp-controller="Auth" asp-action="Logout" method="post">
                     @Html.AntiForgeryToken()
                     <button type="submit">
                         <i class="fa fa-sign-out"></i> Đăng xuất

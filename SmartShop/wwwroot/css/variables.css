@@ -1,58 +1,58 @@
-/* ===== CSS Variables - SmartShop Theme ===== */
+/* biến css chủ đề smartshop */
 :root {
-    /* Primary Colors */
+    /* màu chủ đạo */
     --primary-color: #03cafc;
     --primary-hover: #02a9d4;
     --primary-light: rgba(3, 202, 252, 0.1);
     
-    /* Status Colors */
+    /* màu trạng thái */
     --success-color: #28a745;
     --warning-color: #f0a500;
     --danger-color: #dc3545;
     --info-color: #17a2b8;
     
-    /* Text Colors */
+    /* màu chữ */
     --text-primary: #333;
     --text-muted: #6c757d;
     --text-light: #adb5bd;
     
-    /* Background */
+    /* nền */
     --bg-light: #f8f9fa;
     --bg-white: #ffffff;
     
-    /* Border */
+    /* viền */
     --border-color: #dee2e6;
     --border-radius: 8px;
     --border-radius-sm: 6px;
     
-    /* Shadow */
+    /* bóng */
     --shadow-sm: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
     --shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
     
-    /* Spacing */
+    /* khoảng cách */
     --spacing-xs: 0.25rem;
     --spacing-sm: 0.5rem;
     --spacing-md: 1rem;
     --spacing-lg: 1.5rem;
     --spacing-xl: 2rem;
     
-    /* Navbar */
+    /* navbar */
     --navbar-height: 100px;
 }
 
-/* ===== Fix: Account/Shop Page Layout ===== */
+/* sửa layout trang account/shop */
 .inner_page.position_head {
     padding-top: var(--navbar-height);
     min-height: 100vh;
     background: var(--bg-light);
 }
 
-/* ===== Account Page Extra Top Spacing ===== */
+/* khoảng trên trang account */
 .inner_page.position_head.account-page-section {
     padding-top: calc(var(--navbar-height) + 2.5rem);
 }
 
-/* ===== Dropdown Menu Fix ===== */
+/* sửa dropdown menu */
 .dropdown-menu {
     border-radius: var(--border-radius);
 }

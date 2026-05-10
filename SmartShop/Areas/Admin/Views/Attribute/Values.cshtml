@@ -2,7 +2,6 @@
 @{
     ViewData["Title"] = $"Giá trị — {Model.DisplayName}";
     Layout = "_AdminLayout";
-    // Track which value is being edited (from TempData or query string)
     var editingId = Context.Request.Query.ContainsKey("editId")
         ? int.Parse(Context.Request.Query["editId"]!)
         : 0;
@@ -21,7 +20,6 @@
 
 <div class="row g-4">
 
-    <!-- ── LEFT: existing values table ───────────────────────────────────── -->
     <div class="col-lg-8">
         <div class="card border-0 shadow-sm">
             <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
@@ -57,7 +55,7 @@
                                     <tr class="@(isEditing ? "table-warning" : "")">
                                         @if (isEditing)
                                         {
-                                            <!-- Inline edit row -->
+                                            <!-- hàng chỉnh sửa nội tuyến -->
                                             <td class="text-muted small">@val.Id</td>
                                             <td colspan="3">
                                                 <form asp-area="Admin" asp-controller="Attribute"
@@ -119,7 +117,6 @@
         </div>
     </div>
 
-    <!-- ── RIGHT: add new value form ─────────────────────────────────────── -->
     <div class="col-lg-4">
         <div class="card border-0 shadow-sm">
             <div class="card-header bg-white border-bottom py-3">

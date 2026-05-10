@@ -47,7 +47,7 @@
                 </div>
             </div>
         </div>
-        <!-- FIX: Bootstrap 5 data attributes -->
+        <!-- thuộc tính bootstrap 5 -->
         <button class="carousel-control-prev" type="button" data-bs-target="#banner1" data-bs-slide="prev">
             <i class="fa fa-arrow-left" aria-hidden="true"></i>
             <span class="visually-hidden">Trước</span>
@@ -58,8 +58,7 @@
         </button>
     </div>
 </section>
-<!-- end banner -->
-<!-- about section -->
+<!-- giới thiệu -->
 <div class="about">
     <div class="container">
         <div class="row d_flex">
@@ -83,8 +82,7 @@
         </div>
     </div>
 </div>
-<!-- end about section -->
-<!-- Our Glasses section -->
+<!-- bộ sưu tập kính -->
 @{
     var featuredProducts = ViewBag.FeaturedProducts as List<SmartShop.Models.ViewModels.ProductItemVM>
                            ?? new List<SmartShop.Models.ViewModels.ProductItemVM>();
@@ -139,8 +137,7 @@
         </div>
     </div>
 </div>
-<!-- end Our Glasses section -->
-<!-- Our shop section -->
+<!-- khu vực shop -->
 <div id="about" class="shop">
     <div class="container-fluid">
         <div class="row">
@@ -165,8 +162,7 @@
         </div>
     </div>
 </div>
-<!-- end Our shop section -->
-<!-- clients section -->
+<!-- đánh giá khách hàng -->
 <div class="clients">
     <div class="container">
         <div class="row">
@@ -259,15 +255,13 @@
         </div>
     </div>
 </div>
-<!-- end clients section -->
-<!-- contact section -->
+<!-- liên hệ -->
 <div id="contact" class="contact">
-    <!-- Bọc cả form và map trong 1 div position: relative -->
+    <!-- bọc form và map -->
     <div class="map_section">
-        <!-- Map nằm dưới làm nền -->
+        <!-- map làm nền -->
         <div id="map"></div>
 
-        <!-- Form overlay lên trên map nhờ position: absolute trong CSS -->
         <form id="request" class="main_form">
             <div class="row">
                 <div class="col-md-12">
@@ -292,7 +286,6 @@
         </form>
     </div>
 </div>
-<!-- end contact section -->
 
 @section Scripts {
     <script src="~/js/contact.js" asp-append-version="true"></script>
