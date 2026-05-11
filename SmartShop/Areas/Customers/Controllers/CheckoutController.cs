@@ -21,7 +21,6 @@ namespace SmartShop.Areas.Customers.Controllers
             _userManager = userManager;
         }
 
-        // GET thanh toán
         public async Task<IActionResult> Index()
         {
             var userId = _userManager.GetUserId(User)!;

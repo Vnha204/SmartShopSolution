@@ -1,4 +1,3 @@
-/* admin layout */
 html, body {
     height: 100%;
     margin: 0;
@@ -11,7 +10,6 @@ html, body {
     min-height: 100vh;
 }
 
-/* sidebar */
 .admin-sidebar {
     width: 250px;
     min-height: 100vh;
@@ -48,7 +46,6 @@ html, body {
             letter-spacing: 0.5px;
         }
 
-    /* thông tin người dùng sidebar */
     .admin-sidebar .sidebar-user {
         padding: 14px 20px;
         border-bottom: 1px solid rgba(255,255,255,0.1);
@@ -84,7 +81,6 @@ html, body {
             display: inline-block;
         }
 
-    /* nav items */
     .admin-sidebar .sidebar-nav {
         flex: 1;
         padding: 10px 0;
@@ -131,7 +127,6 @@ html, body {
             font-size: 15px;
         }
 
-    /* sidebar footer */
     .admin-sidebar .sidebar-footer {
         padding: 14px 20px;
         border-top: 1px solid rgba(255,255,255,0.1);
@@ -157,7 +152,6 @@ html, body {
                 color: #fff;
             }
 
-/* nội dung chính */
 .admin-main {
     margin-left: 250px;
     flex: 1;
@@ -166,7 +160,6 @@ html, body {
     min-height: 100vh;
 }
 
-/* thanh trên */
 .admin-topbar {
     background: #fff;
     border-bottom: 1px solid #e8ecef;
@@ -218,13 +211,11 @@ html, body {
                 color: #333;
             }
 
-/* nội dung trang */
 .admin-content {
     padding: 24px;
     flex: 1;
 }
 
-/* toast alert */
 .admin-toast-area {
     position: fixed;
     top: 70px;
@@ -233,7 +224,6 @@ html, body {
     min-width: 300px;
 }
 
-/* responsive */
 @media (max-width: 768px) {
     .admin-sidebar {
         transform: translateX(-250px);
@@ -248,7 +238,6 @@ html, body {
     }
 }
 
-/* thẻ thống kê */
 .stat-card {
     border-radius: 12px;
     border: none;
@@ -268,7 +257,6 @@ html, body {
     background: #03cafc !important;
 }
 
-/* bảng */
 .admin-table thead th {
     background: #f8f9fa;
     font-size: 12px;
@@ -280,7 +268,6 @@ html, body {
     background: #f8f9ff;
 }
 
-/* badge trạng thái */
 .badge-status {
     font-size: 11px;
     padding: 4px 10px;

@@ -20,8 +20,7 @@ namespace SmartShop.Areas.Admin.Controllers
             _unitOfWork = unitOfWork;
             _logger = logger;
         }
-
-        // GET /Admin/api/categories/children?parentId=
+        //Admin/api/categories/children?parentId=
         [HttpGet("children")]
         public async Task<IActionResult> GetChildren([FromQuery] int? parentId)
         {
@@ -44,7 +43,7 @@ namespace SmartShop.Areas.Admin.Controllers
             return Json(children);
         }
 
-        // GET /Admin/api/categories/breadcrumb?categoryId=
+        //Admin/api/categories/breadcrumb?categoryId=
         [HttpGet("breadcrumb")]
         public async Task<IActionResult> GetBreadcrumb([FromQuery] int categoryId)
         {
@@ -53,7 +52,7 @@ namespace SmartShop.Areas.Admin.Controllers
             return Json(breadcrumb.Select(c => new { id = c.Id, name = c.Name, slug = c.Slug }));
         }
 
-        // GET /Admin/api/categories/{categoryId}/attributes?productId=
+        //Admin/api/categories/{categoryId}/attributes?productId=
         [HttpGet("{categoryId}/attributes")]
         public async Task<IActionResult> GetAttributes(int categoryId, [FromQuery] int? productId)
         {

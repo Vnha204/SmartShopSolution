@@ -32,10 +32,7 @@ namespace SmartShop.Areas.Admin.Controllers
             _cloudinary = cloudinary;
             _logger = logger;
         }
-
-        // =====================================================================
-        // GET: Admin/Product
-        // =====================================================================
+        //Admin/Product
         public async Task<IActionResult> Index(ProductIndexVM filter)
         {
             IQueryable<Product> query = _unitOfWork.Products.Query()
@@ -71,10 +68,7 @@ namespace SmartShop.Areas.Admin.Controllers
 
             return View(filter);
         }
-
-        // =====================================================================
-        // AJAX — GET /Admin/Product/GetAttributesByCategory?categoryId=X
-        // =====================================================================
+        //Admin/Product/GetAttributesByCategory?categoryId=X
         [HttpGet]
         public async Task<IActionResult> GetAttributesByCategory(int categoryId)
         {
@@ -89,28 +83,19 @@ namespace SmartShop.Areas.Admin.Controllers
             });
             return Json(result);
         }
-
-        // =====================================================================
-        // GET: Admin/Product/Details/5
-        // =====================================================================
+        //Admin/Product/Details/5
         public async Task<IActionResult> Details(int id)
         {
             var product = await _unitOfWork.Products.GetWithFullDetailsAsync(id);
             if (product == null) return NotFound();
             return View(product);
         }
-
-        // =====================================================================
-        // GET: Admin/Product/Create
-        // =====================================================================
+        //Admin/Product/Create
         public IActionResult Create()
         {
             return View(new ProductFormVM());
         }
-
-        // =====================================================================
-        // POST: Admin/Product/Create
-        // =====================================================================
+        //Admin/Product/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(ProductFormVM vm)
@@ -198,10 +183,7 @@ namespace SmartShop.Areas.Admin.Controllers
             TempData["Success"] = $"Sản phẩm \"{product.Name}\" đã được thêm thành công!";
             return RedirectToAction(nameof(Index));
         }
-
-        // =====================================================================
-        // GET: Admin/Product/Edit/5
-        // =====================================================================
+        //Admin/Product/Edit/5
         public async Task<IActionResult> Edit(int id)
         {
             var product = await _unitOfWork.Products.GetWithCategoriesAndAttributesAsync(id);
@@ -233,10 +215,7 @@ namespace SmartShop.Areas.Admin.Controllers
 
             return View(vm);
         }
-
-        // =====================================================================
-        // POST: Admin/Product/Edit/5
-        // =====================================================================
+        //Admin/Product/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, ProductFormVM vm)
@@ -327,10 +306,7 @@ namespace SmartShop.Areas.Admin.Controllers
             TempData["Success"] = $"Sản phẩm \"{product.Name}\" đã được cập nhật!";
             return RedirectToAction(nameof(Index));
         }
-
-        // =====================================================================
-        // GET: Admin/Product/Delete/5
-        // =====================================================================
+        //Admin/Product/Delete/5
         public async Task<IActionResult> Delete(int id)
         {
             var product = await _unitOfWork.Products.Query()
@@ -340,10 +316,7 @@ namespace SmartShop.Areas.Admin.Controllers
             if (product == null) return NotFound();
             return View(product);
         }
-
-        // =====================================================================
-        // POST: Admin/Product/Delete/5
-        // =====================================================================
+        //Admin/Product/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
@@ -366,11 +339,6 @@ namespace SmartShop.Areas.Admin.Controllers
             TempData["Success"] = $"Sản phẩm \"{product.Name}\" đã được xoá!";
             return RedirectToAction(nameof(Index));
         }
-
-        // =====================================================================
-        // Private helpers
-        // =====================================================================
-
         private async Task<List<AttributeGroupVM>> LoadAttributeGroups(int categoryId)
         {
             var allCats = await _unitOfWork.Categories.Query(c => c.IsActive).ToListAsync();

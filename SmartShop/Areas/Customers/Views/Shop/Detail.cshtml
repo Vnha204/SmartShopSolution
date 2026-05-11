@@ -7,7 +7,6 @@
 
 <div class="product-detail-page inner_page">
     <div class="container">
-
         <!-- breadcrumb -->
         <nav aria-label="breadcrumb" class="product-detail-breadcrumb">
             <ol class="breadcrumb small mb-0">
@@ -22,8 +21,7 @@
         </nav>
 
         <div class="row product-detail-main g-4">
-
-            <!-- cột trái: hình ảnh -->
+            <!--hình ảnh -->
             <div class="col-lg-5 col-md-6">
                 <div class="product-detail-image-panel">
                     <img src="@(Model.ThumbnailUrl ?? "/images/no-image.png")"
@@ -36,20 +34,14 @@
                 </div>
             </div>
 
-            <!-- cột phải: thông tin -->
+            <!--thông tin -->
             <div class="col-lg-7 col-md-6">
                 <div class="product-detail-info">
-
-                    <!-- tên sản phẩm -->
                     <h1 class="product-detail-name">@Model.Name</h1>
-
-                    <!-- số đã bán -->
                     <p class="product-detail-sold">
                         <i class="fa fa-shopping-bag me-1"></i>
                         Đã bán: <strong>@Model.SoldCount</strong>
                     </p>
-
-                    <!-- giá -->
                     <div class="product-detail-price">
                         <span class="price-current">₫@Model.DisplayPrice.ToString("N0")</span>
                         @if (Model.IsOnSale)
@@ -59,14 +51,10 @@
                     </div>
 
                     <hr class="product-detail-divider" />
-
-                    <!-- mô tả -->
                     @if (!string.IsNullOrWhiteSpace(Model.Description))
                     {
                         <p class="product-detail-description">@Model.Description</p>
                     }
-
-                    <!-- tồn kho -->
                     <p class="product-detail-stock @(Model.Stock is > 0 and <= 5 ? "low-stock" : "")">
                         @if (Model.Stock > 0)
                         {
@@ -79,8 +67,6 @@
                             <span class="text-danger fw-semibold">Hết hàng</span>
                         }
                     </p>
-
-                    <!-- thuộc tính -->
                     @if (Model.AttributeGroups.Any())
                     {
                         <div class="product-detail-attributes">
@@ -93,8 +79,6 @@
                             }
                         </div>
                     }
-
-                    <!-- nút mua hàng -->
                     @if (Model.Stock > 0)
                     {
                         <div class="product-detail-actions">
@@ -119,7 +103,6 @@
                                     </button>
                                 </div>
                             </div>
-                            <!-- mua ngay -->
                             <button type="button"
                                     class="btn-detail-buynow"
                                     data-product-id="@Model.Id">

@@ -29,7 +29,6 @@
     </li>
 
     <li class="nav-item dropdown ms-2">
-        <!-- avatar người dùng -->
         <a class="nav-link dropdown-toggle d-flex align-items-center p-0" href="#"
            id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
             <div class="user-avatar rounded-circle bg-primary d-flex align-items-center
@@ -47,26 +46,23 @@
         </a>
 
         <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0" style="min-width: 220px;">
-            <!-- tiêu đề -->
             <li class="dropdown-header px-3 py-2 bg-light">
                 <div class="fw-bold text-dark">@user?.FullName</div>
                 <small class="text-muted">@user?.Email</small>
             </li>
             <li><hr class="dropdown-divider my-1" /></li>
-            
-            <!-- menu thả xuống -->
+            <li>
+                <a class="dropdown-item d-flex align-items-center py-2 px-3"
+                   asp-area="" asp-controller="Account" asp-action="Addresses">
+                    <i class="fa fa-map-marker me-3 text-muted" style="width: 16px; text-align: center;"></i>
+                    <span>Địa chỉ</span>
+                </a>
+            </li>
             <li>
                 <a class="dropdown-item d-flex align-items-center py-2 px-3"
                    asp-area="" asp-controller="Account" asp-action="Orders">
                     <i class="fa fa-shopping-cart me-3 text-muted" style="width: 16px; text-align: center;"></i>
-                    <span>Đơn hàng của tôi</span>
-                </a>
-            </li>
-            <li>
-                <a class="dropdown-item d-flex align-items-center py-2 px-3" 
-                   asp-area="" asp-controller="Account" asp-action="Addresses">
-                    <i class="fa fa-map-marker me-3 text-muted" style="width: 16px; text-align: center;"></i>
-                    <span>Địa chỉ</span>
+                    <span>Đơn hàng</span>
                 </a>
             </li>
             <li>

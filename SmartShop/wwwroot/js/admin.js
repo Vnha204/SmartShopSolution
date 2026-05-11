@@ -1,14 +1,12 @@
 (function () {
     'use strict';
 
-    // admin module
     window.AdminModule = {
         init: function () {
             this.initToastAutoDismiss();
             this.initSidebar();
         },
 
-        // tự ẩn toast sau 4 giây
         initToastAutoDismiss: function () {
             setTimeout(function () {
                 var toasts = document.querySelectorAll('.admin-toast-area .alert');
@@ -21,7 +19,6 @@
             }, 4000);
         },
 
-        // toggle sidebar
         initSidebar: function () {
             var sidebarToggle = document.getElementById('sidebarToggle');
             var sidebar = document.querySelector('.admin-sidebar');
@@ -33,7 +30,6 @@
             }
         },
 
-        // lọc bảng sản phẩm
         filterProducts: function () {
             var keyword = document.getElementById('searchInput');
             var statusFilter = document.getElementById('statusFilter');
@@ -48,7 +44,6 @@
             );
         },
 
-        // lọc bảng đơn hàng
         filterOrders: function (status, tabEl) {
             var tabs = document.querySelectorAll('#orderTabs .nav-link');
             tabs.forEach(function (el) {
@@ -68,7 +63,6 @@
             });
         },
 
-        // lọc bảng chung
         filterTable: function (tableBodyId, keyword, status, counterId) {
             var rows = document.querySelectorAll('#' + tableBodyId + ' tr[data-name]');
             var count = 0;
@@ -92,7 +86,6 @@
         }
     };
 
-    // hàm toàn cục cho onclick
     window.searchProducts = function () {
         AdminModule.filterProducts();
     };
@@ -105,7 +98,6 @@
         AdminModule.filterOrders(status, tabEl);
     };
 
-    // khởi tạo khi dom sẵn sàng
     document.addEventListener('DOMContentLoaded', function () {
         AdminModule.init();
     });

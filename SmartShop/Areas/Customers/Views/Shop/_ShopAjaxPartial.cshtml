@@ -1,13 +1,5 @@
 @model SmartShop.Models.ViewModels.ShopViewModel
 @{ Layout = null; }
-
-{{--
-    AJAX partial returned when partial=1 or X-Requested-With header is set.
-    Contains two sections JS updates independently:
-      #ajaxAttrFilters  → replaces #sidebarAttrFilters innerHTML in the sidebar
-      #ajaxProductGrid  → replaces #shopResults innerHTML in the right column
---}}
-
 <div id="ajaxAttrFilters">
     @if (Model?.Filter?.SelectedCategoryId != null
          && Model.Attributes != null && Model.Attributes.Any())
@@ -40,7 +32,6 @@
 
 <div id="ajaxProductGrid">
 
-    @* Category breadcrumb *@
     @if (Model?.SelectedCategoryBreadcrumb?.Any() == true)
     {
         <nav aria-label="breadcrumb" class="mb-2">
@@ -56,7 +47,6 @@
         </nav>
     }
 
-    @* Sort bar *@
     <div class="d-flex justify-content-between align-items-center mb-4 p-3 bg-white rounded shadow-sm">
         <span class="text-muted">
             Tìm thấy <strong>@(Model?.TotalProducts ?? 0)</strong> sản phẩm
@@ -71,7 +61,6 @@
         </div>
     </div>
 
-    @* Product cards *@
     <div class="row">
         @if (Model?.Products != null && Model.Products.Any())
         {
@@ -113,8 +102,6 @@
             </div>
         }
     </div>
-
-    @* Pagination *@
     @if (Model?.TotalPages > 1)
     {
         <nav class="mt-4 shop-pagination">

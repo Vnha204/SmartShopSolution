@@ -1,9 +1,3 @@
-/* ================================================================
-   shop.css — Shop page specific styles
-   Loaded only on the Shop page via @section Styles in Index.cshtml
-   ================================================================ */
-
-/* ─── Sidebar panel ───────────────────────────────────────────── */
 .shop_sidebar {
     background: #fff;
     border-radius: 8px;
@@ -13,7 +7,6 @@
     top: 110px;
 }
 
-/* ─── Filter groups ───────────────────────────────────────────── */
 .filter_group {
     border-bottom: 1px solid var(--border-color);
     padding-bottom: 16px;
@@ -43,7 +36,6 @@
     gap: 8px;
 }
 
-/* ─── Sale badge ──────────────────────────────────────────────── */
 .sale-badge {
     position: absolute;
     top: 10px;
@@ -58,7 +50,6 @@
     letter-spacing: 0.3px;
 }
 
-/* ─── Clickable product card ──────────────────────────────────── */
 .shop-card-link {
     display: block;
     color: inherit;
@@ -79,7 +70,6 @@
     box-shadow: 0 10px 28px rgba(0, 0, 0, 0.13);
 }
 
-/* ─── Search bar above product grid ───────────────────────────── */
 .shop-search-bar {
     margin-bottom: 16px;
 }
@@ -120,7 +110,6 @@
     border-color: var(--primary-hover);
 }
 
-/* ─── Circular pagination ─────────────────────────────────────── */
 .shop-pagination .page-link {
     width: 38px;
     height: 38px;
@@ -156,7 +145,6 @@
     opacity: 0.55;
 }
 
-/* nút prev/next dạng pill */
 .shop-pagination .page-item:first-child .page-link,
 .shop-pagination .page-item:last-child .page-link {
     width: auto;

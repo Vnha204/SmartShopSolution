@@ -32,7 +32,7 @@ namespace SmartShop.Areas.Customers.Controllers
             _logger      = logger;
         }
 
-        // GET /Customers/Payments/PayOS?orderId={id}
+        //Customers/Payments/PayOS?orderId={id}
         // tạo PayOS payment link, chuyển route
         public async Task<IActionResult> PayOS(int orderId)
         {
@@ -107,7 +107,7 @@ namespace SmartShop.Areas.Customers.Controllers
             return View("PayOS", order);
         }
 
-        // GET /Customers/Payments/PaymentStatus?orderId={id}
+        //Customers/Payments/PaymentStatus?orderId={id}
         [HttpGet]
         public async Task<IActionResult> PaymentStatus(int orderId)
         {

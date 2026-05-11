@@ -140,8 +140,6 @@
         }
     });
 
-    // helpers
-
     function showToast(success, message) {
         var toastEl = document.getElementById('cartToast');
         var body    = document.getElementById('cartToastBody');

@@ -23,7 +23,7 @@ namespace SmartShop.Controllers
             _logger     = logger;
         }
 
-        // POST /api/payos/webhook
+        //api/payos/webhook
         [HttpPost("webhook")]
         public async Task<IActionResult> Webhook([FromBody] JsonElement body)
         {
@@ -54,8 +54,6 @@ namespace SmartShop.Controllers
                 _logger.LogWarning("PayOS webhook: invalid signature");
                 return Unauthorized(new { error = "Invalid signature" });
             }
-
-            // Only act on successful payments (code "00")
             var code = dataEl.TryGetProperty("code", out var codeEl) ? codeEl.GetString() : null;
             if (!string.Equals(code, "00", StringComparison.Ordinal))
             {
@@ -66,8 +64,6 @@ namespace SmartShop.Controllers
             var paymentLinkId = dataEl.TryGetProperty("paymentLinkId", out var plEl) ? plEl.GetString() : null;
             long? payosOrderCode = dataEl.TryGetProperty("orderCode", out var ocEl) && ocEl.TryGetInt64(out var oc)
                 ? oc : null;
-
-            // Lookup: prefer paymentLinkId (stable, unique), fall back to stored PayOSOrderCode
             SmartShop.Models.Order? order = null;
 
             if (!string.IsNullOrEmpty(paymentLinkId))
@@ -87,10 +83,8 @@ namespace SmartShop.Controllers
                 _logger.LogWarning(
                     "PayOS webhook: no order found for paymentLinkId={LinkId} orderCode={OrderCode}",
                     paymentLinkId, payosOrderCode);
-                return Ok(new { message = "order not found" }); // 200 prevents PayOS infinite retries
+                return Ok(new { message = "order not found" });
             }
-
-            // Idempotency: skip if already paid
             if (string.Equals(order.PaymentStatus, "paid", StringComparison.OrdinalIgnoreCase))
                 return Ok(new { message = "already paid" });
 

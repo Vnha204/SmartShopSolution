@@ -37,10 +37,8 @@
 
 <div class="row g-4">
 
-    <!-- trái: sản phẩm + ghi chú -->
+    <!--sản phẩm,ghi chú -->
     <div class="col-lg-8">
-
-        <!-- sản phẩm -->
         <div class="order-detail-card">
             <div class="order-detail-card-title">
                 <i class="fa fa-list"></i> Sản phẩm đặt hàng
@@ -85,8 +83,6 @@
                 <span class="order-total-amount">@Model.TotalPrice.ToString("N0")₫</span>
             </div>
         </div>
-
-        <!-- ghi chú -->
         @if (!string.IsNullOrEmpty(Model.Note))
         {
             <div class="order-detail-card">
@@ -98,11 +94,8 @@
         }
 
     </div>
-
-    <!-- phải: thông tin đơn + địa chỉ -->
+    <!--thông tin đơn,địa chỉ -->
     <div class="col-lg-4">
-
-        <!-- thông tin đơn hàng -->
         <div class="order-detail-card">
             <div class="order-detail-card-title">
                 <i class="fa fa-info-circle"></i> Thông tin đơn hàng
@@ -132,7 +125,6 @@
                 </div>
             }
         </div>
-
         <div class="order-detail-card">
             <div class="order-detail-card-title">
                 <i class="fa fa-map-marker"></i> Địa chỉ giao hàng
@@ -145,7 +137,5 @@
                 @Model.Address.District, @Model.Address.Province
             </p>
         </div>
-
     </div>
-
 </div>

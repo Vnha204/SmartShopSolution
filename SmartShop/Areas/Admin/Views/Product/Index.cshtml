@@ -16,12 +16,10 @@
 </div>
 
 <form method="get" asp-area="Admin" asp-controller="Product" asp-action="Index" id="filterForm">
-    <!-- hàng 1: tìm kiếm & lọc -->
     <div class="card border-0 shadow-sm mb-3">
         <div class="card-body py-3">
             <div class="row g-2 align-items-end">
 
-                <!-- tìm tên -->
                 <div class="col-md-4">
                     <label class="form-label small fw-semibold mb-1">Tìm tên sản phẩm</label>
                     <div class="input-group">
@@ -34,7 +32,6 @@
                     </div>
                 </div>
 
-                <!-- lọc trạng thái -->
                 <div class="col-md-2">
                     <label class="form-label small fw-semibold mb-1">Trạng thái</label>
                     <select name="StatusFilter" class="form-select">
@@ -44,7 +41,6 @@
                     </select>
                 </div>
 
-                <!-- lọc danh mục -->
                 <div class="col-md-3">
                     <label class="form-label small fw-semibold mb-1">Danh mục</label>
                     <select name="CategoryId" class="form-select">
@@ -59,7 +55,6 @@
                     </select>
                 </div>
 
-                <!-- thao tác -->
                 <div class="col-md-3 d-flex gap-2">
                     <button type="submit" class="btn btn-primary flex-fill">
                         <i class="fa fa-search me-1"></i> Lọc
@@ -95,7 +90,6 @@
                 <div class="card-body py-3">
                     <div class="row g-3 align-items-end">
 
-                        @* dropdown mỗi nhóm thuộc tính *@
                         @foreach (var attr in Model.FilterAttributeGroups)
                         {
                             var selectedOptId = Model.AttributeValueIds
@@ -116,7 +110,6 @@
                             </div>
                         }
 
-                        @* khoảng giá *@
                         <div class="col-md-2">
                             <label class="form-label small fw-semibold mb-1">Giá từ (₫)</label>
                             <input type="number" name="MinPrice" value="@Model.MinPrice"
@@ -198,7 +191,6 @@
 
                                 <td class="text-muted small">@product.Id</td>
 
-                                <!-- tên & hình ảnh -->
                                 <td>
                                     <div class="d-flex align-items-center gap-3">
                                         @if (!string.IsNullOrEmpty(product.ThumbnailUrl))
@@ -219,7 +211,6 @@
                                     </div>
                                 </td>
 
-                                <!-- danh mục -->
                                 <td class="small">
                                     @if (category != null)
                                     {
@@ -231,7 +222,6 @@
                                     }
                                 </td>
 
-                                <!-- giá -->
                                 <td class="small">@product.BasePrice.ToString("N0") ₫</td>
                                 <td class="small">
                                     @if (product.SalePrice.HasValue)
@@ -244,21 +234,18 @@
                                     }
                                 </td>
 
-                                <!-- tồn kho -->
                                 <td>
                                     <span class="badge @(product.Stock > 0 ? "bg-success" : "bg-danger") badge-status">
                                         @product.Stock
                                     </span>
                                 </td>
 
-                                <!-- trạng thái -->
                                 <td>
                                     <span class="badge @(product.IsActive ? "bg-success" : "bg-secondary") badge-status">
                                         @(product.IsActive ? "Đang bán" : "Ngừng bán")
                                     </span>
                                 </td>
 
-                                <!-- nổi bật -->
                                 <td>
                                     @if (product.IsFeatured)
                                     {
@@ -272,7 +259,6 @@
                                     }
                                 </td>
 
-                                <!-- thuộc tính -->
                                 <td>
                                     @if (attrValues.Any())
                                     {
@@ -289,7 +275,6 @@
                                     }
                                 </td>
 
-                                <!-- thao tác -->
                                 <td>
                                     <div class="d-flex gap-1">
                                         <a asp-area="Admin" asp-controller="Product" asp-action="Details"

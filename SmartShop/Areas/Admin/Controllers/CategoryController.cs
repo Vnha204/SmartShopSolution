@@ -20,7 +20,7 @@ namespace SmartShop.Areas.Admin.Controllers
             _logger = logger;
         }
 
-        // GET: Admin/Category
+        //Admin/Category
         public async Task<IActionResult> Index()
         {
             var categories = await _unitOfWork.Categories.Query()
@@ -30,7 +30,7 @@ namespace SmartShop.Areas.Admin.Controllers
             return View(categories);
         }
 
-        // GET: Admin/Category/Create
+        //Admin/Category/Create
         public async Task<IActionResult> Create()
         {
             ViewBag.ParentCategories = await _unitOfWork.Categories
@@ -40,7 +40,7 @@ namespace SmartShop.Areas.Admin.Controllers
             return View(new Category());
         }
 
-        // POST: Admin/Category/Create
+        //Admin/Category/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Category model)
@@ -66,7 +66,7 @@ namespace SmartShop.Areas.Admin.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // GET: Admin/Category/Edit/5
+        //Admin/Category/Edit/5
         public async Task<IActionResult> Edit(int id)
         {
             var category = await _unitOfWork.Categories.GetByIdAsync(id);
@@ -79,7 +79,7 @@ namespace SmartShop.Areas.Admin.Controllers
             return View(category);
         }
 
-        // POST: Admin/Category/Edit/5
+        //Admin/Category/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, Category model)
@@ -117,7 +117,7 @@ namespace SmartShop.Areas.Admin.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // GET: Admin/Category/Delete/5
+        //Admin/Category/Delete/5
         public async Task<IActionResult> Delete(int id)
         {
             var category = await _unitOfWork.Categories.Query()
@@ -129,7 +129,7 @@ namespace SmartShop.Areas.Admin.Controllers
             return View(category);
         }
 
-        // POST: Admin/Category/Delete/5
+        //Admin/Category/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)

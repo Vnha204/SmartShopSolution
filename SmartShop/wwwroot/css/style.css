@@ -802,11 +802,6 @@ ul.location_icon {
             color: #03cafc;
         }
 
-
-
-
-/* css trang nội */
-
 .position_head .header {
     position: inherit;
     background: #03cafc;
@@ -816,8 +811,6 @@ ul.location_icon {
 .shop {
     margin-bottom: 90px;
 }
-
-/* nút lọc trang kính */
 
 .filter-btns {
     display: flex;
@@ -841,8 +834,6 @@ ul.location_icon {
     background: var(--primary-color);
     color: #fff;
 }
-
-/* nút thêm vào giỏ trong lưới shop */
 
 .shop_item .send_btn {
     width: auto;

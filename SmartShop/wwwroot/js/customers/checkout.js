@@ -11,7 +11,6 @@
             if (radio.checked) item.classList.add('selected');
 
             item.addEventListener('click', function () {
-                // bỏ chọn tất cả
                 document.querySelectorAll('.address-radio-item').forEach(function (i) {
                     i.classList.remove('selected');
                 });

@@ -19,7 +19,7 @@ namespace SmartShop.Areas.Admin.Controllers
             _logger = logger;
         }
 
-        // GET /Admin/Order?q=&status=&paymentStatus=&from=&to=
+        //Admin/Order?q=&status=&paymentStatus=&from=&to=
         public async Task<IActionResult> Index(
             string? q             = null,
             string? status        = null,
@@ -53,7 +53,7 @@ namespace SmartShop.Areas.Admin.Controllers
             return View(orders.ToList());
         }
 
-        // GET /Admin/Order/Details/{id}
+        //Admin/Order/Details/{id}
         public async Task<IActionResult> Details(int id)
         {
             var order = await _unitOfWork.Orders.GetWithDetailsAsync(id);
@@ -61,7 +61,7 @@ namespace SmartShop.Areas.Admin.Controllers
             return View(order);
         }
 
-        // POST /Admin/Order/UpdateStatus
+        //Admin/Order/UpdateStatus
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdateStatus(int id, string status)
@@ -81,7 +81,6 @@ namespace SmartShop.Areas.Admin.Controllers
             var order = await _unitOfWork.Orders.GetWithDetailsAsync(id);
             if (order == null) return NotFound();
 
-            // Restore stock exactly once when cancelling
             if (status == OrderStatus.Cancelled && order.Status != OrderStatus.Cancelled)
             {
                 foreach (var item in order.OrderItems)
@@ -107,7 +106,7 @@ namespace SmartShop.Areas.Admin.Controllers
             return RedirectToAction(nameof(Details), new { id });
         }
 
-        // POST /Admin/Order/UpdatePaymentStatus
+        //Admin/Order/UpdatePaymentStatus
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdatePaymentStatus(int id, string paymentStatus)

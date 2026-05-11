@@ -37,7 +37,7 @@ namespace SmartShop.Services
             string returnUrl,
             string cancelUrl)
         {
-            // PayOS signature: (spec: amount, cancelUrl, description, orderCode, returnUrl)
+            // PayOS sig: (spec: amount, cancelUrl, description, orderCode, returnUrl)
             var sigData   = $"amount={amount}&cancelUrl={cancelUrl}&description={description}&orderCode={orderCode}&returnUrl={returnUrl}";
             var signature = ComputeHmacSha256(sigData, _settings.ChecksumKey);
 

@@ -1,58 +1,46 @@
-/* biến css chủ đề smartshop */
 :root {
-    /* màu chủ đạo */
     --primary-color: #03cafc;
     --primary-hover: #02a9d4;
     --primary-light: rgba(3, 202, 252, 0.1);
     
-    /* màu trạng thái */
     --success-color: #28a745;
     --warning-color: #f0a500;
     --danger-color: #dc3545;
     --info-color: #17a2b8;
     
-    /* màu chữ */
     --text-primary: #333;
     --text-muted: #6c757d;
     --text-light: #adb5bd;
     
-    /* nền */
     --bg-light: #f8f9fa;
     --bg-white: #ffffff;
     
-    /* viền */
     --border-color: #dee2e6;
     --border-radius: 8px;
     --border-radius-sm: 6px;
     
-    /* bóng */
     --shadow-sm: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
     --shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
     
-    /* khoảng cách */
     --spacing-xs: 0.25rem;
     --spacing-sm: 0.5rem;
     --spacing-md: 1rem;
     --spacing-lg: 1.5rem;
     --spacing-xl: 2rem;
     
-    /* navbar */
     --navbar-height: 100px;
 }
 
-/* sửa layout trang account/shop */
 .inner_page.position_head {
     padding-top: var(--navbar-height);
     min-height: 100vh;
     background: var(--bg-light);
 }
 
-/* khoảng trên trang account */
 .inner_page.position_head.account-page-section {
     padding-top: calc(var(--navbar-height) + 2.5rem);
 }
 
-/* sửa dropdown menu */
 .dropdown-menu {
     border-radius: var(--border-radius);
 }
@@ -74,7 +62,6 @@
     flex-shrink: 0;
 }
 
-/* ===== Account Sidebar Fix ===== */
 .card-custom {
     border: 0;
     border-radius: var(--border-radius);
@@ -114,7 +101,6 @@
     color: var(--primary-color);
 }
 
-/* ===== Account Section Styles ===== */
 .account-sidebar-card {
     position: sticky;
     top: 120px;
@@ -163,7 +149,6 @@
     min-height: 400px;
 }
 
-/* Order & Address items */
 order-item,
 .address-item {
     transition: all 0.2s ease;
@@ -175,7 +160,6 @@ order-item,
     border-color: var(--primary-color) !important;
 }
 
-/* ===== Utility Classes ===== */
 .btn-primary-custom {
     background: var(--primary-color);
     border: none;
@@ -197,7 +181,6 @@ order-item,
     background: var(--primary-color) !important;
 }
 
-/* Form input consistent */
 .form-control-custom {
     border-radius: var(--border-radius-sm);
     border: 1px solid var(--border-color);
@@ -208,12 +191,11 @@ order-item,
     box-shadow: 0 0 0 0.2rem var(--primary-light);
 }
 
-/* ===== Navbar Alignment Fix ===== */
 .navigation .navbar-nav {
     display: flex;
-    align-items: center;  /* vertically centre all items in the pill */
+    align-items: center;
     gap: 0.5rem;
-    flex-wrap: nowrap;    /* never let items wrap and collide */
+    flex-wrap: nowrap;    
 }
 
 .navigation .navbar-nav .nav-item {
@@ -221,32 +203,24 @@ order-item,
     align-items: center;
 }
 
-/* Prevent long labels from wrapping and causing overlap */
 .navigation .navbar-nav .nav-link {
     display: flex;
     align-items: center;
     white-space: nowrap;
 }
 
-/* Avatar link: Bootstrap p-0 already sets padding:0, but keep for explicitness */
 .navigation .navbar-nav .nav-item.dropdown > .nav-link {
     padding: 0;
 }
 
-/* Remove spinner completely */
 #account-loading {
     display: none !important;
 }
 
-/* Themed link color (uses brand primary color) */
 .text-theme-link {
     color: var(--primary-color) !important;
 }
 
-/* ===== Unified Button Theme =====
-   Use .btn-theme-primary to replace inline primary button styles.
-   Bootstrap .btn overrides ensure consistent rounded corners.
-   ============================================ */
 .btn-theme-primary {
     background: var(--primary-color);
     color: #fff !important;
@@ -262,12 +236,10 @@ order-item,
     color: #fff !important;
 }
 
-/* Rounded corners for ALL Bootstrap buttons site-wide */
 .btn {
     border-radius: 8px !important;
 }
 
-/* Ensure Bootstrap btn-primary matches the brand color */
 .btn-primary {
     background-color: var(--primary-color) !important;
     border-color: var(--primary-color) !important;
@@ -280,7 +252,6 @@ order-item,
     border-color: var(--primary-hover) !important;
 }
 
-/* Outline primary: brand border/text, fills brand on hover */
 .btn-outline-primary {
     border-color: var(--primary-color) !important;
     color: var(--primary-color) !important;
@@ -293,9 +264,6 @@ order-item,
     color: #fff !important;
 }
 
-/* ===== Shop / customer send_btn inherits rounded via .btn above =====
-   .read_more and .send_btn in style.css already have border-radius.
-   Keep .btn-primary-custom aligned with the theme. ===== */
 .btn-primary-custom {
     background: var(--primary-color);
     border: none;

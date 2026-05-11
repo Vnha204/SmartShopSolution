@@ -64,7 +64,6 @@
     padding: 4px 0 4px 32px;
 }
 
-/* tên sản phẩm */
 .product-detail-name {
     font-size: 2rem;
     font-weight: 700;
@@ -75,14 +74,12 @@
     word-break: break-word;
 }
 
-/* số đã bán */
 .product-detail-sold {
     font-size: 13px;
     color: var(--text-muted);
     margin: 0;
 }
 
-/* giá */
 .product-detail-price {
     display: flex;
     align-items: baseline;
@@ -109,7 +106,6 @@
     margin: 0;
 }
 
-/* mô tả */
 .product-detail-description {
     font-size: 14px;
     color: #555;
@@ -118,7 +114,6 @@
     margin: 0;
 }
 
-/* tồn kho */
 .product-detail-stock {
     font-size: 13px;
     color: var(--text-muted);
@@ -159,7 +154,6 @@
     gap: 12px;
 }
 
-/* qty + giỏ hàng: cạnh nhau, mỗi 50% */
 .detail-actions-row {
     display: flex;
     gap: 12px;
@@ -308,7 +302,6 @@
     padding-bottom: 0;
 }
 
-/* giá gốc trên thẻ sản phẩm liên quan */
 .original-price {
     font-size: 0.82em;
     color: var(--text-muted);

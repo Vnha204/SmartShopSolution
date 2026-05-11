@@ -21,8 +21,7 @@ namespace SmartShop.Areas.Admin.Controllers
             _unitOfWork = unitOfWork;
             _logger = logger;
         }
-
-        // GET: Admin/Attribute
+        //Admin/Attribute
         public async Task<IActionResult> Index()
         {
             var attrs = await _unitOfWork.Attributes.Query()
@@ -33,11 +32,9 @@ namespace SmartShop.Areas.Admin.Controllers
                 .ToListAsync();
             return View(attrs);
         }
-
-        // GET: Admin/Attribute/Create
+        //Admin/Attribute/Create
         public IActionResult Create() => View(new ModelAttribute());
-
-        // POST: Admin/Attribute/Create
+        //Admin/Attribute/Create
         [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(ModelAttribute model)
         {
@@ -52,16 +49,14 @@ namespace SmartShop.Areas.Admin.Controllers
             TempData["Success"] = $"Thuộc tính \"{model.DisplayName}\" đã được thêm.";
             return RedirectToAction(nameof(Index));
         }
-
-        // GET: Admin/Attribute/Edit/5
+        //Admin/Attribute/Edit/5
         public async Task<IActionResult> Edit(int id)
         {
             var attr = await _unitOfWork.Attributes.GetByIdAsync(id);
             if (attr == null) return NotFound();
             return View(attr);
         }
-
-        // POST: Admin/Attribute/Edit/5
+        //Admin/Attribute/Edit/5
         [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, ModelAttribute model)
         {
@@ -78,8 +73,7 @@ namespace SmartShop.Areas.Admin.Controllers
             TempData["Success"] = $"Đã cập nhật thuộc tính \"{model.DisplayName}\".";
             return RedirectToAction(nameof(Index));
         }
-
-        // GET: Admin/Attribute/Delete/5
+        //Admin/Attribute/Delete/5
         public async Task<IActionResult> Delete(int id)
         {
             var attr = await _unitOfWork.Attributes.Query()
@@ -90,8 +84,7 @@ namespace SmartShop.Areas.Admin.Controllers
             if (attr == null) return NotFound();
             return View(attr);
         }
-
-        // POST: Admin/Attribute/Delete/5
+        //Admin/Attribute/Delete/5
         [HttpPost, ActionName("Delete"), ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
@@ -108,8 +101,7 @@ namespace SmartShop.Areas.Admin.Controllers
             TempData["Success"] = "Đã xoá thuộc tính.";
             return RedirectToAction(nameof(Index));
         }
-
-        // GET: Admin/Attribute/Values/5
+        //Admin/Attribute/Values/5
         public async Task<IActionResult> Values(int id)
         {
             var attr = await _unitOfWork.Attributes.Query()
@@ -118,8 +110,7 @@ namespace SmartShop.Areas.Admin.Controllers
             if (attr == null) return NotFound();
             return View(attr);
         }
-
-        // POST: Admin/Attribute/AddValue
+        //Admin/Attribute/AddValue
         [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> AddValue(int attributeId, string value,
             string displayName, int sortOrder = 0)
@@ -148,8 +139,7 @@ namespace SmartShop.Areas.Admin.Controllers
             TempData["Success"] = $"Đã thêm giá trị \"{displayName}\".";
             return RedirectToAction(nameof(Values), new { id = attributeId });
         }
-
-        // POST: Admin/Attribute/EditValue
+        //Admin/Attribute/EditValue
         [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> EditValue(int id, string value,
             string displayName, int sortOrder = 0)
@@ -170,8 +160,7 @@ namespace SmartShop.Areas.Admin.Controllers
             TempData["Success"] = $"Đã cập nhật giá trị \"{displayName}\".";
             return RedirectToAction(nameof(Values), new { id = val.AttributeId });
         }
-
-        // POST: Admin/Attribute/DeleteValue
+        //Admin/Attribute/DeleteValue
         [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteValue(int id)
         {

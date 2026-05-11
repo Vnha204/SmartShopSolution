@@ -1,5 +1,4 @@
 /* trang đơn hàng khách */
-
 .orders-section {
     padding: 40px 0 60px;
 }
@@ -11,7 +10,6 @@
     margin-bottom: 1.5rem;
 }
 
-/* bảng danh sách đơn */
 .orders-card {
     background: var(--bg-white);
     border-radius: var(--border-radius);
@@ -55,7 +53,6 @@
     color: var(--text-primary);
 }
 
-/* badge trạng thái */
 .order-badge {
     display: inline-block;
     padding: 3px 10px;
@@ -75,7 +72,6 @@
 .order-badge-pending-pay { background: #fff3cd; color: #856404; }
 .order-badge-paid    { background: #d1e7dd; color: #0f5132; }
 
-/* trạng thái trống */
 .orders-empty {
     text-align: center;
     padding: 60px 20px;
@@ -89,7 +85,6 @@
     opacity: 0.3;
 }
 
-/* trang chi tiết đơn */
 .order-detail-card {
     background: var(--bg-white);
     border-radius: var(--border-radius);

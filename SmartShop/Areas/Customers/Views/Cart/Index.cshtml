@@ -23,7 +23,6 @@
         else
         {
             <div id="cart-body" class="row g-4">
-                <!-- giỏ hàng -->
                 <div class="col-lg-8">
                     <div class="cart-table">
                         <table class="table mb-0">
@@ -40,7 +39,7 @@
                                 @foreach (var item in Model.Items)
                                 {
                                     <tr data-item-id="@item.CartItemId">
-                                        <!-- hình thu nhỏ -->
+                                        <!-- hình-->
                                         <td style="width:90px">
                                             @if (!string.IsNullOrEmpty(item.ThumbnailUrl))
                                             {

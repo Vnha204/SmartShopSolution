@@ -13,7 +13,6 @@
     display: flex;
 }
 
-/* wrapper <a> lấp đầy cột */
 .glasses-cards-container .shop-card-link {
     display: flex;
     width: 100%;
@@ -23,7 +22,6 @@
     display: flex;
     flex-direction: column;
     width: 100%;
-    /* màu viền */
     border: 1px solid #03cafc;
     border-radius: 6px;
     overflow: hidden;
@@ -54,7 +52,6 @@
     display: block;
 }
 
-/* hàng giá sản phẩm */
 .glasses-cards-container .glasses_box h3 {
     flex-shrink: 0;
     margin: 0;
@@ -62,7 +59,6 @@
     line-height: 1.4;
 }
 
-/* tên sản phẩm — giới hạn 2 dòng */
 .glasses-cards-container .glasses_box p {
     flex-grow: 1;
     display: -webkit-box;

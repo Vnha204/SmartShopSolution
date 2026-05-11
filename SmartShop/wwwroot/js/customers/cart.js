@@ -1,4 +1,4 @@
-// ajax giỏ hàng — không reload trang
+//giỏ hàng
 (function () {
     'use strict';
 
@@ -58,16 +58,13 @@
             return;
         }
 
-        // cập nhật từng dòng, xóa dòng không còn tồn tại
         var tbody = body.querySelector('tbody');
         if (tbody) {
-            // xóa dòng không còn trong phản hồi
             var itemIds = cartData.items.map(function (i) { return String(i.cartItemId); });
             tbody.querySelectorAll('tr[data-item-id]').forEach(function (row) {
                 if (itemIds.indexOf(row.dataset.itemId) === -1) row.remove();
             });
 
-            // cập nhật số lượng và tổng tiền các dòng còn lại
             cartData.items.forEach(function (item) {
                 var row = tbody.querySelector('tr[data-item-id="' + item.cartItemId + '"]');
                 if (!row) return;
@@ -78,7 +75,6 @@
             });
         }
 
-        // cập nhật tổng kết
         var totalQtyEl = body.querySelector('[data-field="total-qty"]');
         if (totalQtyEl) totalQtyEl.textContent = cartData.totalQuantity;
         var totalEl = body.querySelector('[data-field="total"]');
@@ -114,7 +110,6 @@
 
     document.addEventListener('click', function (e) {
 
-        // giảm số lượng
         var minusBtn = e.target.closest('.qty-minus');
         if (minusBtn) {
             var itemId = minusBtn.dataset.itemId;
@@ -129,7 +124,6 @@
             return;
         }
 
-        // tăng số lượng
         var plusBtn = e.target.closest('.qty-plus');
         if (plusBtn) {
             var itemId = plusBtn.dataset.itemId;
@@ -145,7 +139,6 @@
             return;
         }
 
-        // xóa sản phẩm
         var removeBtn = e.target.closest('.btn-remove-item');
         if (removeBtn) {
             var itemId = removeBtn.dataset.itemId;
@@ -156,7 +149,6 @@
             return;
         }
 
-        // xóa toàn bộ giỏ
         var clearBtn = e.target.closest('#btn-clear-cart');
         if (clearBtn) {
             if (!confirm('Xóa toàn bộ giỏ hàng?')) return;

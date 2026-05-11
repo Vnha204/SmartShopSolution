@@ -1,0 +1,20 @@
+@model SmartShop.Models.ViewModels.CustomerEmailViewModel
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head><meta charset="utf-8"></head>
+<body style="font-family:Arial,sans-serif;color:#333;max-width:600px;margin:0 auto;">
+  <h2>Xin chào @Model.FullName,</h2>
+  <p>Cảm ơn bạn đã liên hệ với <strong>SmartShop</strong>!</p>
+  <p>Chúng tôi đã nhận được tin nhắn của bạn và sẽ phản hồi trong vòng <strong>24 giờ</strong>.</p>
+  <h3 style="margin-top:24px;">Thông tin bạn đã gửi:</h3>
+  <table border="0" cellpadding="8" cellspacing="0" style="border-collapse:collapse;">
+    <tr><td style="font-weight:bold;padding-right:16px;">Họ tên:</td><td>@Model.FullName</td></tr>
+    <tr><td style="font-weight:bold;padding-right:16px;">Số điện thoại:</td><td>@Model.Phone</td></tr>
+    <tr><td style="font-weight:bold;padding-right:16px;">Tin nhắn:</td><td>@Model.Message</td></tr>
+  </table>
+  <p style="margin-top:32px;">Trân trọng,<br><strong>SmartShop</strong></p>
+</body>
+</html>

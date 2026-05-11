@@ -4,8 +4,6 @@
     ViewData["ActivePage"] = "Shop";
     ViewData["BodyClass"] = "position_head";
 }
-
-<!-- trang shop -->
 <div class="shop_page inner_page">
     <div class="container">
         <div class="row">
@@ -33,7 +31,6 @@
                     </div>
 
                     <form id="filterForm" method="get" asp-action="Index">
-
                         <!-- bộ lọc danh mục -->
                         <div class="filter_group">
                             <h5><i class="fa fa-tag me-2"></i> Danh mục</h5>
@@ -42,7 +39,6 @@
                                    name="selectedCategoryId"
                                    id="selectedCategoryId"
                                    value="@(Model?.Filter?.SelectedCategoryId?.ToString() ?? "")" />
-
                             <!-- dropdown danh mục -->
                             <div id="categoryChainContainer"></div>
 
@@ -92,7 +88,6 @@
                             }
                         }
                         </div>
-
                         <!-- bộ lọc khoảng giá -->
                         <div class="filter_group">
                             <h5><i class="fa fa-money me-2"></i> Khoảng giá</h5>
@@ -129,13 +124,11 @@
                         <button type="submit" class="btn btn-primary-custom w-100 mt-2">
                             <i class="fa fa-search me-2"></i> Áp dụng bộ lọc
                         </button>
-
                     </form>
                 </div>
             </div>
 
             <div class="col-lg-9 col-md-8">
-
                 <div class="shop-search-bar" id="shopSearchBar">
                     <div class="input-group">
                         <input type="text"
@@ -151,7 +144,6 @@
                 </div>
 
             <div id="shopResults">
-
                 <!-- breadcrumb danh mục -->
                 @if (Model?.SelectedCategoryBreadcrumb?.Any() == true)
                 {
@@ -167,8 +159,6 @@
                         </ol>
                     </nav>
                 }
-
-                <!-- thanh sắp xếp -->
                 <div class="d-flex justify-content-between align-items-center mb-4 p-3 bg-white rounded shadow-sm">
                     <span class="text-muted">
                         Tìm thấy <strong>@(Model?.TotalProducts ?? 0)</strong> sản phẩm
@@ -182,7 +172,6 @@
                         </select>
                     </div>
                 </div>
-
                 <!-- thẻ sản phẩm -->
                 <div class="row" id="productGrid">
                     @if (Model?.Products != null && Model.Products.Any())
@@ -225,8 +214,6 @@
                         </div>
                     }
                 </div>
-
-                <!-- phân trang -->
                 @if (Model?.TotalPages > 1)
                 {
                     <nav class="mt-4 shop-pagination">

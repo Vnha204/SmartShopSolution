@@ -10,20 +10,13 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
     <title>@ViewData["Title"] - SmartShop</title>
-
-    <!-- bootstrap css -->
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <!-- css template -->
     <link rel="stylesheet" href="~/css/style.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/responsive.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/jquery.mCustomScrollbar.min.css" />
-    <!-- favicon -->
     <link rel="icon" href="~/images/fevicon.png" type="image/gif" />
-    <!-- csrf token cho ajax -->
     <meta name="csrf-token" content="@_af.GetAndStoreTokens(Context).RequestToken" />
-    <!-- font awesome -->
     <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" />
-    <!-- fancybox -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/2.1.5/jquery.fancybox.min.css" media="screen" />
     <style>
         html, body { overflow-x: hidden; max-width: 100%; }
@@ -46,12 +39,9 @@
     }
 </head>
 <body class="main-layout @bodyClass">
-
-    <!-- loader -->
     <div class="loader_bg">
         <div class="loader"><img src="~/images/loading.gif" alt="#" /></div>
     </div>
-    <!-- header -->
     <header>
         <div class="header">
             <div class="container-fluid">
@@ -104,8 +94,6 @@
         </div>
     </header>
     @RenderBody()
-
-    <!-- footer -->
     <footer>
         <div class="footer">
             <div class="container">
@@ -130,19 +118,16 @@
             </div>
         </div>
     </footer>
-
-    <!-- script lõi -->
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/jquery.mCustomScrollbar.concat.min.js"></script>
     
-    <!-- script ứng dụng -->
     <script src="~/js/custom.js"></script>
     <script src="~/js/account.js"></script>
     <script src="~/js/address.js"></script>
     <script src="~/js/forgot-password.js"></script>
 
-    <!-- mapbox (có điều kiện) -->
+    <!-- mapbox-->
     @if (ViewData["ShowMap"] != null && (bool)ViewData["ShowMap"])
     {
         <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
@@ -150,8 +135,6 @@
     }
     
     @await RenderSectionAsync("Scripts", required: false)
-
-    <!-- toast giỏ hàng -->
     <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index:1200">
         <div id="cartToast" class="toast align-items-center border-0" role="alert" aria-live="assertive" aria-atomic="true">
             <div class="d-flex">

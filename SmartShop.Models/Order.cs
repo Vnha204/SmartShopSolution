@@ -12,48 +12,31 @@ namespace SmartShop.Models
     public class Order
     {
         public int Id { get; set; }
-
         [Required]
-        public string UserId { get; set; } = string.Empty;  // FK → AppUser (IdentityUser dùng string Id)
+        public string UserId { get; set; } = string.Empty;
         public AppUser? User { get; set; }
-
         public int AddressId { get; set; }
         public Address Address { get; set; } = null!;
-
         [Required, MaxLength(50)]
         public string OrderCode { get; set; } = string.Empty;
-
-        // pending | confirmed | processing | shipping | delivered | cancelled
         [MaxLength(50)]
         public string Status { get; set; } = OrderStatus.Pending;
-
         [Column(TypeName = "decimal(18,2)")]
         public decimal TotalPrice { get; set; }
-
         [MaxLength(50)]
-        public string PaymentMethod { get; set; } = "cod";  // cod | momo | vnpay
-
+        public string PaymentMethod { get; set; } = "cod";
         [MaxLength(50)]
         public string PaymentStatus { get; set; } = "unpaid";
-
         public string? Note { get; set; }
         public DateTime CreatedAt { get; set; } = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time"));
         public DateTime UpdatedAt { get; set; } = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time"));
-
-        // PayOS tracking — populated when a payment link is created
         [MaxLength(100)]
         public string? PayOSPaymentLinkId { get; set; }
-
         public long? PayOSOrderCode { get; set; }
-
         [MaxLength(500)]
         public string? PayOSCheckoutUrl { get; set; }
-
-        // Navigation
         public ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
     }
-
-    // Constants cho Status — không hardcode string
     public static class OrderStatus
     {
         public const string Pending = "pending";

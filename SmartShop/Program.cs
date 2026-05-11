@@ -12,7 +12,6 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// ===== ASP.NET Core Identity =====
 builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
 {
     options.Password.RequireDigit = true;
@@ -24,7 +23,6 @@ builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
 .AddEntityFrameworkStores<AppDbContext>()
 .AddDefaultTokenProviders();
 
-// ===== Cookie settings =====
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.LoginPath = "/auth/login";
@@ -45,7 +43,6 @@ builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
 
-// ===== Seed Roles & Admin =====
 using (var scope = app.Services.CreateScope())
 {
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
@@ -75,7 +72,6 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-// ===== Middleware pipeline =====
 if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
@@ -96,8 +92,7 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
-// ===== Route config =====
-app.MapControllers(); // enables attribute-routed controllers (e.g. PayOSWebhookController)
+app.MapControllers(); 
 
 app.MapAreaControllerRoute(
     name: "Admin",

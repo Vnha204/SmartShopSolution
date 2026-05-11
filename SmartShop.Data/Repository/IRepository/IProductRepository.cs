@@ -9,26 +9,14 @@ namespace SmartShop.Data.Repository.IRepository
 {
     public interface IProductRepository : IRepository<Product>
     {
-        /// <summary>Lấy sản phẩm theo slug.</summary>
         Task<Product?> GetBySlugAsync(string slug);
-
-        /// <summary>
-        /// Dynamic filter: lọc theo category + attributes đã chọn + khoảng giá.
-        /// NULL-safe — sản phẩm thiếu attribute không gây lỗi.
-        /// </summary>
         Task<IEnumerable<Product>> FilterAsync(
             int categoryId,
             decimal? minPrice,
             decimal? maxPrice,
             List<int>? attributeValueIds);
-
-        /// <summary>Lấy sản phẩm nổi bật.</summary>
         Task<IEnumerable<Product>> GetFeaturedAsync(int take = 8);
-
-        /// <summary>Full eager-load for Details view (Categories→Category, AttributeValues→Attribute).</summary>
         Task<Product?> GetWithFullDetailsAsync(int id);
-
-        /// <summary>Lighter eager-load for Edit form (ProductCategories + ProductAttributeValues only).</summary>
         Task<Product?> GetWithCategoriesAndAttributesAsync(int id);
     }
 }
