@@ -8,9 +8,8 @@
 
     document.addEventListener('DOMContentLoaded', function () {
         var filterForm = document.getElementById('filterForm');
-        if (!filterForm) return;   // không ở trang shop
+        if (!filterForm) return;
 
-        // lưu url hiện tại vào history
         history.replaceState({}, '', window.location.href);
 
         var selectedInput = document.getElementById('selectedCategoryId');

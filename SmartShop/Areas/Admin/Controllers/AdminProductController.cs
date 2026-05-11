@@ -23,7 +23,7 @@ namespace SmartShop.Areas.Admin.Controllers
         private static readonly HashSet<string> _allowedContentTypes =
             new(StringComparer.OrdinalIgnoreCase) { "image/jpeg", "image/png", "image/webp" };
 
-        private const long _maxFileSize = 5 * 1024 * 1024; // 5 MB
+        private const long _maxFileSize = 5 * 1024 * 1024;
 
         public ProductController(IUnitOfWork unitOfWork, ICloudinaryService cloudinary,
             ILogger<ProductController> logger)
