@@ -18,14 +18,14 @@ namespace SmartShop.Areas.Customers.Controllers
             _logger = logger;
         }
 
-        // GET /Customers/Glasses  (full page)
+        //Customers/Glasses
         public async Task<IActionResult> Index(string filter = "all")
         {
             var vm = await BuildViewModelAsync(filter);
             return View(vm);
         }
 
-        // GET /Customers/Glasses/Grid?filter=…  (AJAX partial)
+        //Customers/Glasses/Grid?filter=…
         [HttpGet]
         public async Task<IActionResult> Grid(string filter = "all")
         {

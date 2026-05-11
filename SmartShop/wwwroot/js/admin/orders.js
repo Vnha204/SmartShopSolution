@@ -1,4 +1,3 @@
-// Admin orders — client-side tab filtering by status
 (function () {
     'use strict';
 

@@ -1,8 +1,3 @@
-/**
- * admin-product-thumbnail.js
- * Handles live image preview for the product thumbnail file input.
- * Used by Admin/Product/Create and Admin/Product/Edit.
- */
 (function () {
     'use strict';
 

@@ -23,7 +23,7 @@ namespace SmartShop.Areas.Customers.Controllers
             _logger = logger;
         }
 
-        // GET /Customers/Cart
+        //Customers/Cart
         public async Task<IActionResult> Index()
         {
             var userId = _userManager.GetUserId(User)!;
@@ -48,7 +48,7 @@ namespace SmartShop.Areas.Customers.Controllers
             return View(vm);
         }
 
-        // POST /Customers/Cart/Add
+        //Customers/Cart/Add
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Add(int productId, int quantity = 1)
@@ -109,7 +109,7 @@ namespace SmartShop.Areas.Customers.Controllers
             return RedirectToAction("Index");
         }
 
-        // POST /Customers/Cart/Update
+        //Customers/Cart/Update
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Update(int cartItemId, int quantity)
@@ -153,7 +153,7 @@ namespace SmartShop.Areas.Customers.Controllers
             return RedirectToAction("Index");
         }
 
-        // POST /Customers/Cart/Remove
+        //Customers/Cart/Remove
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Remove(int cartItemId)
@@ -187,7 +187,7 @@ namespace SmartShop.Areas.Customers.Controllers
             return RedirectToAction("Index");
         }
 
-        // POST /Customers/Cart/Clear
+        //Customers/Cart/Clear
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Clear()

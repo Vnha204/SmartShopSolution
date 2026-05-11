@@ -1,8 +1,3 @@
-/**
- * contact.js - Contact form AJAX handler
- * SmartShop - dùng chung cho trang chủ và trang liên hệ
- */
-
 (function () {
     'use strict';
 
@@ -58,9 +53,6 @@
             btn.textContent = originalText;
         }
     }
-
-    // ── Helpers ────────────────────────────────────────────────────────────────
-
     function clearMessages(form) {
         form.querySelectorAll('.contact-msg').forEach(function (el) { el.remove(); });
     }
@@ -76,7 +68,6 @@
     }
 
     function showFieldErrors(form, errors) {
-        // Map ViewModel property names → form input name attributes
         var fieldMap = {
             FullName: 'Name',
             Phone:    'PhoneNumber',

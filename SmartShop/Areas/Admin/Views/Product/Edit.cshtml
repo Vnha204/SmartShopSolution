@@ -217,8 +217,8 @@
     <script src="~/js/admin/product-attributes.js" asp-append-version="true"></script>
     <script>
     const CAT_API          = '/Admin/api/categories';
-    const _existingCatId   = @Html.Raw(existingCatId);          // int hoặc null
-    const _existingSelIds  = @Html.Raw(selectedIdsJson);        // mảng int
+    const _existingCatId   = @Html.Raw(existingCatId);          
+    const _existingSelIds  = @Html.Raw(selectedIdsJson);        
     let   _maxDepth        = 0;
 
     function removeDepthsFrom(fromDepth) {
@@ -294,7 +294,7 @@
         } else {
             const newCat = parseInt(categoryId);
             const text   = await fetchBreadcrumbText(newCat);
-            setLeaf(newCat, text, []);  // empty selection when category changes
+            setLeaf(newCat, text, []);  
         }
     }
 

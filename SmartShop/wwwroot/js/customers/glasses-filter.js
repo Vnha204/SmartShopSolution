@@ -24,7 +24,6 @@
         .then(function (html) {
             gridContainer.innerHTML = html;
 
-            // Update active filter button
             filterLinks.forEach(function (link) {
                 if (link.dataset.filter === filter) {
                     link.classList.add('active');
@@ -41,7 +40,6 @@
             }
         })
         .catch(function () {
-            // Fallback: full page navigation
             window.location.href = '?filter=' + encodeURIComponent(filter);
         })
         .finally(function () {
@@ -50,7 +48,6 @@
         });
     }
 
-    // Intercept filter link clicks
     filterLinks.forEach(function (link) {
         link.addEventListener('click', function (e) {
             e.preventDefault();
@@ -59,13 +56,11 @@
         });
     });
 
-    // Handle browser back/forward
     window.addEventListener('popstate', function (e) {
         var filter = (e.state && e.state.filter) ? e.state.filter : 'all';
         loadGrid(filter, false);
     });
 
-    // Set initial history state so popstate works on first back
     (function () {
         var url = new URL(window.location.href);
         var currentFilter = url.searchParams.get('filter') || 'all';

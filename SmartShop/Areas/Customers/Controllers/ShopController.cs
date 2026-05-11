@@ -18,7 +18,7 @@ namespace SmartShop.Areas.Customers.Controllers
             _logger = logger;
         }
 
-        // GET: /Customers/Shop
+        //Customers/Shop
         public async Task<IActionResult> Index(
             [FromQuery] ShopFilterVM filter,
             string sortBy = "newest",
@@ -151,7 +151,7 @@ namespace SmartShop.Areas.Customers.Controllers
             return View(vm);
         }
 
-        // GET: /Customers/Shop/Detail/{slug}
+        //Customers/Shop/Detail/{slug}
         public async Task<IActionResult> Detail(string slug)
         {
             if (string.IsNullOrWhiteSpace(slug))

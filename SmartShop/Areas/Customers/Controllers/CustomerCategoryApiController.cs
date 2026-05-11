@@ -19,7 +19,7 @@ namespace SmartShop.Areas.Customers.Controllers
             _logger = logger;
         }
 
-        // GET /Customers/api/categories/children?parentId=
+        //Customers/api/categories/children?parentId=
         [HttpGet("children")]
         public async Task<IActionResult> GetChildren([FromQuery] int? parentId)
         {
@@ -42,7 +42,7 @@ namespace SmartShop.Areas.Customers.Controllers
             return Json(children);
         }
 
-        // GET /Customers/api/categories/breadcrumb?categoryId=
+        //Customers/api/categories/breadcrumb?categoryId=
         [HttpGet("breadcrumb")]
         public async Task<IActionResult> GetBreadcrumb([FromQuery] int categoryId)
         {

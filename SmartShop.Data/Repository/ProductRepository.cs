@@ -26,13 +26,12 @@ namespace SmartShop.Data.Repository
                 .Where(p => p.IsActive)
                 .Where(p => p.ProductCategories.Any(pc => pc.CategoryId == categoryId));
 
-            // Lọc giá — NULL-safe (dùng SalePrice nếu có, ngược lại dùng BasePrice)
             if (minPrice.HasValue)
                 query = query.Where(p => (p.SalePrice ?? p.BasePrice) >= minPrice.Value);
             if (maxPrice.HasValue)
                 query = query.Where(p => (p.SalePrice ?? p.BasePrice) <= maxPrice.Value);
 
-            // Dynamic filter — AND giữa các attribute, OR trong cùng attribute
+            // AND giữa các attribute,OR trong cùng attribute
             if (attributeValueIds != null && attributeValueIds.Any())
             {
                 var grouped = await _context.AttributeValues

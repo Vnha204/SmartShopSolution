@@ -67,7 +67,6 @@
             </ul>
         </div>
 
-        @* nút xác nhận thủ công payos — chỉ khi webhook chưa kích hoạt *@
         @if (string.Equals(Model.PaymentMethod, "payos", StringComparison.OrdinalIgnoreCase)
              && string.Equals(Model.PaymentStatus, "pending", StringComparison.OrdinalIgnoreCase))
         {

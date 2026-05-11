@@ -218,13 +218,11 @@ html, body {
                 color: #333;
             }
 
-/* nội dung trang */
 .admin-content {
     padding: 24px;
     flex: 1;
 }
 
-/* toast alert */
 .admin-toast-area {
     position: fixed;
     top: 70px;
@@ -268,7 +266,6 @@ html, body {
     background: #03cafc !important;
 }
 
-/* bảng */
 .admin-table thead th {
     background: #f8f9fa;
     font-size: 12px;
@@ -280,7 +277,6 @@ html, body {
     background: #f8f9ff;
 }
 
-/* badge trạng thái */
 .badge-status {
     font-size: 11px;
     padding: 4px 10px;

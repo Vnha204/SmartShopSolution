@@ -22,6 +22,6 @@ namespace SmartShop.Models
         public int Quantity { get; set; }
 
         [Column(TypeName = "decimal(18,2)")]
-        public decimal UnitPrice { get; set; }  // snapshot giá lúc đặt
+        public decimal UnitPrice { get; set; }
     }
 }

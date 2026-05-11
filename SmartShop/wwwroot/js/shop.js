@@ -8,9 +8,8 @@
 
     document.addEventListener('DOMContentLoaded', function () {
         var filterForm = document.getElementById('filterForm');
-        if (!filterForm) return;   // không ở trang shop
+        if (!filterForm) return;
 
-        // lưu url hiện tại vào history
         history.replaceState({}, '', window.location.href);
 
         var selectedInput = document.getElementById('selectedCategoryId');
@@ -109,10 +108,6 @@
             loadFromUrl(window.location.search);
         });
     });
-
-    // ajax helpers
-
-    // thu thập trạng thái form
     function buildParams(overrides) {
         var params = new URLSearchParams();
 
@@ -156,17 +151,12 @@
         .then(function (r) { return r.text(); })
         .then(function (html) {
             applyPartialHtml(html);
-            // cập nhật url không có partial=1
             history.pushState({}, '', window.location.pathname + (queryStr ? '?' + queryStr : ''));
         })
         .catch(function (err) { console.error('Shop AJAX error', err); });
     }
-
-    // khôi phục trạng thái từ url
     function loadFromUrl(search) {
         var params = new URLSearchParams(search);
-
-        // khôi phục sidebar
         var si = document.getElementById('selectedCategoryId');
         if (si) si.value = params.get('selectedCategoryId') || '';
 
@@ -181,7 +171,6 @@
             if (maxInp) maxInp.value = params.get('maxPrice') || '';
         }
 
-        // xây lại chuỗi danh mục
         var catId = params.get('selectedCategoryId');
         removeCatDepthsFrom(0);
         if (catId) {
@@ -190,7 +179,6 @@
             renderCatLevel(null, 0);
         }
 
-        // tải và áp dụng partial
         params.set('partial', '1');
         fetch(SHOP_PATH + '?' + params.toString(), {
             headers: { 'X-Requested-With': 'XMLHttpRequest' }
@@ -200,7 +188,6 @@
         .catch(function (err) { console.error('Popstate fetch error', err); });
     }
 
-    // phân tích partial html và thay nội dung
     function applyPartialHtml(html) {
         var doc = new DOMParser().parseFromString(html, 'text/html');
 
@@ -216,8 +203,6 @@
             shopResults.innerHTML = ajaxGrid.innerHTML;
         }
     }
-
-    // danh mục drill-down
 
     function removeCatDepthsFrom(fromDepth) {
         for (var d = fromDepth; d <= _maxCatDepth + 1; d++) {
@@ -263,7 +248,6 @@
                 });
 
                 wrapper.appendChild(sel);
-                // kiểm tra phần tử cũ cùng depth
                 var stale = document.getElementById(wrapper.id);
                 if (stale) stale.remove();
                 container.appendChild(wrapper);
@@ -292,7 +276,6 @@
         if (hasChildren) {
             renderCatLevel(categoryId, depth + 1);
         } else {
-            // lá danh mục — cập nhật ajax
             submitAjax();
         }
     }
@@ -326,9 +309,6 @@
         }
         return Promise.resolve();
     }
-
-    // thêm vào giỏ hàng
-
     document.addEventListener('click', function (e) {
         var btn = e.target.closest('.add_cart');
         if (!btn) return;
@@ -399,9 +379,6 @@
             }
         }
     }
-
-    // preset giá
-
     function applyPricePreset(value) {
         var filterForm = document.getElementById('filterForm');
         if (!filterForm) return;

@@ -159,7 +159,7 @@
     gap: 12px;
 }
 
-/* qty + giỏ hàng: cạnh nhau, mỗi 50% */
+/* qty + giỏ hàng */
 .detail-actions-row {
     display: flex;
     gap: 12px;

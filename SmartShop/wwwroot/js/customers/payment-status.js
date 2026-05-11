@@ -1,7 +1,6 @@
 (function () {
     'use strict';
 
-    // Read orderId from the data attribute on the container element
     var section = document.querySelector('.payos-section[data-order-id]');
     if (!section) return;
 
@@ -54,13 +53,11 @@
             statusBadge.textContent = 'Đã thanh toán';
         }
 
-        // Redirect to order detail after a short delay so the user sees the success state
         setTimeout(function () {
             window.location.href = '/account/OrderDetail?orderId=' + orderId;
         }, 2500);
     }
 
-    // Poll immediately, then on interval
     poll();
     intervalId = setInterval(poll, POLL_INTERVAL_MS);
 }());

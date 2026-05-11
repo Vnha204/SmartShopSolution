@@ -1,6 +1,4 @@
-/* css trang đơn hàng admin */
 
-/* form lọc */
 .order-filter-form .form-control,
 .order-filter-form .form-select {
     font-size: 0.85rem;
@@ -10,7 +8,6 @@
     font-size: 0.85rem;
 }
 
-/* badge thanh toán */
 .badge-pay-unpaid  { background-color: #f8d7da !important; color: #842029 !important; }
 .badge-pay-pending { background-color: #fff3cd !important; color: #856404 !important; }
 .badge-pay-paid    { background-color: #d1e7dd !important; color: #0f5132 !important; }

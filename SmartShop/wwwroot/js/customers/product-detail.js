@@ -139,9 +139,6 @@
             });
         }
     });
-
-    // helpers
-
     function showToast(success, message) {
         var toastEl = document.getElementById('cartToast');
         var body    = document.getElementById('cartToastBody');
@@ -153,7 +150,6 @@
 
         bootstrap.Toast.getOrCreateInstance(toastEl, { delay: 2500 }).show();
     }
-
     function incrementCartBadge(qty) {
         var badge = document.querySelector('.cart-nav-link .cart-badge');
         if (badge) {

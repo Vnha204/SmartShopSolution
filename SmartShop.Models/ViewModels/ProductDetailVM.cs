@@ -2,9 +2,6 @@ using System.Collections.Generic;
 
 namespace SmartShop.Models.ViewModels
 {
-    /// <summary>
-    /// ViewModel for the product detail page (Shop/Detail/{slug}).
-    /// </summary>
     public class ProductDetailVM
     {
         public int Id { get; set; }
@@ -17,14 +14,8 @@ namespace SmartShop.Models.ViewModels
         public int Stock { get; set; }
         public bool IsFeatured { get; set; }
         public int SoldCount { get; set; }
-
-        /// <summary>Attribute groups for display (e.g. Chất liệu: Titanium).</summary>
         public List<ProductAttributeGroupVM> AttributeGroups { get; set; } = new();
-
-        /// <summary>Related products from the same primary category.</summary>
         public List<ProductItemVM> RelatedProducts { get; set; } = new();
-
-        // Computed helpers
         public decimal DisplayPrice => SalePrice ?? BasePrice;
         public bool IsOnSale => SalePrice.HasValue && SalePrice < BasePrice;
         public int DiscountPercent => IsOnSale
@@ -32,10 +23,6 @@ namespace SmartShop.Models.ViewModels
             : 0;
     }
 
-    /// <summary>
-    /// A single attribute group shown on the detail page
-    /// (e.g. AttributeDisplayName = "Chất liệu", Values = ["Titanium", "Nhựa"]).
-    /// </summary>
     public class ProductAttributeGroupVM
     {
         public string AttributeName { get; set; } = string.Empty;

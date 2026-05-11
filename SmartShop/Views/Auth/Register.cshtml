@@ -12,7 +12,6 @@
                 <div class="card shadow-sm border-0 rounded-3">
                     <div class="card-body p-4 p-md-5">
 
-                        <!-- tiêu đề -->
                         <div class="text-center mb-4">
                             <h3 class="fw-bold text-theme-link">
                                 <i class="fa fa-user-plus me-2"></i> Đăng ký
@@ -20,7 +19,6 @@
                             <p class="text-muted small">Tạo tài khoản SmartShop miễn phí</p>
                         </div>
 
-                        <!-- lỗi xác thực -->
                         @if (!ViewData.ModelState.IsValid)
                         {
                             <div class="alert alert-danger py-2 small">
@@ -36,7 +34,6 @@
                         <form asp-controller="Auth" asp-action="Register" method="post">
                             @Html.AntiForgeryToken()
 
-                            <!-- họ và tên -->
                             <div class="mb-3">
                                 <label asp-for="FullName" class="form-label fw-semibold small"></label>
                                 <div class="input-group">
@@ -51,7 +48,6 @@
                                 <span asp-validation-for="FullName" class="text-danger small"></span>
                             </div>
 
-                            <!-- email -->
                             <div class="mb-3">
                                 <label asp-for="Email" class="form-label fw-semibold small"></label>
                                 <div class="input-group">
@@ -66,7 +62,6 @@
                                 <span asp-validation-for="Email" class="text-danger small"></span>
                             </div>
 
-                            <!-- mật khẩu -->
                             <div class="mb-3">
                                 <label asp-for="Password" class="form-label fw-semibold small"></label>
                                 <div class="input-group">
@@ -86,7 +81,6 @@
                                 <span asp-validation-for="Password" class="text-danger small"></span>
                             </div>
 
-                            <!-- xác nhận mật khẩu -->
                             <div class="mb-4">
                                 <label asp-for="ConfirmPassword" class="form-label fw-semibold small"></label>
                                 <div class="input-group">
@@ -106,13 +100,11 @@
                                 <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
                             </div>
 
-                            <!-- nút đăng ký -->
                             <button type="submit" class="btn btn-theme-primary w-100 fw-semibold py-2">
                                 <i class="fa fa-user-plus me-2"></i> Tạo tài khoản
                             </button>
                         </form>
 
-                        <!-- liên kết đăng nhập -->
                         <div class="text-center mt-4 pt-2 border-top">
                             <p class="small text-muted mb-0">
                                 Đã có tài khoản?

@@ -20,7 +20,7 @@ namespace SmartShop.Areas.Admin.Controllers
             _logger = logger;
         }
 
-        // GET: Admin/CategoryAttribute
+        //Admin/CategoryAttribute
         public async Task<IActionResult> Index()
         {
             var categories = await _unitOfWork.Categories.Query()
@@ -35,7 +35,7 @@ namespace SmartShop.Areas.Admin.Controllers
             return View(categories);
         }
 
-        // GET: Admin/CategoryAttribute/Manage/5
+        //Admin/CategoryAttribute/Manage/5
         public async Task<IActionResult> Manage(int id)
         {
             var category = await _unitOfWork.Categories.GetByIdAsync(id);
@@ -57,7 +57,7 @@ namespace SmartShop.Areas.Admin.Controllers
             return View();
         }
 
-        // POST: Admin/CategoryAttribute/Manage/5
+        //Admin/CategoryAttribute/Manage/5
         [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> Manage(int id, List<int>? enabledAttributeIds)
         {
