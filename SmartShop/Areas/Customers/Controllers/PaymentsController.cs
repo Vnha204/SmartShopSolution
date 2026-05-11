@@ -49,7 +49,6 @@ namespace SmartShop.Areas.Customers.Controllers
             if (string.Equals(order.PaymentStatus, "paid", StringComparison.OrdinalIgnoreCase))
                 return RedirectToAction(nameof(PayOSReturn), new { orderId });
 
-            // Tái sử dụng link thanh toán cũ để tránh lỗi PayOS 231
             if (!string.IsNullOrWhiteSpace(order.PayOSPaymentLinkId) &&
                 !string.IsNullOrWhiteSpace(order.PayOSCheckoutUrl) &&
                 (string.Equals(order.PaymentStatus, "pending", StringComparison.OrdinalIgnoreCase) ||
@@ -70,7 +69,7 @@ namespace SmartShop.Areas.Customers.Controllers
                 : order.OrderCode;
 
             var result = await _payOS.CreatePaymentLinkAsync(
-                orderCode:   order.Id,
+                orderCode:   DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
                 amount:      (int)order.TotalPrice,
                 description: description,
                 returnUrl:   returnUrl,
@@ -102,6 +101,17 @@ namespace SmartShop.Areas.Customers.Controllers
 
             var userId = _userManager.GetUserId(User)!;
             if (order.UserId != userId) return Forbid();
+
+            if (cancelled &&
+                (!string.IsNullOrWhiteSpace(order.PayOSPaymentLinkId) ||
+                 !string.IsNullOrWhiteSpace(order.PayOSCheckoutUrl)))
+            {
+                order.PayOSCheckoutUrl   = null;
+                order.PayOSPaymentLinkId = null;
+                order.UpdatedAt          = TimeHelper.VietnamNow();
+                _unitOfWork.Orders.Update(order);
+                await _unitOfWork.SaveAsync();
+            }
 
             ViewData["Cancelled"] = cancelled;
             return View("PayOS", order);
