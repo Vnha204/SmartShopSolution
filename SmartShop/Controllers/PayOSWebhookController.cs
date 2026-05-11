@@ -9,13 +9,13 @@ namespace SmartShop.Controllers
     [Route("api/payos")]
     public class PayOSWebhookController : ControllerBase
     {
-        private readonly IPayOSService                   _payOS;
-        private readonly IUnitOfWork                     _unitOfWork;
+        private readonly IPayOSService _payOS;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<PayOSWebhookController> _logger;
 
         public PayOSWebhookController(
-            IPayOSService                   payOS,
-            IUnitOfWork                     unitOfWork,
+            IPayOSService payOS,
+            IUnitOfWork unitOfWork,
             ILogger<PayOSWebhookController> logger)
         {
             _payOS      = payOS;

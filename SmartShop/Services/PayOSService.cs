@@ -14,20 +14,20 @@ namespace SmartShop.Services
 
     public class PayOSService : IPayOSService
     {
-        private readonly IHttpClientFactory    _httpClientFactory;
-        private readonly PayOSSettings         _settings;
+        private readonly IHttpClientFactory _httpClientFactory;
+        private readonly PayOSSettings _settings;
         private readonly ILogger<PayOSService> _logger;
 
         private const string ApiBaseUrl = "https://api-merchant.payos.vn";
 
         public PayOSService(
-            IHttpClientFactory      httpClientFactory,
+            IHttpClientFactory httpClientFactory,
             IOptions<PayOSSettings> options,
-            ILogger<PayOSService>   logger)
+            ILogger<PayOSService> logger)
         {
             _httpClientFactory = httpClientFactory;
-            _settings          = options.Value;
-            _logger            = logger;
+            _settings = options.Value;
+            _logger = logger;
         }
 
         public async Task<PayOSPaymentResult> CreatePaymentLinkAsync(
